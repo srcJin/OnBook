@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c68dc3484b5708d44ba4e2ccab1decf4, type: 3}
+  m_Name: LeftXRHandsDefaultBonesState
+  m_EditorClassIdentifier: 
+  bonePositions:
+  - boneId: 1
+    position: {x: 0, y: 0, z: 0}
+  - boneId: 28
+    position: {x: 0.0022668615, y: -0.005782122, z: 0.069093734}
+  - boneId: 3
+    position: {x: 0.02974387, y: -0.020151902, z: 0.037984286}
+  - boneId: 4
+    position: {x: 0.0000000088475645, y: 0.000000019557774, z: 0.03439183}
+  - boneId: 5
+    position: {x: 0.000000040745363, y: -0.000000010360964, z: 0.035745997}
+  - boneId: 7
+    position: {x: -0.00070913695, y: 0.0010863254, z: 0.026011864}
+  - boneId: 8
+    position: {x: 0.019854262, y: -0.011623831, z: 0.03930091}
+  - boneId: 9
+    position: {x: 0.0050574066, y: 0.00388458, z: 0.062242948}
+  - boneId: 10
+    position: {x: -0.0000000018626451, y: -0.000000013038516, z: 0.040119104}
+  - boneId: 11
+    position: {x: 0.0000000023283064, y: -0.000000008381903, z: 0.025708178}
+  - boneId: 12
+    position: {x: -0.00031269807, y: 0.0010843342, z: 0.023655754}
+  - boneId: 13
+    position: {x: 0.0027081128, y: -0.008874084, z: 0.03701345}
+  - boneId: 14
+    position: {x: -0.00088246353, y: 0.006183978, z: 0.064160585}
+  - boneId: 15
+    position: {x: -0.000000024214387, y: -0.00000003236346, z: 0.045407742}
+  - boneId: 16
+    position: {x: -0.000000016763806, y: 0.000000023283064, z: 0.029141653}
+  - boneId: 17
+    position: {x: -0.00032646768, y: 0.001202994, z: 0.026407668}
+  - boneId: 18
+    position: {x: -0.01585874, y: -0.006363438, z: 0.036785223}
+  - boneId: 19
+    position: {x: -0.0026158364, y: -0.00054319575, z: 0.05703418}
+  - boneId: 20
+    position: {x: 0.000000013969839, y: 0.000000007916242, z: 0.04124968}
+  - boneId: 21
+    position: {x: 0.0000000027939677, y: 0.000000017695129, z: 0.028109074}
+  - boneId: 22
+    position: {x: -0.00027280534, y: 0.0017010979, z: 0.025731929}
+  - boneId: 23
+    position: {x: -0.024327677, y: -0.009964198, z: 0.036042657}
+  - boneId: 24
+    position: {x: 0.000002341345, y: -0.0000010523945, z: 0.04828869}
+  - boneId: 25
+    position: {x: 0.000000017695129, y: -0.000000006519258, z: 0.032495737}
+  - boneId: 26
+    position: {x: -0.000000018626451, y: -0.000000012572855, z: 0.02148519}
+  - boneId: 27
+    position: {x: 0.00026069675, y: 0.0012863511, z: 0.023189247}

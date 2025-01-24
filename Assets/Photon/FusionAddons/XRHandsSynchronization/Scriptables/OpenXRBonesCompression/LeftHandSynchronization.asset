@@ -1,0 +1,412 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57c3dce928a7b51469e543e194c7a70b, type: 3}
+  m_Name: LeftHandSynchronization
+  m_EditorClassIdentifier: 
+  bonesInfo:
+  - boneId: 1
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 28
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 3
+    axisCompressionMode: 10
+    applyOffset: 0
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: -9.578735
+    XmaxRange: 63.007202
+    YminRange: 6.730438
+    YmaxRange: 63.05597
+    ZminRange: -103.322754
+    ZmaxRange: -58.444336
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 4
+    axisCompressionMode: 4
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 8.745854}
+    XminRange: -8.824768
+    XmaxRange: 63.68077
+    YminRange: -9.685425
+    YmaxRange: 6.429062
+    ZminRange: 8.713608
+    ZmaxRange: 13.691559
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 5
+    axisCompressionMode: 4
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: -8.207126}
+    XminRange: -20.51117
+    XmaxRange: 55.341766
+    YminRange: -3.1279297
+    YmaxRange: 10.908295
+    ZminRange: -11.949951
+    ZmaxRange: -8.145508
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 7
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 8
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 9
+    axisCompressionMode: 4
+    applyOffset: 1
+    offsetValue: {x: 0, y: 3.26, z: -3.17}
+    XminRange: -10.882568
+    XmaxRange: 78.390594
+    YminRange: -26.958984
+    YmaxRange: 21.932587
+    ZminRange: -26.847656
+    ZmaxRange: -1.7196045
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 10
+    axisCompressionMode: 1
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: -5.35}
+    XminRange: 0.4116211
+    XmaxRange: 87.15463
+    YminRange: -0.80474854
+    YmaxRange: 170.74744
+    ZminRange: 2.9585571
+    ZmaxRange: 170.96341
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 11
+    axisCompressionMode: 12
+    applyOffset: 1
+    offsetValue: {x: 0, y: -2.6771913, z: 11.94}
+    XminRange: -8.121826
+    XmaxRange: 73.5502
+    YminRange: -3.2659912
+    YmaxRange: 0.33631897
+    ZminRange: 1.4449463
+    ZmaxRange: 2.5563812
+    followBoneDetails:
+      followedBone: 10
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 12
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 13
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 14
+    axisCompressionMode: 4
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0.67995226}
+    XminRange: -10.4782715
+    XmaxRange: 86.40115
+    YminRange: -15.084961
+    YmaxRange: 0.75653076
+    ZminRange: 0.29641724
+    ZmaxRange: 6.145355
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 15
+    axisCompressionMode: 1
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 1.61}
+    XminRange: -0.21936035
+    XmaxRange: 88.58267
+    YminRange: -0.50427246
+    YmaxRange: 174.9403
+    ZminRange: 1.287674
+    ZmaxRange: 175.3778
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 16
+    axisCompressionMode: 12
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: -5.02}
+    XminRange: -10.315247
+    XmaxRange: 69.07355
+    YminRange: -0.8833008
+    YmaxRange: 24.368301
+    ZminRange: 4.063385
+    ZmaxRange: 29.924072
+    followBoneDetails:
+      followedBone: 15
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 17
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 18
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 19
+    axisCompressionMode: 4
+    applyOffset: 1
+    offsetValue: {x: 0, y: -0.45, z: 7.97}
+    XminRange: -10.324829
+    XmaxRange: 84.631256
+    YminRange: -26.66504
+    YmaxRange: -4.22
+    ZminRange: 4.4878693
+    ZmaxRange: 115.9324
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 20
+    axisCompressionMode: 1
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0.3}
+    XminRange: 0.66082764
+    XmaxRange: 84.88611
+    YminRange: -0.29760742
+    YmaxRange: 163.13428
+    ZminRange: 3.8530884
+    ZmaxRange: 164.34225
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 21
+    axisCompressionMode: 12
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 8.81}
+    XminRange: -2.020874
+    XmaxRange: 78.237305
+    YminRange: 3.3425598
+    YmaxRange: 23.703156
+    ZminRange: 0.38017273
+    ZmaxRange: 24.35054
+    followBoneDetails:
+      followedBone: 20
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 22
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 23
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 5.368744, y: -15.384592, z: 23.418396}
+    XminRange: 5.3687286
+    XmaxRange: 5.368759
+    YminRange: -15.384644
+    YmaxRange: -15.3845825
+    ZminRange: 23.41838
+    ZmaxRange: 23.418411
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 24
+    axisCompressionMode: 4
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: -13.9}
+    XminRange: -28.950409
+    XmaxRange: 82.290405
+    YminRange: -4.5
+    YmaxRange: 24.274307
+    ZminRange: -122.87198
+    ZmaxRange: -8.83667
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 25
+    axisCompressionMode: 1
+    applyOffset: 0
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: -1.3348389
+    XmaxRange: 82.98938
+    YminRange: -4.9766846
+    YmaxRange: 149.0983
+    ZminRange: 4.373932
+    ZmaxRange: 156.30255
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 26
+    axisCompressionMode: 12
+    applyOffset: 1
+    offsetValue: {x: 0, y: 5.7290497, z: 0}
+    XminRange: -2.7416992
+    XmaxRange: 77.41284
+    YminRange: 5.6351013
+    YmaxRange: 14.7452545
+    ZminRange: -0.20916748
+    ZmaxRange: 11.437225
+    followBoneDetails:
+      followedBone: 25
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  - boneId: 27
+    axisCompressionMode: 0
+    applyOffset: 1
+    offsetValue: {x: 0, y: 0, z: 0}
+    XminRange: 0
+    XmaxRange: 0
+    YminRange: 0
+    YmaxRange: 0
+    ZminRange: 0
+    ZmaxRange: 0
+    followBoneDetails:
+      followedBone: 0
+      boneAxis: 0
+      minInputRot: 0
+      maxInputRot: 0
+  limitHandChangeEmissionPersecond: 0
+  handChangeEmissionMinDelay: 0.1
+  interpolateBoneRotations: 1
+  storedInterpolationStates: 10
+  interpolationDelay: 0.1
+  uncompressingBoneDataOnNetworkChangesOnly: 1
+  debugRemoteRenderingLocally: 0

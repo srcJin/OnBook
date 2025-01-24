@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="GuideButton" src="project://database/Assets/Photon/FusionAddons/XRGuide/Scripts/Editor/XRCreationGuide/XRCreationGuideButton.uxml?fileID=9197481963319205126&amp;guid=78c899d2cdc78754e9b66aafbac7c9b8&amp;type=3#XRCreationGuideButton" />
+    <Style src="project://database/Assets/Photon/FusionAddons/XRGuide/Scripts/Editor/XRCreationGuide/XRCreationGuide.uss?fileID=7433441132597879392&amp;guid=16dfd95d6c3383348be489962300c5d4&amp;type=3#XRCreationGuide" />
+    <ui:VisualElement name="selected-item" style="flex-grow: 1; visibility: visible; display: none;" />
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1">
+        <ui:VisualElement name="runner-view" class="category-view" style="justify-content: center;">
+            <ui:Label tabindex="-1" text="Runner" parse-escape-sequences="true" display-tooltip-when-elided="true" class="xr-component-type" style="border-top-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px; border-bottom-left-radius: 3px; justify-content: center; align-items: flex-start; background-color: rgb(167, 167, 167);">
+                <ui:Button text="-" display-tooltip-when-elided="true" name="toggle-view-button" style="width: 20px; left: 95%; align-items: center; justify-content: center;" />
+            </ui:Label>
+            <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" mode="Horizontal" name="button-scrollview">
+                <ui:Instance template="GuideButton" name="GuideButton" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement name="hardwarerig-view" class="category-view" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Hardware rig" parse-escape-sequences="true" display-tooltip-when-elided="true" class="xr-component-type" style="justify-content: center; background-color: rgb(167, 167, 167);">
+                <ui:Button text="-" display-tooltip-when-elided="true" name="toggle-view-button" style="width: 20px; left: 95%; align-items: center; justify-content: center;" />
+            </ui:Label>
+            <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" mode="Horizontal" horizontal-scroller-visibility="Auto" name="button-scrollview" style="height: auto; display: flex;">
+                <ui:Instance template="GuideButton" name="XRCreationGuideButton" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement name="networkrig-view" class="category-view" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Network rig prefab" parse-escape-sequences="true" display-tooltip-when-elided="true" class="xr-component-type" style="background-color: rgb(167, 167, 167);">
+                <ui:Button text="-" display-tooltip-when-elided="true" name="toggle-view-button" style="width: 20px; left: 95%; align-items: center; justify-content: center;" />
+            </ui:Label>
+            <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" mode="Horizontal" name="button-scrollview">
+                <ui:Instance template="GuideButton" name="XRCreationGuideButton" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement name="sceneobjects-view" class="category-view" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="Scene Objects" parse-escape-sequences="true" display-tooltip-when-elided="true" class="xr-component-type" style="background-color: rgb(167, 167, 167);">
+                <ui:Button text="-" display-tooltip-when-elided="true" name="toggle-view-button" style="width: 20px; left: 95%; align-items: center; justify-content: center;" />
+            </ui:Label>
+            <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" mode="Horizontal" name="button-scrollview">
+                <ui:Instance template="GuideButton" name="XRCreationGuideButton" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:ScrollView>
+    <ui:VisualElement name="visual-elements-templates" style="display: flex;" />
+</ui:UXML>

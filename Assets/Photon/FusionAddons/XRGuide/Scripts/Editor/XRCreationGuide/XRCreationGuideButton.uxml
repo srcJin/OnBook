@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Photon/FusionAddons/XRGuide/Scripts/Editor/XRCreationGuide/XRCreationGuide.uss?fileID=7433441132597879392&amp;guid=16dfd95d6c3383348be489962300c5d4&amp;type=3#XRCreationGuide" />
+    <ui:Button display-tooltip-when-elided="true" tooltip="Sample tooltip" name="guide-button" class="xr-button" style="height: 130px; width: 150px; flex-direction: column; align-items: center; justify-content: flex-start;">
+        <ui:VisualElement style="background-color: rgba(38, 134, 229, 0); position: absolute; left: auto; width: 150px; height: 85px; flex-direction: column; align-items: center;">
+            <ui:VisualElement name="guide-button-image" style="background-image: url(&quot;project://database/Assets/Photon/FusionAddons/XRShared/Scripts/Utils/Editor/images/xrguide-spawn-runner.jpg?fileID=2800000&amp;guid=6eb1c35caae59974b9e659b1527c9872&amp;type=3#xrguide-spawn-runner&quot;); width: 150px; height: 85px; -unity-background-scale-mode: stretch-to-fill; bottom: auto; align-items: center; position: relative; top: auto; flex-shrink: 1; min-width: auto; justify-content: center; flex-direction: column; opacity: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement style="-unity-background-image-tint-color: rgb(0, 0, 0); width: 150px; height: 40px; background-color: rgba(229, 12, 12, 0); overflow: visible; visibility: visible; left: 0; position: absolute; right: 0; bottom: 0; align-items: center; justify-content: center;">
+            <ui:Label text="CATEGORY 1 " display-tooltip-when-elided="true" name="guide-button-title" style="justify-content: center; -unity-text-align: middle-center; align-items: center; bottom: auto; position: absolute; width: 100%; left: auto; right: auto; color: rgb(255, 255, 255); white-space: normal; height: auto; min-height: auto; max-height: none; -unity-font-style: bold;" />
+        </ui:VisualElement>
+    </ui:Button>
+</ui:UXML>

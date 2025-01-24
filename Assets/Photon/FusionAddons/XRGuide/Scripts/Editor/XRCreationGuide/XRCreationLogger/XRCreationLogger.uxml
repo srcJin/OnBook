@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="margin-top: 5px; margin-right: 5px; margin-left: 5px; margin-bottom: 5px; flex-direction: row; height: 20px;">
+        <ui:Label text="Latest actions:" display-tooltip-when-elided="true" style="margin-top: 0; margin-left: 0; padding-right: 2px; padding-left: 1px;" />
+        <ui:Button text="Clear" display-tooltip-when-elided="true" name="clear-logs" style="flex-shrink: 0; right: 0; position: absolute;" />
+    </ui:VisualElement>
+    <ui:ListView focusable="true" name="log-listview" style="margin-top: 5px; margin-left: 5px; margin-right: 5px; margin-bottom: 5px;" />
+</ui:UXML>
