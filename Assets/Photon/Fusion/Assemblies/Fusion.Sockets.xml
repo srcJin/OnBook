@@ -55,6 +55,11 @@
             Clear and return the OUT Encrypt Buffer 
             </summary>
         </member>
+        <member name="M:Fusion.Encryption.DataEncryptor.Dispose">
+            <summary>
+            Dispose of the DataEncryptor
+            </summary>
+        </member>
         <member name="T:Fusion.Encryption.IDataEncryption">
             <summary>
             Interface for classes that manage the encryption/decryption of byte arrays
@@ -221,10 +226,66 @@
             Represents an encryption token.
             </summary>
         </member>
+        <member name="T:Fusion.EncryptionConfig">
+            <summary>
+            Configuration for the Encryption Feature
+            </summary>
+        </member>
         <member name="F:Fusion.EncryptionConfig.EnableEncryption">
             <summary>
             Enabled the Encryption Feature
             </summary>
+        </member>
+        <member name="T:Fusion.Sockets.INetBitWriteStream">
+            <summary>
+            Interface for writing bits to a stream.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.INetBitWriteStream.OffsetBits">
+            <summary>
+            Gets the current offset in bits.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.INetBitWriteStream.WriteInt32(System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit signed integer to the stream.
+            </summary>
+            <param name="value">The 32-bit signed integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 32.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetBitWriteStream.WriteInt32VarLength(System.Int32)">
+            <summary>
+            Writes a 32-bit signed integer to the stream with variable length encoding.
+            </summary>
+            <param name="value">The 32-bit signed integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetBitWriteStream.WriteInt32VarLength(System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit signed integer to the stream with variable length encoding and a specified block size.
+            </summary>
+            <param name="value">The 32-bit signed integer value to write.</param>
+            <param name="blockSize">The block size for variable length encoding.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetBitWriteStream.WriteUInt64VarLength(System.UInt64,System.Int32)">
+            <summary>
+            Writes a 64-bit unsigned integer to the stream with variable length encoding and a specified block size.
+            </summary>
+            <param name="value">The 64-bit unsigned integer value to write.</param>
+            <param name="blockSize">The block size for variable length encoding.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetBitWriteStream.WriteBoolean(System.Boolean)">
+            <summary>
+            Writes a boolean value to the stream.
+            </summary>
+            <param name="b">The boolean value to write.</param>
+            <returns>The boolean value that was written.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetBitWriteStream.WriteBytesAligned(System.Void*,System.Int32)">
+            <summary>
+            Writes a sequence of bytes to the stream, aligned to byte boundaries.
+            </summary>
+            <param name="buffer">A pointer to the buffer containing the bytes to write.</param>
+            <param name="length">The number of bytes to write.</param>
         </member>
         <member name="T:Fusion.Sockets.NetAddress">
             <summary>
@@ -317,6 +378,41 @@
             <exception cref="T:System.ArgumentException">If IP is empty/null or an invalid IP, or port &lt; 0</exception>
             <exception cref="T:Fusion.AssertException">If unable to parse IP</exception>
         </member>
+        <member name="M:Fusion.Sockets.NetAddress.Equals(Fusion.Sockets.NetAddress)">
+            <summary>
+            Determines whether the specified <see cref="T:Fusion.Sockets.NetAddress"/> instances are equal.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetAddress.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:Fusion.Sockets.NetAddress"/> is equal to the current <see cref="T:Fusion.Sockets.NetAddress"/>.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetAddress.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetAddress.ToString">
+            <summary>
+            Provides a string representation of the <see cref="T:Fusion.Sockets.NetAddress"/>
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetAddress.EqualityComparer">
+            <summary>
+            Provides methods to compare two <see cref="T:Fusion.Sockets.NetAddress"/> instances for equality.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetAddress.EqualityComparer.Equals(Fusion.Sockets.NetAddress,Fusion.Sockets.NetAddress)">
+            <summary>
+            Determines whether the specified <see cref="T:Fusion.Sockets.NetAddress"/> instances are equal.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetAddress.EqualityComparer.GetHashCode(Fusion.Sockets.NetAddress)">
+            <summary>
+            Returns a hash code for the specified <see cref="T:Fusion.Sockets.NetAddress"/>.
+            </summary>
+        </member>
         <member name="T:Fusion.Sockets.NetAddress.SubnetMask">
             <summary>
             IPv4 Subnet Mask Utilities
@@ -344,6 +440,497 @@
             <param name="netAddress">EndPoint</param>
             <param name="subnetMask">Subnet Mask</param>
             <returns>Network Address based on the Subnet Mask</returns>
+        </member>
+        <member name="T:Fusion.Sockets.NetBitBuffer">
+            <summary>
+            Represents a buffer for reading and writing bits.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetBitBuffer.Address">
+            <summary>
+            The address of the buffer.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.Data">
+            <summary>
+            Gets or sets a pointer to the data in the buffer.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.LengthBits">
+            <summary>
+            Gets the length of the buffer in bits.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.BytesRemaining">
+            <summary>
+            Gets the number of bytes remaining in the buffer.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.LengthBytes">
+            <summary>
+            Gets or sets the length of the buffer in bytes.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.OffsetBits">
+            <summary>
+            Gets or sets the current offset in bits.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.Done">
+            <summary>
+            Gets a value indicating whether the buffer has been fully read.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.Overflow">
+            <summary>
+            Gets a value indicating whether the buffer has overflowed.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.OverflowOrLessThanOneByteRemaining">
+            <summary>
+            Gets a value indicating whether the buffer has overflowed or has less than one byte remaining.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.OffsetBitsUnsafe">
+            <summary>
+            Gets or sets the current offset in bits without any safety checks.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.DoneOrOverflow">
+            <summary>
+            Gets a value indicating whether the buffer is done or has overflowed.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.MoreToRead">
+            <summary>
+            Gets a value indicating whether there is more data to read in the buffer.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.PacketType">
+            <summary>
+            Gets or sets the packet type stored in the buffer.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReplaceDataFromBlockWithTemp(System.Int32)">
+            <summary>
+            Replaces the current data block with a temporary block of the specified size.
+            </summary>
+            <param name="tempSize">The size of the temporary block in bytes.</param>
+        </member>
+        <member name="T:Fusion.Sockets.NetBitBuffer.Offset">
+            <summary>
+            Represents an offset within a NetBitBuffer.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.Offset.#ctor(Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Initializes a new instance of the Offset struct with the specified buffer.
+            </summary>
+            <param name="buffer">The buffer to initialize the offset from.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.Offset.GetLength(Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Gets the length in bits from the stored offset to the current offset of the buffer.
+            </summary>
+            <param name="buffer">The buffer to calculate the length from.</param>
+            <returns>The length in bits.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.GetOffset(Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Gets the current offset of the specified buffer.
+            </summary>
+            <param name="buffer">The buffer to get the offset from.</param>
+            <returns>An Offset struct representing the current offset.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.Allocate(System.Int32,System.Int32)">
+            <summary>
+            Allocates a new NetBitBuffer with the specified group and size.
+            </summary>
+            <param name="group">The group identifier for the buffer.</param>
+            <param name="size">The size of the buffer in bytes.</param>
+            <returns>A pointer to the allocated NetBitBuffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReleaseRef(Fusion.Sockets.NetBitBuffer*@)">
+            <summary>
+            Releases the reference to the specified buffer and sets it to null.
+            </summary>
+            <param name="buffer">A reference to the buffer to release.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.Release(Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Releases the specified buffer.
+            </summary>
+            <param name="buffer">The buffer to release.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.SetBufferLengthBytes(System.UInt64*,System.Int32)">
+            <summary>
+            Sets the buffer length in bytes and updates the internal length in bits.
+            </summary>
+            <param name="buffer">A pointer to the buffer.</param>
+            <param name="lenghtInBytes">The length of the buffer in bytes.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.Clear">
+            <summary>
+            Clears the buffer by setting all bits to zero.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteBoolean(System.Boolean)">
+            <summary>
+            Writes a boolean value to the buffer.
+            </summary>
+            <param name="value">The boolean value to write.</param>
+            <returns>The boolean value that was written.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadBoolean">
+            <summary>
+            Reads a boolean value from the buffer.
+            </summary>
+            <returns>The boolean value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.PeekBoolean">
+            <summary>
+            Peeks at the next boolean value in the buffer without advancing the read position.
+            </summary>
+            <returns>The boolean value peeked from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteByte(System.Byte,System.Int32)">
+            <summary>
+            Writes a byte value to the buffer.
+            </summary>
+            <param name="value">The byte value to write.</param>
+            <param name="bits">The number of bits to write. Default is 8.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadByte(System.Int32)">
+            <summary>
+            Reads a byte value from the buffer.
+            </summary>
+            <param name="bits">The number of bits to read. Default is 8.</param>
+            <returns>The byte value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteInt16(System.Int16,System.Int32)">
+            <summary>
+            Writes a 16-bit signed integer value to the buffer.
+            </summary>
+            <param name="value">The 16-bit signed integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 16.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadInt16(System.Int32)">
+            <summary>
+            Reads a 16-bit signed integer value from the buffer.
+            </summary>
+            <param name="bits">The number of bits to read. Default is 16.</param>
+            <returns>The 16-bit signed integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteUInt16(System.UInt16,System.Int32)">
+            <summary>
+            Writes a 16-bit unsigned integer value to the buffer.
+            </summary>
+            <param name="value">The 16-bit unsigned integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 16.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadUInt16(System.Int32)">
+            <summary>
+            Reads a 16-bit unsigned integer value from the buffer.
+            </summary>
+            <param name="bits">The number of bits to read. Default is 16.</param>
+            <returns>The 16-bit unsigned integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteInt32(System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit signed integer value to the buffer.
+            </summary>
+            <param name="value">The 32-bit signed integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 32.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadInt32(System.Int32)">
+            <summary>
+            Reads a 32-bit signed integer value from the buffer.
+            </summary>
+            <param name="bits">The number of bits to read. Default is 32.</param>
+            <returns>The 32-bit signed integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteUInt32(System.UInt32,System.Int32)">
+            <summary>
+            Writes a 32-bit unsigned integer value to the buffer.
+            </summary>
+            <param name="value">The 32-bit unsigned integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 32.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteString(System.String)">
+            <summary>
+            Writes a string to the buffer using UTF-8 encoding.
+            </summary>
+            <param name="value">The string to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteString(System.String,System.Text.Encoding)">
+            <summary>
+            Writes a string to the buffer using the specified encoding.
+            </summary>
+            <param name="value">The string to write.</param>
+            <param name="encoding">The encoding to use.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadString">
+            <summary>
+            Reads a string from the buffer using UTF-8 encoding.
+            </summary>
+            <returns>The string read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadString(System.Text.Encoding)">
+            <summary>
+            Reads a string from the buffer using the specified encoding.
+            </summary>
+            <param name="encoding">The encoding to use.</param>
+            <returns>The string read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.CanWrite(System.Int32)">
+            <summary>
+            Checks if the specified number of bits can be written to the buffer.
+            </summary>
+            <param name="bits">The number of bits to check.</param>
+            <returns><c>true</c> if the specified number of bits can be written; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.CanRead(System.Int32)">
+            <summary>
+            Checks if the specified number of bits can be read from the buffer.
+            </summary>
+            <param name="bits">The number of bits to check.</param>
+            <returns><c>true</c> if the specified number of bits can be read; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.IsOnEvenByte">
+            <summary>
+            Gets a value indicating whether the buffer is aligned to an even byte boundary.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBuffer.OffsetBytes">
+            <summary>
+            Gets the current offset in bytes.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.PadToByteBoundary">
+            <summary>
+            Pads the buffer to the next byte boundary by writing zero bits if necessary.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.GetDataPointer">
+            <summary>
+            Gets a pointer to the current data position in the buffer.
+            </summary>
+            <returns>A pointer to the current data position in the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.PadToByteBoundaryAndGetPtr">
+            <summary>
+            Pads the buffer to the next byte boundary and returns a pointer to the current data position.
+            </summary>
+            <returns>A pointer to the current data position in the buffer after padding to the byte boundary.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.CheckBitCount(System.Int32)">
+            <summary>
+            Checks if the specified number of bits can be read or written without exceeding the buffer length.
+            </summary>
+            <param name="count">The number of bits to check.</param>
+            <returns><c>true</c> if the specified number of bits can be read or written; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.SeekToByteBoundary">
+            <summary>
+            Advances the buffer offset to the next byte boundary.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteBytesAligned(System.Byte[],System.Int32)">
+            <summary>
+            Writes an array of bytes to the buffer, ensuring byte alignment.
+            </summary>
+            <param name="buffer">The array of bytes to write.</param>
+            <param name="length">The number of bytes to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteBytesAligned(System.Void*,System.Int32)">
+            <summary>
+            Writes a block of bytes to the buffer, ensuring byte alignment.
+            </summary>
+            <param name="buffer">A pointer to the block of bytes to write.</param>
+            <param name="length">The number of bytes to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadBytesAligned(System.Byte[],System.Int32)">
+            <summary>
+            Reads an array of bytes from the buffer, ensuring byte alignment.
+            </summary>
+            <param name="buffer">The array to store the read bytes.</param>
+            <param name="length">The number of bytes to read.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadBytesAligned(System.Void*,System.Int32)">
+            <summary>
+            Reads a block of bytes from the buffer, ensuring byte alignment.
+            </summary>
+            <param name="buffer">A pointer to the block of bytes to store the read data.</param>
+            <param name="length">The number of bytes to read.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteInt64VarLength(System.Int64,System.Int32)">
+            <summary>
+            Writes a 64-bit signed integer value with variable length to the buffer.
+            </summary>
+            <param name="value">The 64-bit signed integer value to write.</param>
+            <param name="blockSize">The block size in bits.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteInt32VarLength(System.Int32)">
+            <summary>
+            Writes a 32-bit signed integer value with variable length to the buffer.
+            </summary>
+            <param name="value">The 32-bit signed integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteInt32VarLength(System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit signed integer value with variable length to the buffer.
+            </summary>
+            <param name="value">The 32-bit signed integer value to write.</param>
+            <param name="blockSize">The block size in bits.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadInt32VarLength">
+            <summary>
+            Reads a 32-bit signed integer value with variable length from the buffer.
+            </summary>
+            <returns>The 32-bit signed integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadInt64VarLength(System.Int32)">
+            <summary>
+            Reads a 64-bit signed integer value with variable length from the buffer.
+            </summary>
+            <param name="blockSize">The block size in bits.</param>
+            <returns>The 64-bit signed integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadInt32VarLength(System.Int32)">
+            <summary>
+            Reads a 32-bit signed integer value with variable length from the buffer.
+            </summary>
+            <param name="blockSize">The block size in bits.</param>
+            <returns>The 32-bit signed integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadUInt32VarLength(System.Int32)">
+            <summary>
+            Reads a 32-bit unsigned integer value with variable length from the buffer.
+            </summary>
+            <param name="blockSize">The block size in bits.</param>
+            <returns>The 32-bit unsigned integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadUInt64VarLength(System.Int32)">
+            <summary>
+            Reads a 64-bit unsigned integer value with variable length from the buffer.
+            </summary>
+            <param name="blockSize">The block size in bits.</param>
+            <returns>The 64-bit unsigned integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteUInt32VarLength(System.UInt32,System.Int32)">
+            <summary>
+            Writes a 32-bit unsigned integer value with variable length to the buffer.
+            </summary>
+            <param name="value">The 32-bit unsigned integer value to write.</param>
+            <param name="blockSize">The block size in bits.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteUInt64VarLength(System.UInt64,System.Int32)">
+            <summary>
+            Writes a 64-bit unsigned integer value with variable length to the buffer.
+            </summary>
+            <param name="value">The 64-bit unsigned integer value to write.</param>
+            <param name="blockSize">The block size in bits.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteUInt32VarLength(System.UInt32)">
+            <summary>
+            Writes a 32-bit unsigned integer value with variable length to the buffer.
+            </summary>
+            <param name="value">The 32-bit unsigned integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadUInt32VarLength">
+            <summary>
+            Reads a 32-bit unsigned integer value with variable length from the buffer.
+            </summary>
+            <returns>The 32-bit unsigned integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadUInt32(System.Int32)">
+            <summary>
+            Reads a 32-bit unsigned integer value from the buffer.
+            </summary>
+            <param name="bits">The number of bits to read. Default is 32.</param>
+            <returns>The 32-bit unsigned integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteInt64(System.Int64,System.Int32)">
+            <summary>
+            Writes a 64-bit signed integer value to the buffer.
+            </summary>
+            <param name="value">The 64-bit signed integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 64.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadInt64(System.Int32)">
+            <summary>
+            Reads a 64-bit signed integer value from the buffer.
+            </summary>
+            <param name="bits">The number of bits to read. Default is 64.</param>
+            <returns>The 64-bit signed integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteUInt64(System.UInt64,System.Int32)">
+            <summary>
+            Writes a 64-bit unsigned integer value to the buffer.
+            </summary>
+            <param name="value">The 64-bit unsigned integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 64.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadUInt64(System.Int32)">
+            <summary>
+            Reads a 64-bit unsigned integer value from the buffer.
+            </summary>
+            <param name="bits">The number of bits to read. Default is 64.</param>
+            <returns>The 64-bit unsigned integer value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteSingle(System.Single)">
+            <summary>
+            Writes a single-precision floating-point value to the buffer.
+            </summary>
+            <param name="value">The single-precision floating-point value to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadSingle">
+            <summary>
+            Reads a single-precision floating-point value from the buffer.
+            </summary>
+            <returns>The single-precision floating-point value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteDouble(System.Double)">
+            <summary>
+            Writes a double-precision floating-point value to the buffer.
+            </summary>
+            <param name="value">The double-precision floating-point value to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.ReadDouble">
+            <summary>
+            Reads a double-precision floating-point value from the buffer.
+            </summary>
+            <returns>The double-precision floating-point value read from the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteInt32AtOffset(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit integer value at a specified offset in the buffer.
+            </summary>
+            <param name="value">The 32-bit integer value to write.</param>
+            <param name="offset">The offset in bits where the value should be written.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteUInt64AtOffset(System.UInt64,System.Int32,System.Int32)">
+            <summary>
+            Writes a 64-bit unsigned integer value at a specified offset in the buffer.
+            </summary>
+            <param name="value">The 64-bit unsigned integer value to write.</param>
+            <param name="offset">The offset in bits where the value should be written.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.Write(System.UInt64,System.Int32)">
+            <summary>
+            Writes a value to the buffer with a specified number of bits.
+            </summary>
+            <param name="value">The value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBuffer.WriteSlow(System.UInt64,System.Int32)">
+            <summary>
+            Writes a value to the buffer with a specified number of bits, handling cases where the value spans multiple words.
+            </summary>
+            <param name="value">The value to write.</param>
+            <param name="bits">The number of bits to write.</param>
         </member>
         <member name="T:Fusion.Sockets.NetBitBufferList">
             <summary>
@@ -380,6 +967,166 @@
             </summary>
             <param name="item">NetBitBuffer to check</param>
             <returns>True if the list contains the item, false otherwise</returns>
+        </member>
+        <member name="T:Fusion.Sockets.NetBitBufferNull">
+            <summary>
+            Represents a null bit buffer for writing data.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBufferNull.OffsetBits">
+            <summary>
+            Gets or sets the offset in bits.
+            </summary>
+            <value>The current offset in bits.</value>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.PadToByteBoundary">
+            <summary>
+            Pads the buffer to the next byte boundary by writing zero bits if necessary.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteByte(System.Byte,System.Int32)">
+            <summary>
+            Writes a byte value to the buffer and increments the offset by the specified number of bits.
+            </summary>
+            <param name="value">The byte value to write.</param>
+            <param name="bits">The number of bits to write. Default is 8.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteInt32(System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit integer value to the buffer and increments the offset by the specified number of bits.
+            </summary>
+            <param name="value">The 32-bit integer value to write.</param>
+            <param name="bits">The number of bits to write. Default is 32.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteInt32VarLength(System.Int32)">
+            <summary>
+            Writes a 32-bit integer value with variable length encoding.
+            </summary>
+            <param name="value">The 32-bit integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteInt32VarLength(System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit integer value with variable length encoding and a specified block size.
+            </summary>
+            <param name="value">The 32-bit integer value to write.</param>
+            <param name="blockSize">The block size for encoding.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteUInt32VarLength(System.UInt32,System.Int32)">
+            <summary>
+            Writes a 32-bit unsigned integer value with variable length encoding and a specified block size.
+            </summary>
+            <param name="value">The 32-bit unsigned integer value to write.</param>
+            <param name="blockSize">The block size for encoding.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteUInt64VarLength(System.UInt64,System.Int32)">
+            <summary>
+            Writes a 64-bit unsigned integer value with variable length encoding and a specified block size.
+            </summary>
+            <param name="value">The 64-bit unsigned integer value to write.</param>
+            <param name="blockSize">The block size for encoding.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteUInt32VarLength(System.UInt32)">
+            <summary>
+            Writes a 32-bit unsigned integer value with variable length encoding.
+            </summary>
+            <param name="value">The 32-bit unsigned integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteBoolean(System.Boolean)">
+            <summary>
+            Writes a boolean value to the buffer and increments the offset by 1 bit.
+            </summary>
+            <param name="b">The boolean value to write.</param>
+            <returns>The boolean value that was written.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferNull.WriteBytesAligned(System.Void*,System.Int32)">
+            <summary>
+            Writes a specified number of bytes from a buffer to the bit buffer, ensuring byte alignment.
+            </summary>
+            <param name="buffer">A pointer to the buffer containing the bytes to write.</param>
+            <param name="length">The number of bytes to write.</param>
+        </member>
+        <member name="T:Fusion.Sockets.NetBitBufferSerializer">
+            <summary>
+            Represents a serializer for reading and writing data to a <see cref="T:Fusion.Sockets.NetBitBuffer"/>.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBufferSerializer.Writing">
+            <summary>
+            Gets a value indicating whether the serializer is in write mode.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBufferSerializer.Reading">
+            <summary>
+            Gets a value indicating whether the serializer is in read mode.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetBitBufferSerializer.Buffer">
+            <summary>
+            Gets the buffer associated with the serializer.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Writer(Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Creates a new instance of <see cref="T:Fusion.Sockets.NetBitBufferSerializer"/> for writing to the buffer.
+            </summary>
+            <param name="buffer">The buffer to write to.</param>
+            <returns>A new instance of <see cref="T:Fusion.Sockets.NetBitBufferSerializer"/> configured for writing.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Reader(Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Creates a new instance of <see cref="T:Fusion.Sockets.NetBitBufferSerializer"/> for reading from the buffer.
+            </summary>
+            <param name="buffer">The buffer to read from.</param>
+            <returns>A new instance of <see cref="T:Fusion.Sockets.NetBitBufferSerializer"/> configured for reading.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Check(System.Boolean)">
+            <summary>
+            Checks the boolean value and writes or reads it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The boolean value to check.</param>
+            <returns>The boolean value read from the buffer if in read mode, otherwise the value written to the buffer.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Serialize(System.Single@)">
+            <summary>
+            Serializes a float value by writing or reading it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The float value to serialize.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Serialize(System.Byte@)">
+            <summary>
+            Serializes a byte value by writing or reading it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The byte value to serialize.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Serialize(System.Boolean@)">
+            <summary>
+            Serializes a boolean value by writing or reading it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The boolean value to serialize.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Serialize(System.Int32@)">
+            <summary>
+            Serializes an integer value by writing or reading it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The integer value to serialize.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Serialize(System.UInt32@)">
+            <summary>
+            Serializes an unsigned integer value by writing or reading it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The unsigned integer value to serialize.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Serialize(System.UInt64@)">
+            <summary>
+            Serializes an unsigned long value by writing or reading it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The unsigned long value to serialize.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetBitBufferSerializer.Serialize(System.String@)">
+            <summary>
+            Serializes a string value by writing or reading it from the buffer based on the serializer mode.
+            </summary>
+            <param name="value">The string value to serialize.</param>
         </member>
         <member name="T:Fusion.Sockets.NetCommands">
             <summary>
@@ -526,6 +1273,171 @@
             Builds a <see cref="T:Fusion.Sockets.NetConfig"/> with the default values
             </summary>
         </member>
+        <member name="T:Fusion.Sockets.NetConfigNotify">
+            <summary>
+            Represents the configuration for network notifications.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigNotify.AckMaskBytes">
+            <summary>
+            The number of bytes used for acknowledgment masks.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigNotify.AckForceCount">
+            <summary>
+            The count of forced acknowledgments.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigNotify.AckForceTimeout">
+            <summary>
+            The timeout for forced acknowledgments.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigNotify.WindowSize">
+            <summary>
+            The size of the window.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigNotify.SequenceBytes">
+            <summary>
+            The number of bytes used for sequences.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConfigNotify.SequenceBounds">
+            <summary>
+            Gets the sequence bounds, calculated as WindowSize * 16.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConfigNotify.AckMaskBits">
+            <summary>
+            Gets the number of bits used for acknowledgment masks.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConfigNotify.Defaults">
+            <summary>
+            Gets the default configuration for network notifications.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetConfigSimulation">
+            <summary>
+            Represents the configuration for network simulation.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulation.LossNotifySequences">
+            <summary>
+            Pointer to the sequences used for loss notifications.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulation.LossNotifySequencesLength">
+            <summary>
+            The length of the loss notification sequences.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulation.DelayOscillator">
+            <summary>
+            The oscillator used for simulating delay.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulation.LossOscillator">
+            <summary>
+            The oscillator used for simulating loss.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulation.DuplicateChance">
+            <summary>
+            The chance of a duplicate packet.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConfigSimulation.Defaults">
+            <summary>
+            Gets the default configuration for network simulation.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConfigSimulation.WithLossNotifySequences(System.Int16[])">
+            <summary>
+            Creates a configuration with specified loss notification sequences.
+            </summary>
+            <param name="sequences">The sequences to be used for loss notifications.</param>
+            <returns>A new instance of <see cref="T:Fusion.Sockets.NetConfigSimulation"/> with the specified sequences.</returns>
+        </member>
+        <member name="T:Fusion.Sockets.NetConfigSimulationOscillator">
+            <summary>
+            Represents an oscillator configuration for network simulation.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetConfigSimulationOscillator.WaveShape">
+            <summary>
+            Defines the shape of the wave.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.WaveShape.Noise">
+            <summary>
+            Random noise wave shape.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.WaveShape.Sine">
+            <summary>
+            Sine wave shape.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.WaveShape.Square">
+            <summary>
+            Square wave shape.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.WaveShape.Triangle">
+            <summary>
+            Triangle wave shape.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.WaveShape.Saw">
+            <summary>
+            Sawtooth wave shape.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.WaveShape.ReverseSaw">
+            <summary>
+            Reverse sawtooth wave shape.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.Shape">
+            <summary>
+            The shape of the wave.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.Min">
+            <summary>
+            The minimum value of the wave.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.Max">
+            <summary>
+            The maximum value of the wave.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.Period">
+            <summary>
+            The period of the wave in seconds.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.Threshold">
+            <summary>
+            The threshold value for the wave.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConfigSimulationOscillator.Additional">
+            <summary>
+            Additional noise to be added to the wave.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConfigSimulationOscillator.GetCurveValue(System.Random,System.Double)">
+            <summary>
+            Calculates the value of the wave at a given time.
+            </summary>
+            <param name="rng">The random number generator.</param>
+            <param name="elapsedSecs">The elapsed time in seconds.</param>
+            <returns>The calculated wave value.</returns>
+        </member>
         <member name="T:Fusion.Sockets.NetConnectFailedReason">
             <summary>
             The reason a connection with a remote server has failed
@@ -546,19 +1458,319 @@
             Server refused the connection
             </summary>
         </member>
+        <member name="T:Fusion.Sockets.NetConnection">
+            <summary>
+            Network connection
+            </summary>
+        </member>
         <member name="F:Fusion.Sockets.NetConnection.UNIQUE_ID_SIZE">
             <summary>
             Client Unique ID size in bytes
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnection.Active">
+            <summary>
+            Gets a value indicating whether the connection is active.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnection.RoundTripTime">
+            <summary>
+            Gets the round-trip time (RTT) for the connection.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnection.RemoteAddress">
+            <summary>
+            Gets the remote address of the connection.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnection.ConnectionStatus">
+            <summary>
+            Gets the current status of the connection.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnection.LocalConnectionId">
+            <summary>
+            Gets the local connection ID.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnection.RemoteConnectionId">
+            <summary>
+            Gets the remote connection ID.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnection.ToString">
+            <summary>
+            Returns a string that represents the current NetConnection.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetConnectionId">
+            <summary>
+            Represents a network connection ID.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetConnectionId.EqualityComparer">
+            <summary>
+            An equality comparer for NetConnectionId instances.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionId.EqualityComparer.Equals(Fusion.Sockets.NetConnectionId,Fusion.Sockets.NetConnectionId)">
+            <summary>
+            Compares two NetConnectionId instances for equality.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionId.EqualityComparer.GetHashCode(Fusion.Sockets.NetConnectionId)">
+            <summary>
+            Get the hash code for the NetConnectionId.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionId.Group">
+            <summary> The group of the connection.</summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionId.GroupIndex">
+            <summary> The index of the connection within the group.</summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionId.Equals(Fusion.Sockets.NetConnectionId)">
+            <summary>
+            Compares this NetConnectionId to another for equality.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionId.Equals(System.Object)">
+            <summary>
+            Compares this NetConnectionId to another for equality.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionId.GetHashCode">
+            <summary>
+            Get the hash code for this NetConnectionId.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionId.op_Equality(Fusion.Sockets.NetConnectionId,Fusion.Sockets.NetConnectionId)">
+            <summary>
+            Compares two NetConnectionId instances for equality.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionId.op_Inequality(Fusion.Sockets.NetConnectionId,Fusion.Sockets.NetConnectionId)">
+            <summary>
+            Compares two NetConnectionId instances for inequality.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetConnectionMap">
+            <summary>
+            Represents a network connection map.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetConnectionMap.EntryState">
+            <summary>
+            Represents the state of an entry in the `NetConnectionMap`.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionMap.EntryState.None">
+            <summary>
+            The entry is not in use.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionMap.EntryState.Free">
+            <summary>
+            The entry is free and available for use.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionMap.EntryState.Used">
+            <summary>
+            The entry is currently in use.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetConnectionMap.Iterator">
+            <summary>
+            Iterator for traversing the connections in a `NetConnectionMap`.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnectionMap.Iterator.Current">
+            <summary>
+            Gets the current connection in the iteration.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Iterator.#ctor(Fusion.Sockets.NetConnectionMap*)">
+            <summary>
+            Initializes a new instance of the `Iterator` struct.
+            </summary>
+            <param name="map">The `NetConnectionMap` to iterate over.</param>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnectionMap.Iterator.IsValid">
+            <summary>
+            Gets a value indicating whether the current index is valid.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Iterator.Next">
+            <summary>
+            Advances the iterator to the next connection.
+            </summary>
+            <returns>True if the iterator was successfully advanced to the next connection, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Dispose(Fusion.Sockets.NetConnectionMap*,Fusion.Sockets.INetPeerGroupCallbacks)">
+            <summary>
+            Disposes of the specified `NetConnectionMap` and its associated resources.
+            </summary>
+            <param name="map">A pointer to the `NetConnectionMap` to dispose.</param>
+            <param name="callbacks">The callbacks to invoke during disposal.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Allocate(System.Int32,System.Int16,Fusion.Sockets.NetConfig*@)">
+            <summary>
+            Allocates and initializes a new `NetConnectionMap` with the specified capacity and group index.
+            </summary>
+            <param name="capacity">The number of connections the map can hold.</param>
+            <param name="groupIndex">The group index associated with the connections.</param>
+            <param name="config">The configuration settings for the network connections.</param>
+            <returns>A pointer to the newly allocated `NetConnectionMap`.</returns>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnectionMap.Count">
+            <summary>
+            Gets the count of used connections minus the free connections.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnectionMap.CountUsed">
+            <summary>
+            Gets the count of used connections.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnectionMap.ConnectionsBuffer">
+            <summary>
+            Gets the buffer of connections.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetConnectionMap.Full">
+            <summary>
+            Gets a value indicating whether the connection map is full.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Remap(Fusion.Sockets.NetAddress,Fusion.Sockets.NetAddress)">
+            <summary>
+            Remaps a connection from an old address to a new address.
+            </summary>
+            <param name="oldAddress">The old address of the connection.</param>
+            <param name="newAddress">The new address of the connection.</param>
+            <returns>A pointer to the remapped connection, or null if the remapping failed.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Remove(Fusion.Sockets.NetAddress)">
+            <summary>
+            Removes a connection from the network peer group by its address.
+            </summary>
+            <param name="address">The address of the connection to remove.</param>
+            <returns>True if the connection was successfully removed, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Insert(Fusion.Sockets.NetAddress,System.Byte[])">
+            <summary>
+            Inserts a new connection into the network peer group using the specified address and unique ID.
+            </summary>
+            <param name="address">The address of the connection to insert.</param>
+            <param name="uniqueId">The unique ID of the connection to insert.</param>
+            <returns>A pointer to the newly inserted connection, or null if the connection is already in use or the capacity is full.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.FindByIndex(System.Int32)">
+            <summary>
+            Gets a connection by its index in the network peer group.
+            </summary>
+            <param name="index">The index of the connection to retrieve.</param>
+            <returns>A pointer to the connection if found, otherwise throws an IndexOutOfRangeException.</returns>
+            <exception cref="T:System.IndexOutOfRangeException">Thrown when the index is out of the usable capacity range.</exception>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.TryFindByIndex(System.Int32,Fusion.Sockets.NetConnection*@)">
+            <summary>
+            Tries to get a connection by its index in the network peer group.
+            </summary>
+            <param name="index">The index of the connection to retrieve.</param>
+            <param name="connection">Output parameter that will point to the connection if found.</param>
+            <returns>True if the connection was found, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Find(Fusion.Sockets.NetConnectionId)">
+            <summary>
+            Finds a connection by its ID in the network peer group.
+            </summary>
+            <param name="id">The ID of the connection to find.</param>
+            <returns>A pointer to the connection if found, otherwise null.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetConnectionMap.Find(Fusion.Sockets.NetAddress)">
+            <summary>
+            Finds a connection by its address in the network peer group.
+            </summary>
+            <param name="address">The address of the connection to find.</param>
+            <returns>A pointer to the connection if found, otherwise null.</returns>
+        </member>
+        <member name="T:Fusion.Sockets.NetConnectionStatus">
+            <summary>
+            Represents the status of a network connection.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionStatus.Created">
+            <summary>
+            The connection has been created.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionStatus.Connecting">
+            <summary>
+            The connection is in the process of connecting.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionStatus.Connected">
+            <summary>
+            The connection is established.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionStatus.Disconnected">
+            <summary>
+            The connection has been disconnected.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetConnectionStatus.Shutdown">
+            <summary>
+            The connection has been shut down.
             </summary>
         </member>
         <member name="T:Fusion.Sockets.NetDisconnectReason">
             <summary>
             Disconnect Reason Flag
             </summary>
+            <summary>
+            Disconnect Reason Flag
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetDisconnectReason.Unknown">
+            <summary>
+            The reason for disconnection is unknown.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetDisconnectReason.Timeout">
+            <summary>
+            The connection timed out.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetDisconnectReason.Requested">
+            <summary>
+            The disconnection was requested.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetDisconnectReason.SequenceOutOfBounds">
+            <summary>
+            The sequence is out of bounds.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetDisconnectReason.SendWindowFull">
+            <summary>
+            The send window is full.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetDisconnectReason.ByRemote">
+            <summary>
+            The disconnection was initiated by the remote party.
+            </summary>
         </member>
         <member name="T:Fusion.Sockets.NetPacketType">
             <summary>
             Describe the type of a Networked Packet
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.NetPeer">
+            <summary>
+            Network Peer
             </summary>
         </member>
         <member name="F:Fusion.Sockets.NetPeer.DEFAULT_HEADERS">
@@ -611,6 +1823,416 @@
             Flag for the last fragment.
             </summary>
         </member>
+        <member name="P:Fusion.Sockets.NetPeer.Address">
+            <summary>
+            Gets the network address of the peer.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetPeer.Config">
+            <summary>
+            Gets the configuration settings for the peer.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetPeer.GroupCount">
+            <summary>
+            Gets the number of connection groups.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetPeer.IsShutdown">
+            <summary>
+            Gets a value indicating whether the peer is shut down.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.GetConfigPointer(Fusion.Sockets.NetPeer*)">
+            <summary>
+            Gets a pointer to the configuration settings of the specified NetPeer.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <returns>A pointer to the NetConfig if the peer is not shut down; otherwise, null.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.GetGroup(Fusion.Sockets.NetPeer*,System.Int32)">
+            <summary>
+            Gets a pointer to the NetPeerGroup at the specified index.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="index">The index of the NetPeerGroup.</param>
+            <returns>A pointer to the NetPeerGroup if the peer is not shut down; otherwise, null.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Update(Fusion.Sockets.NetPeer*,Fusion.Sockets.INetSocket,System.Random)">
+            <summary>
+            Updates the state of the specified NetPeer.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="socket">The socket used for network communication.</param>
+            <param name="rng">A random number generator.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Update(Fusion.Sockets.NetPeer*,Fusion.Sockets.INetSocket,System.Boolean*,System.Random)">
+            <summary>
+            Updates the state of the specified NetPeer and indicates whether work was done.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="socket">The socket used for network communication.</param>
+            <param name="work">A pointer to a boolean indicating whether work was done.</param>
+            <param name="rng">A random number generator.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Recv(Fusion.Sockets.NetPeer*,Fusion.Sockets.INetSocket,System.Random)">
+            <summary>
+            Receives data for the specified NetPeer.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="socket">The socket used for network communication.</param>
+            <param name="rng">A random number generator.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Recv(Fusion.Sockets.NetPeer*,Fusion.Sockets.INetSocket,System.Boolean*,System.Random)">
+            <summary>
+            Receives data for the specified NetPeer and indicates whether work was done.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="socket">The socket used for network communication.</param>
+            <param name="work">A pointer to a boolean indicating whether work was done.</param>
+            <param name="rng">A random number generator.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.RemapAddress(Fusion.Sockets.NetPeer*,Fusion.Sockets.NetAddress,Fusion.Sockets.NetAddress)">
+            <summary>
+            Remaps the network address of the specified NetPeer.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="oldAddress">The old network address.</param>
+            <param name="newAddress">The new network address.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Send(Fusion.Sockets.NetPeer*,Fusion.Sockets.INetSocket)">
+            <summary>
+            Sends data for the specified NetPeer.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="socket">The socket used for network communication.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Send(Fusion.Sockets.NetPeer*,Fusion.Sockets.INetSocket,System.Boolean*)">
+            <summary>
+            Sends data for the specified NetPeer and indicates whether work was done.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="socket">The socket used for network communication.</param>
+            <param name="work">A pointer to a boolean indicating whether work was done.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Initialize(Fusion.Sockets.NetConfig,Fusion.Sockets.INetSocket)">
+            <summary>
+            Initializes a new instance of the NetPeer structure with the specified configuration and socket.
+            </summary>
+            <param name="config">The configuration settings for the NetPeer.</param>
+            <param name="socket">The socket used for network communication.</param>
+            <returns>A pointer to the newly initialized NetPeer instance.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Initialize(Fusion.Sockets.NetPeer*,Fusion.Sockets.NetConfig,Fusion.Sockets.INetSocket)">
+            <summary>
+            Initializes the specified NetPeer instance with the given configuration and socket.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="config">The configuration settings for the NetPeer.</param>
+            <param name="socket">The socket used for network communication.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeer.Destroy(Fusion.Sockets.NetPeer*,Fusion.Sockets.INetSocket,Fusion.Sockets.INetPeerGroupCallbacks)">
+            <summary>
+            Destroys the specified NetPeer instance and releases associated resources.
+            </summary>
+            <param name="p">A pointer to the NetPeer instance.</param>
+            <param name="socket">The socket used for network communication.</param>
+            <param name="callbacks">The callbacks for the NetPeerGroup.</param>
+        </member>
+        <member name="T:Fusion.Sockets.NetPeerGroup">
+            <summary>
+            Network Peer Group.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetPeerGroup.Time">
+            <summary>
+            Gets the elapsed time in seconds.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetPeerGroup.Group">
+            <summary>
+            Gets the group index.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetPeerGroup.ConnectionCount">
+            <summary>
+            Gets the number of active connections.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.GetConnection(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnectionId)">
+            <summary>
+            Gets a connection by its ID in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="id">The ID of the connection to retrieve.</param>
+            <returns>A pointer to the connection if found, otherwise null.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.GetConnectionByIndex(Fusion.Sockets.NetPeerGroup*,System.Int32)">
+            <summary>
+            Gets a connection by its index in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="index">The index of the connection to retrieve.</param>
+            <returns>A pointer to the connection if found, otherwise null.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.TryGetConnectionByIndex(Fusion.Sockets.NetPeerGroup*,System.Int32,Fusion.Sockets.NetConnection*@)">
+            <summary>
+            Tries to get a connection by its index in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="index">The index of the connection to retrieve.</param>
+            <param name="connection">Output parameter that will point to the connection if found.</param>
+            <returns>True if the connection was found, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.ConnectionIterator(Fusion.Sockets.NetPeerGroup*)">
+            <summary>
+            Gets an iterator for the connections in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <returns>An iterator for the connections in the network peer group.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.Connect(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetAddress,System.Byte[],System.Byte[])">
+            <summary>
+            Connects to a specified address with an optional unique ID and token.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="address">The address to connect to.</param>
+            <param name="token">The token used for the connection.</param>
+            <param name="uniqueId">Optional unique ID for the connection.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.Connect(Fusion.Sockets.NetPeerGroup*,System.String,System.UInt16,System.Byte[],System.Byte[])">
+            <summary>
+            Connects to a specified IP address and port with an optional unique ID and token.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="ip">The IP address to connect to.</param>
+            <param name="port">The port to connect to.</param>
+            <param name="token">The token used for the connection.</param>
+            <param name="uniqueId">Optional unique ID for the connection.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.Disconnect(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*,System.Byte[])">
+            <summary>
+            Disconnects a given connection from the network peer group with an optional token.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="c">Pointer to the connection to be disconnected.</param>
+            <param name="token">Optional token used for the disconnection.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.Update(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.INetPeerGroupCallbacks)">
+            <summary>
+            Updates the network peer group by processing received data, handling timeouts, and managing connection retries.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="cb">Callback interface for network peer group events.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.SendReliable(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*,Fusion.Sockets.ReliableId,System.Byte*,System.Int32)">
+            <summary>
+            Sends reliable data for a given connection in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="c">Pointer to the connection.</param>
+            <param name="rid">Reliable ID for the data being sent.</param>
+            <param name="data">Pointer to the data to be sent.</param>
+            <param name="dataLength">The length of the data to be sent.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.ChangeConnectionAddressDuringConnecting(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*,Fusion.Sockets.NetAddress)">
+            <summary>
+            Changes the address of a connection during the connecting phase.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="c">Pointer to the connection.</param>
+            <param name="newAddress">The new address to be assigned to the connection.</param>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.SendUnconnectedData(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetAddress,System.Void*,System.Int32)">
+            <summary>
+            Sends unconnected data to a specified address.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="address">The address to send the data to.</param>
+            <param name="data">Pointer to the data to be sent.</param>
+            <param name="dataLength">The length of the data to be sent.</param>
+            <returns>True if the data was successfully sent, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.GetUnreliableDataBuffer(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*,Fusion.Sockets.NetBitBuffer*@)">
+            <summary>
+            Gets an unreliable data buffer for a given connection in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="c">Pointer to the connection.</param>
+            <param name="b">Output parameter that will point to the bit buffer containing the data to be sent.</param>
+            <returns>True if the buffer was successfully acquired, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.SendUnreliableDataBuffer(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*,Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Sends an unreliable data buffer for a given connection in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="c">Pointer to the connection.</param>
+            <param name="b">Pointer to the bit buffer containing the data to be sent.</param>
+            <returns>True if the buffer was successfully sent, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.GetNotifyDataBuffer(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*,Fusion.Sockets.NetBitBuffer*@)">
+            <summary>
+            Gets a notify data buffer for a given connection in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="c">Pointer to the connection.</param>
+            <param name="b">Output parameter that will point to the bit buffer containing the data to be sent.</param>
+            <returns>True if the buffer was successfully acquired, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.SendNotifyDataBuffer(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*,Fusion.Sockets.NetBitBuffer*,System.Void*)">
+            <summary>
+            Sends a notify data buffer for a given connection in the network peer group.
+            </summary>
+            <param name="g">Pointer to the network peer group.</param>
+            <param name="c">Pointer to the connection.</param>
+            <param name="b">Pointer to the bit buffer containing the data to be sent.</param>
+            <param name="userData">Pointer to user data associated with the buffer.</param>
+            <returns>True if the buffer was successfully sent, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.NetPeerGroup.GetConnectionIdleTime(Fusion.Sockets.NetPeerGroup*,Fusion.Sockets.NetConnection*)">
+            <summary>
+            Gets the idle time of a connection.
+            </summary>
+            <param name="g">The network peer group.</param>
+            <param name="c">The connection whose idle time is to be calculated.</param>
+            <returns>The idle time of the connection in seconds.</returns>
+        </member>
+        <member name="T:Fusion.Sockets.OnConnectionRequestReply">
+            <summary>
+            Represents the possible replies to a connection request.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.OnConnectionRequestReply.Ok">
+            <summary>
+            The connection request is accepted.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.OnConnectionRequestReply.Refuse">
+            <summary>
+            The connection request is refused.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.OnConnectionRequestReply.Waiting">
+            <summary>
+            The connection request is waiting for a decision.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.INetPeerGroupCallbacks">
+            <summary>
+            Defines the callbacks for network peer group events.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnConnected(Fusion.Sockets.NetConnection*)">
+            <summary>
+            Called when a connection is established.
+            </summary>
+            <param name="connection">The connection that was established.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnDisconnected(Fusion.Sockets.NetConnection*,Fusion.Sockets.NetDisconnectReason)">
+            <summary>
+            Called when a connection is disconnected.
+            </summary>
+            <param name="connection">The connection that was disconnected.</param>
+            <param name="reason">The reason for disconnection.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnUnreliableData(Fusion.Sockets.NetConnection*,Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Called when unreliable data is received.
+            </summary>
+            <param name="connection">The connection from which the data was received.</param>
+            <param name="buffer">The buffer containing the data.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnUnconnectedData(Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Called when unconnected data is received.
+            </summary>
+            <param name="buffer">The buffer containing the data.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnNotifyData(Fusion.Sockets.NetConnection*,Fusion.Sockets.NetBitBuffer*)">
+            <summary>
+            Called when notify data is received.
+            </summary>
+            <param name="connection">The connection from which the data was received.</param>
+            <param name="buffer">The buffer containing the data.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnNotifyLost(Fusion.Sockets.NetConnection*,Fusion.Sockets.NetSendEnvelope)">
+            <summary>
+            Called when notify data is lost.
+            </summary>
+            <param name="connection">The connection from which the data was lost.</param>
+            <param name="envelope">The envelope containing the lost data.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnNotifyDelivered(Fusion.Sockets.NetConnection*,Fusion.Sockets.NetSendEnvelope)">
+            <summary>
+            Called when notify data is delivered.
+            </summary>
+            <param name="connection">The connection to which the data was delivered.</param>
+            <param name="envelope">The envelope containing the delivered data.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnNotifyDispose(Fusion.Sockets.NetSendEnvelope)">
+            <summary>
+            Called when a notify envelope is disposed.
+            </summary>
+            <param name="envelope">The envelope that was disposed.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnReliableData(Fusion.Sockets.NetConnection*,Fusion.Sockets.ReliableId,System.Byte*)">
+            <summary>
+            Called when reliable data is received.
+            </summary>
+            <param name="connection">The connection from which the data was received.</param>
+            <param name="id">The identifier of the reliable data.</param>
+            <param name="data">The data received.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnConnectionRequest(Fusion.Sockets.NetAddress,System.Byte[],System.Byte[])">
+            <summary>
+            Called when a connection request is received.
+            </summary>
+            <param name="remoteAddress">The address of the remote peer.</param>
+            <param name="token">The token associated with the connection request.</param>
+            <param name="uniqueId">The unique identifier for the connection request.</param>
+            <returns>The reply to the connection request.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnConnectionFailed(Fusion.Sockets.NetAddress,Fusion.Sockets.NetConnectFailedReason)">
+            <summary>
+            Called when a connection attempt fails.
+            </summary>
+            <param name="address">The address of the remote peer.</param>
+            <param name="reason">The reason for the connection failure.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetPeerGroupCallbacks.OnConnectionAttempt(Fusion.Sockets.NetConnection*,System.Int32,System.Int32)">
+            <summary>
+            Called when a connection attempt is made.
+            </summary>
+            <param name="connection">The connection being attempted.</param>
+            <param name="attempts">The number of attempts made.</param>
+            <param name="totalConnectAttempts">The total number of connection attempts.</param>
+        </member>
+        <member name="T:Fusion.Sockets.NetSendEnvelope">
+            <summary>
+            Represents an envelope for sending network packets in the Fusion.Sockets namespace.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetSendEnvelope.UserData">
+            <summary>
+            Gets or sets the user data associated with the envelope.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetSendEnvelope.Sequence">
+            <summary>
+            Gets or sets the sequence number of the packet.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetSendEnvelope.SendTime">
+            <summary>
+            Gets or sets the time the packet was sent.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetSendEnvelope.PacketType">
+            <summary>
+            Gets or sets the type of the network packet.
+            </summary>
+        </member>
         <member name="M:Fusion.Sockets.NetSequencer.Distance(System.UInt64,System.UInt64)">
             <summary>
             Calculates the distance between two sequence numbers, taking into account the circular nature of the sequence.
@@ -624,6 +2246,380 @@
             If they are the same, the result is zero.
             </returns>
             <exception cref="T:System.ArgumentException">Thrown when the calculated distance is outside the range of an integer.</exception>
+        </member>
+        <member name="T:Fusion.Sockets.ReliableBuffer">
+            <summary>
+            Represents a buffer for reliable data transmission.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableBuffer.SEQ_BYTES">
+            <summary>
+            The number of bytes used for the sequence.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableBuffer._sequencer">
+            <summary>
+            The sequencer used for generating sequence numbers.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableBuffer._receiveList">
+            <summary>
+            The list of received reliable data.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableBuffer._receiveSequence">
+            <summary>
+            The current receive sequence number.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.ReliableBuffer.SequenceBits">
+            <summary>
+            Gets the number of bits used for the sequence.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableBuffer.Create">
+            <summary>
+            Creates a new instance of the ReliableBuffer structure.
+            </summary>
+            <returns>A new ReliableBuffer instance.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableBuffer.NextSendSequence">
+            <summary>
+            Gets the next sequence number for sending data.
+            </summary>
+            <returns>The next sequence number.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableBuffer.Dispose">
+            <summary>
+            Disposes of the ReliableBuffer, freeing any allocated memory.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableBuffer.LateReceive(System.Void*@,Fusion.Sockets.ReliableId@,System.Byte*@)">
+            <summary>
+            Attempts to receive data from the reliable buffer.
+            </summary>
+            <param name="root">The pointer to the memory that needs to be freed later.</param>
+            <param name="id">The reliable identifier associated with the received data.</param>
+            <param name="data">The pointer to the received data.</param>
+            <returns>
+            <c>true</c> if the data is exactly what is expected; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableBuffer.LateFree(System.Void*)">
+            <summary>
+            Frees the memory associated with the specified root pointer.
+            </summary>
+            <param name="root">The pointer to the memory to be freed.</param>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableBuffer.Receive(Fusion.Sockets.NetBitBuffer*,Fusion.Sockets.ReliableId@)">
+            <summary>
+            Receives data from the specified buffer and processes it.
+            </summary>
+            <param name="buffer">The buffer containing the data to be received.</param>
+            <param name="rid">The reliable identifier associated with the received data.</param>
+            <returns>
+            <c>true</c> if the data is exactly what is expected; otherwise, <c>false</c>.
+            </returns>
+        </member>
+        <member name="T:Fusion.Sockets.ReliableKey">
+            <summary>
+            Represents a reliable key structure used in the Fusion.Sockets namespace.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableKey.SIZE">
+            <summary>
+            The size of the ReliableKey structure in bytes.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableKey.Data">
+            <summary>
+            Fixed byte array to store the key data.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableKey.GetInts(System.Int32@,System.Int32@,System.Int32@,System.Int32@)">
+            <summary>
+            Gets the key data as integers.
+            </summary>
+            <param name="key0">The first integer key.</param>
+            <param name="key1">The second integer key.</param>
+            <param name="key2">The third integer key.</param>
+            <param name="key3">The fourth integer key.</param>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableKey.GetUlongs(System.UInt64@,System.UInt64@)">
+            <summary>
+            Gets the key data as unsigned long integers.
+            </summary>
+            <param name="key0">The first unsigned long key.</param>
+            <param name="key1">The second unsigned long key.</param>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableKey.FromInts(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Creates a ReliableKey from integer values.
+            </summary>
+            <param name="key0">The first integer key.</param>
+            <param name="key1">The second integer key.</param>
+            <param name="key2">The third integer key.</param>
+            <param name="key3">The fourth integer key.</param>
+            <returns>A new ReliableKey instance.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableKey.FromULongs(System.UInt64,System.UInt64)">
+            <summary>
+            Creates a ReliableKey from unsigned long values.
+            </summary>
+            <param name="key0">The first unsigned long key.</param>
+            <param name="key1">The second unsigned long key.</param>
+            <returns>A new ReliableKey instance.</returns>
+        </member>
+        <member name="T:Fusion.Sockets.ReliableId">
+            <summary>
+            Represents a reliable identifier used in the Fusion.Sockets namespace.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.SIZE">
+            <summary>
+            The size of the ReliableId structure in bytes.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.Sequence">
+            <summary>
+            The sequence number associated with this ReliableId.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.SliceLength">
+            <summary>
+            The length of the slice.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.TotalLength">
+            <summary>
+            The total length.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.Source">
+            <summary>
+            The source identifier.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.SourceSend">
+            <summary>
+            The source send identifier.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.Target">
+            <summary>
+            The target identifier.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId.Key">
+            <summary>
+            The reliable key associated with this ReliableId.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableId._padding">
+            <summary>
+            Padding to align the structure.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.ReliableId.SourceCombined">
+            <summary>
+            Gets the combined source identifier.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.ReliableHeader">
+            <summary>
+            Represents a reliable header structure used in the Fusion.Sockets namespace.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableHeader.SIZE">
+            <summary>
+            The size of the ReliableHeader structure in bytes.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableHeader.Next">
+            <summary>
+            Pointer to the next ReliableHeader in the list.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableHeader.Prev">
+            <summary>
+            Pointer to the previous ReliableHeader in the list.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableHeader.Id">
+            <summary>
+            The ReliableId associated with this ReliableHeader.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableHeader.GetData(Fusion.Sockets.ReliableHeader*)">
+            <summary>
+            Gets the data associated with the specified ReliableHeader.
+            </summary>
+            <param name="header">The ReliableHeader to get data from.</param>
+            <returns>A pointer to the data associated with the specified ReliableHeader.</returns>
+        </member>
+        <member name="T:Fusion.Sockets.ReliableList">
+            <summary>
+            Represents a list of reliable headers.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableList.Count">
+            <summary>
+            Gets or sets the number of items in the list.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableList.Head">
+            <summary>
+            Gets or sets the head of the list.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.ReliableList.Tail">
+            <summary>
+            Gets or sets the tail of the list.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableList.AddFirst(Fusion.Sockets.ReliableHeader*)">
+            <summary>
+            Adds the specified item to the beginning of the list.
+            </summary>
+            <param name="item">The item to add to the beginning of the list.</param>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableList.AddLast(Fusion.Sockets.ReliableHeader*)">
+            <summary>
+            Adds the specified item to the end of the list.
+            </summary>
+            <param name="item">The item to add to the end of the list.</param>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableList.AddBefore(Fusion.Sockets.ReliableHeader*,Fusion.Sockets.ReliableHeader*)">
+            <summary>
+            Adds the specified item before another specified item in the list.
+            </summary>
+            <param name="before">The item before which the new item will be added.</param>
+            <param name="item">The item to add to the list.</param>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableList.AddAfter(Fusion.Sockets.ReliableHeader*,Fusion.Sockets.ReliableHeader*)">
+            <summary>
+            Adds the specified item after another specified item in the list.
+            </summary>
+            <param name="after">The item after which the new item will be added.</param>
+            <param name="item">The item to add to the list.</param>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableList.RemoveHead">
+            <summary>
+            Removes and returns the head element of the list.
+            </summary>
+            <returns>The head element of the list.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.ReliableList.Remove(Fusion.Sockets.ReliableHeader*)">
+            <summary>
+            Removes the specified item from the list.
+            </summary>
+            <param name="item">The item to remove.</param>
+        </member>
+        <member name="T:Fusion.Sockets.NetSocket">
+            <summary>
+            Represents a network socket with a handle and a native socket.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetSocket.Handle">
+            <summary>
+            The handle of the socket.
+            </summary>
+        </member>
+        <member name="F:Fusion.Sockets.NetSocket.NativeSocket">
+            <summary>
+            The native socket.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.NetSocket.IsCreated">
+            <summary>
+            Gets a value indicating whether the socket is created.
+            </summary>
+        </member>
+        <member name="T:Fusion.Sockets.INetSocket">
+            <summary>
+            Defines the interface for network socket operations.
+            </summary>
+        </member>
+        <member name="P:Fusion.Sockets.INetSocket.SupportsMultiThreading">
+            <summary>
+            Gets a value indicating whether the socket supports multi-threading.
+            </summary>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.Initialize(Fusion.Sockets.NetConfig)">
+            <summary>
+            Initializes the socket with the specified configuration.
+            </summary>
+            <param name="config">The configuration for the socket.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.Create(Fusion.Sockets.NetConfig)">
+            <summary>
+            Creates a new socket with the specified configuration.
+            </summary>
+            <param name="config">The configuration for the socket.</param>
+            <returns>The created socket.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.Bind(Fusion.Sockets.NetSocket,Fusion.Sockets.NetConfig)">
+            <summary>
+            Binds the socket to the specified address and configuration.
+            </summary>
+            <param name="socket">The socket to bind.</param>
+            <param name="config">The configuration for the socket.</param>
+            <returns>The bound address.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.CanFragment(Fusion.Sockets.NetAddress)">
+            <summary>
+            Determines whether the specified address can be fragmented.
+            </summary>
+            <param name="address">The address to check.</param>
+            <returns>True if the address can be fragmented, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.Poll(Fusion.Sockets.NetSocket,System.Int64)">
+            <summary>
+            Polls the socket for incoming data with the specified timeout.
+            </summary>
+            <param name="socket">The socket to poll.</param>
+            <param name="timeout">The timeout in milliseconds.</param>
+            <returns>True if data is available, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.Receive(Fusion.Sockets.NetSocket,Fusion.Sockets.NetAddress*,System.Byte*,System.Int32)">
+            <summary>
+            Receives data from the socket into the specified buffer.
+            </summary>
+            <param name="socket">The socket to receive data from.</param>
+            <param name="address">The address of the sender.</param>
+            <param name="buffer">The buffer to store the received data.</param>
+            <param name="bufferLength">The length of the buffer.</param>
+            <returns>The number of bytes received.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.Send(Fusion.Sockets.NetSocket,Fusion.Sockets.NetAddress*,System.Byte*,System.Int32,System.Boolean)">
+            <summary>
+            Sends data from the specified buffer to the socket.
+            </summary>
+            <param name="socket">The socket to send data to.</param>
+            <param name="address">The address of the recipient.</param>
+            <param name="buffer">The buffer containing the data to send.</param>
+            <param name="bufferLength">The length of the buffer.</param>
+            <param name="reliable">Send reliable or not</param>
+            <returns>The number of bytes sent.</returns>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.Destroy(Fusion.Sockets.NetSocket)">
+            <summary>
+            Destroys the specified socket.
+            </summary>
+            <param name="socket">The socket to destroy.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.DeleteEncryptionKey(Fusion.Sockets.NetAddress)">
+            <summary>
+            Deletes the encryption key for the specified address.
+            </summary>
+            <param name="address">The address to delete the encryption key for.</param>
+        </member>
+        <member name="M:Fusion.Sockets.INetSocket.SetupEncryption(System.Byte[],System.Byte[])">
+            <summary>
+            Sets up encryption with the specified key and encrypted key.
+            </summary>
+            <param name="key">The encryption key.</param>
+            <param name="encryptedKey">The encrypted key.</param>
         </member>
         <member name="M:Fusion.Sockets.NetSocketNative.SetupEncryption(System.Byte[],System.Byte[])">
             Encryption System
@@ -982,6 +2978,11 @@
             <param name="stunServerAddress">STUN Server Address</param>
             <returns><see cref="T:Fusion.Sockets.Stun.StunServers.StunServer"/> reference </returns>
         </member>
+        <member name="T:Fusion.Protocol.BitStream">
+            <summary>
+            BitStream serialization methods.
+            </summary>
+        </member>
         <member name="P:Fusion.Protocol.BitStream.Size">
             <summary>
             Total size in BITS of the buffer
@@ -996,6 +2997,11 @@
             <summary>
             Size of written buffer in BYTES
             Ammount of bytes required considering the total of written bytes
+            </summary>
+        </member>
+        <member name="P:Fusion.Protocol.BitStream.IsEvenBytes">
+            <summary>
+            Gets a value indicating whether the current position is at an even byte boundary.
             </summary>
         </member>
         <member name="P:Fusion.Protocol.BitStream.Capacity">
@@ -1027,6 +3033,751 @@
             <summary>
             Internal Byte Array
             </summary>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fusion.Protocol.BitStream"/> class with an empty byte array.
+            </summary>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fusion.Protocol.BitStream"/> class with a specified size in bytes.
+            </summary>
+            <param name="size">The size of the byte array in bytes.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.#ctor(System.Byte[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fusion.Protocol.BitStream"/> class with the specified byte array.
+            </summary>
+            <param name="arr">The byte array to use as the internal buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.#ctor(System.Byte[],System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Fusion.Protocol.BitStream"/> class with the specified byte array and size.
+            </summary>
+            <param name="arr">The byte array to use as the internal buffer.</param>
+            <param name="size">The size of the byte array in bytes.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SetBuffer(System.Byte[])">
+            <summary>
+            Sets the internal buffer to the specified byte array.
+            </summary>
+            <param name="arr">The byte array to use as the internal buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SetBuffer(System.Byte[],System.Int32)">
+            <summary>
+            Sets the internal buffer to the specified byte array and size.
+            </summary>
+            <param name="arr">The byte array to use as the internal buffer.</param>
+            <param name="size">The size of the byte array in bytes.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.RoundToByte">
+            <summary>
+            Rounds the current position to the nearest byte boundary by filling with zero bits if necessary.
+            </summary>
+            <returns>The number of bytes required to store the current position.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Expand">
+            <summary>
+            Doubles the capacity of the internal buffer.
+            </summary>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.CanWrite">
+            <summary>
+            Checks if at least one bit can be written to the stream.
+            </summary>
+            <returns>True if at least one bit can be written, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.CanRead">
+            <summary>
+            Checks if at least one bit can be read from the stream.
+            </summary>
+            <returns>True if at least one bit can be read, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.CanWrite(System.Int32)">
+            <summary>
+            Checks if the specified number of bits can be written to the stream.
+            </summary>
+            <param name="bits">The number of bits to check.</param>
+            <returns>True if the specified number of bits can be written, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.CanRead(System.Int32)">
+            <summary>
+            Checks if the specified number of bits can be read from the stream.
+            </summary>
+            <param name="bits">The number of bits to check.</param>
+            <returns>True if the specified number of bits can be read, otherwise false.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.CopyFromArray(System.Byte[])">
+            <summary>
+            Copies data from the specified byte array into the internal buffer.
+            </summary>
+            <param name="array">The byte array to copy from.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Reset">
+            <summary>
+            Resets the internal buffer to its initial state.
+            </summary>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Reset(System.Int32)">
+            <summary>
+            Resets the internal buffer to the specified size.
+            </summary>
+            <param name="byteSize">The size in bytes to reset the buffer to.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ResetFast(System.Int32)">
+            <summary>
+            Resets the internal buffer to the specified size without clearing the data.
+            </summary>
+            <param name="byteSize">The size in bytes to reset the buffer to.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ToArray">
+            <summary>
+            Converts the internal buffer to a byte array.
+            </summary>
+            <returns>A byte array containing the data in the internal buffer.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteBool(System.Boolean)">
+            <summary>
+            Writes a boolean value to the stream.
+            </summary>
+            <param name="value">The boolean value to write.</param>
+            <returns>The boolean value that was written.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteBoolean(System.Boolean)">
+            <summary>
+            Writes a boolean value to the stream.
+            </summary>
+            <param name="value">The boolean value to write.</param>
+            <returns>The boolean value that was written.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadBool">
+            <summary>
+            Reads a boolean value from the stream.
+            </summary>
+            <returns>The boolean value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadBoolean">
+            <summary>
+            Reads a boolean value from the stream.
+            </summary>
+            <returns>The boolean value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByte(System.Byte,System.Int32)">
+            <summary>
+            Writes a byte value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The byte value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadByte(System.Int32)">
+            <summary>
+            Reads a byte value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <returns>The byte value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByte(System.Byte)">
+            <summary>
+            Writes a byte value to the stream.
+            </summary>
+            <param name="value">The byte value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadByte">
+            <summary>
+            Reads a byte value from the stream.
+            </summary>
+            <returns>The byte value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadSByte">
+            <summary>
+            Reads a signed byte value from the stream.
+            </summary>
+            <returns>The signed byte value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteSByte(System.SByte)">
+            <summary>
+            Writes a signed byte value to the stream.
+            </summary>
+            <param name="value">The signed byte value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteUShort(System.UInt16,System.Int32)">
+            <summary>
+            Writes an unsigned short value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The unsigned short value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadUShort(System.Int32)">
+            <summary>
+            Reads an unsigned short value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <returns>The unsigned short value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteUShort(System.UInt16)">
+            <summary>
+            Writes an unsigned short value to the stream.
+            </summary>
+            <param name="value">The unsigned short value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadUShort">
+            <summary>
+            Reads an unsigned short value from the stream.
+            </summary>
+            <returns>The unsigned short value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteShort(System.Int16,System.Int32)">
+            <summary>
+            Writes a short value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The short value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadShort(System.Int32)">
+            <summary>
+            Reads a short value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <returns>The short value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteShort(System.Int16)">
+            <summary>
+            Writes a short value to the stream.
+            </summary>
+            <param name="value">The short value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadShort">
+            <summary>
+            Reads a short value from the stream.
+            </summary>
+            <returns>The short value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteChar(System.Char)">
+            <summary>
+            Writes a character value to the stream.
+            </summary>
+            <param name="value">The character value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadChar">
+            <summary>
+            Reads a character value from the stream.
+            </summary>
+            <returns>The character value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteUInt(System.UInt32,System.Int32)">
+            <summary>
+            Writes an unsigned 32-bit integer value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The unsigned 32-bit integer value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadUInt(System.Int32)">
+            <summary>
+            Reads an unsigned 32-bit integer value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <returns>The unsigned 32-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteUInt(System.UInt32)">
+            <summary>
+            Writes an unsigned 32-bit integer value to the stream.
+            </summary>
+            <param name="value">The unsigned 32-bit integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadUInt">
+            <summary>
+            Reads an unsigned 32-bit integer value from the stream.
+            </summary>
+            <returns>The unsigned 32-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteInt_Shifted(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Writes a shifted 32-bit integer value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The 32-bit integer value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+            <param name="shift">The number of bits to shift.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadInt_Shifted(System.Int32,System.Int32)">
+            <summary>
+            Reads a shifted 32-bit integer value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <param name="shift">The number of bits to shift.</param>
+            <returns>The 32-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteInt(System.Int32,System.Int32)">
+            <summary>
+            Writes a 32-bit integer value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The 32-bit integer value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadInt(System.Int32)">
+            <summary>
+            Reads a 32-bit integer value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <returns>The 32-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteInt(System.Int32)">
+            <summary>
+            Writes a 32-bit integer value to the stream.
+            </summary>
+            <param name="value">The 32-bit integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadInt">
+            <summary>
+            Reads a 32-bit integer value from the stream.
+            </summary>
+            <returns>The 32-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteULong(System.UInt64,System.Int32)">
+            <summary>
+            Writes an unsigned 64-bit integer value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The unsigned 64-bit integer value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadULong(System.Int32)">
+            <summary>
+            Reads an unsigned 64-bit integer value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <returns>The unsigned 64-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteULong(System.UInt64)">
+            <summary>
+            Writes an unsigned 64-bit integer value to the stream.
+            </summary>
+            <param name="value">The unsigned 64-bit integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadULong">
+            <summary>
+            Reads an unsigned 64-bit integer value from the stream.
+            </summary>
+            <returns>The unsigned 64-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteLong(System.Int64,System.Int32)">
+            <summary>
+            Writes a signed 64-bit integer value to the stream with a specified number of bits.
+            </summary>
+            <param name="value">The signed 64-bit integer value to write.</param>
+            <param name="bits">The number of bits to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadLong(System.Int32)">
+            <summary>
+            Reads a signed 64-bit integer value from the stream with a specified number of bits.
+            </summary>
+            <param name="bits">The number of bits to read.</param>
+            <returns>The signed 64-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteLong(System.Int64)">
+            <summary>
+            Writes a signed 64-bit integer value to the stream.
+            </summary>
+            <param name="value">The signed 64-bit integer value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadLong">
+            <summary>
+            Reads a signed 64-bit integer value from the stream.
+            </summary>
+            <returns>The signed 64-bit integer value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteFloat(System.Single)">
+            <summary>
+            Writes a 32-bit floating point value to the stream.
+            </summary>
+            <param name="value">The 32-bit floating point value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadFloat">
+            <summary>
+            Reads a 32-bit floating point value from the stream.
+            </summary>
+            <returns>The 32-bit floating point value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteDouble(System.Double)">
+            <summary>
+            Writes a 64-bit floating point value to the stream.
+            </summary>
+            <param name="value">The 64-bit floating point value to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadDouble">
+            <summary>
+            Reads a 64-bit floating point value from the stream.
+            </summary>
+            <returns>The 64-bit floating point value that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByteArray(System.Byte[])">
+            <summary>
+            Writes a byte array to the stream.
+            </summary>
+            <param name="from">The byte array to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByteArray(System.Byte[],System.Int32)">
+            <summary>
+            Writes a specified number of bytes from a byte array to the stream.
+            </summary>
+            <param name="from">The byte array to write from.</param>
+            <param name="count">The number of bytes to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByteArray(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Writes a specified number of bytes from a byte array to the stream starting at a given offset.
+            </summary>
+            <param name="from">The byte array to write from.</param>
+            <param name="offset">The starting offset in the byte array.</param>
+            <param name="count">The number of bytes to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadByteArray(System.Int32)">
+            <summary>
+            Reads a specified number of bytes from the stream into a new byte array.
+            </summary>
+            <param name="size">The number of bytes to read.</param>
+            <returns>A byte array containing the read bytes.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadByteArray(System.Byte[])">
+            <summary>
+            Reads bytes from the stream into the specified byte array.
+            </summary>
+            <param name="to">The byte array to read into.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadByteArray(System.Byte[],System.Int32)">
+            <summary>
+            Reads a specified number of bytes from the stream into the specified byte array.
+            </summary>
+            <param name="to">The byte array to read into.</param>
+            <param name="count">The number of bytes to read.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadByteArray(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Reads a specified number of bytes from the stream into the specified byte array starting at a given offset.
+            </summary>
+            <param name="to">The byte array to read into.</param>
+            <param name="offset">The starting offset in the byte array.</param>
+            <param name="count">The number of bytes to read.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByteArrayLengthPrefixed(System.Byte[])">
+            <summary>
+            Writes a byte array to the stream with a length prefix.
+            </summary>
+            <param name="array">The byte array to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByteArrayLengthPrefixed(System.Byte[],System.Int32)">
+            <summary>
+            Writes a byte array to the stream with a length prefix and a specified maximum length.
+            </summary>
+            <param name="array">The byte array to write.</param>
+            <param name="maxLength">The maximum length of the byte array to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadByteArrayLengthPrefixed">
+            <summary>
+            Reads a byte array from the stream with a length prefix.
+            </summary>
+            <returns>A byte array containing the read bytes, or null if the length prefix indicates no data.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteString(System.String,System.Text.Encoding)">
+            <summary>
+            Writes a string to the stream using the specified encoding.
+            </summary>
+            <param name="value">The string to write.</param>
+            <param name="encoding">The encoding to use for the string.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteString(System.String)">
+            <summary>
+            Writes a string to the stream using UTF-8 encoding.
+            </summary>
+            <param name="value">The string to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadString(System.Text.Encoding)">
+            <summary>
+            Reads a string from the stream using the specified encoding.
+            </summary>
+            <param name="encoding">The encoding to use for the string.</param>
+            <returns>The string that was read, or null if the length prefix indicates no data.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadString">
+            <summary>
+            Reads a string from the stream using UTF-8 encoding.
+            </summary>
+            <returns>The string that was read, or null if the length prefix indicates no data.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteGuid(System.Guid)">
+            <summary>
+            Writes a GUID to the stream.
+            </summary>
+            <param name="guid">The GUID to write.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.ReadGuid">
+            <summary>
+            Reads a GUID from the stream.
+            </summary>
+            <returns>The GUID that was read.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.WriteByteAt(System.Byte[],System.Int32,System.Int32,System.Byte)">
+            <summary>
+            Writes a byte value at a specified bit position in a byte array.
+            </summary>
+            <param name="data">The byte array to write to.</param>
+            <param name="ptr">The bit position to start writing at.</param>
+            <param name="bits">The number of bits to write.</param>
+            <param name="value">The byte value to write.</param>
+        </member>
+        <member name="T:Fusion.Protocol.BitStream.ArrayElementSerializer`1">
+            <summary>
+            Serialize a value.
+            </summary>
+            <typeparam name="T">The value type.</typeparam>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Condition(System.Boolean)">
+            <summary>
+            Evaluates a condition and serializes it if in write mode, or deserializes it if in read mode.
+            </summary>
+            <param name="condition">The condition to evaluate and serialize/deserialize.</param>
+            <returns>The evaluated condition.</returns>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.String@)">
+            <summary>
+            Serializes or deserializes a string value.
+            </summary>
+            <param name="value">The string value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Boolean@)">
+            <summary>
+            Serializes or deserializes a boolean value.
+            </summary>
+            <param name="value">The boolean value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Single@)">
+            <summary>
+            Serializes or deserializes a float value.
+            </summary>
+            <param name="value">The float value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Double@)">
+            <summary>
+            Serializes or deserializes a double value.
+            </summary>
+            <param name="value">The double value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int64@)">
+            <summary>
+            Serializes or deserializes a 64-bit integer value.
+            </summary>
+            <param name="value">The 64-bit integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt64@)">
+            <summary>
+            Serializes or deserializes a 64-bit unsigned integer value.
+            </summary>
+            <param name="value">The 64-bit unsigned integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Byte@)">
+            <summary>
+            Serializes or deserializes a byte value.
+            </summary>
+            <param name="value">The byte value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt32@)">
+            <summary>
+            Serializes or deserializes a 32-bit unsigned integer value.
+            </summary>
+            <param name="value">The 32-bit unsigned integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt32@,System.Int32)">
+            <summary>
+            Serializes or deserializes a 32-bit unsigned integer value with a specified number of bits.
+            </summary>
+            <param name="value">The 32-bit unsigned integer value to serialize/deserialize.</param>
+            <param name="bits">The number of bits to use for serialization/deserialization.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt64@,System.Int32)">
+            <summary>
+            Serializes or deserializes a 64-bit unsigned integer value with a specified number of bits.
+            </summary>
+            <param name="value">The 64-bit unsigned integer value to serialize/deserialize.</param>
+            <param name="bits">The number of bits to use for serialization/deserialization.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int32@)">
+            <summary>
+            Serializes or deserializes a 32-bit integer value.
+            </summary>
+            <param name="value">The 32-bit integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int32@,System.Int32)">
+            <summary>
+            Serializes or deserializes a 32-bit integer value with a specified number of bits.
+            </summary>
+            <param name="value">The 32-bit integer value to serialize/deserialize.</param>
+            <param name="bits">The number of bits to use for serialization/deserialization.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int32[]@)">
+            <summary>
+            Serializes or deserializes an array of 32-bit integers.
+            </summary>
+            <param name="value">The array of 32-bit integers to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Byte[]@)">
+            <summary>
+            Serializes or deserializes a byte array with a length prefix.
+            </summary>
+            <param name="value">The byte array to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Byte[]@,System.Int32@)">
+            <summary>
+            Serializes or deserializes a byte array with a specified length.
+            </summary>
+            <param name="array">The byte array to serialize/deserialize.</param>
+            <param name="length">The length of the byte array.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Byte[]@,System.Int32)">
+            <summary>
+            Serializes or deserializes a byte array with a fixed size.
+            </summary>
+            <param name="value">The byte array to serialize/deserialize.</param>
+            <param name="fixedSize">The fixed size of the byte array.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Byte[]@,System.Int32@,System.Int32)">
+            <summary>
+            Serializes or deserializes a byte array with a specified length and fixed size.
+            </summary>
+            <param name="array">The byte array to serialize/deserialize.</param>
+            <param name="length">The length of the byte array.</param>
+            <param name="fixedSize">The fixed size of the byte array.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeArrayLength``1(``0[]@)">
+            <summary>
+            Serializes or deserializes the length of an array.
+            </summary>
+            <typeparam name="T">The type of the array elements.</typeparam>
+            <param name="array">The array whose length to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeArray``1(``0[]@,Fusion.Protocol.BitStream.ArrayElementSerializer{``0})">
+            <summary>
+            Serializes or deserializes an array of elements using a specified serializer.
+            </summary>
+            <typeparam name="T">The type of the array elements.</typeparam>
+            <param name="array">The array to serialize/deserialize.</param>
+            <param name="serializer">The serializer to use for each element.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Byte*)">
+            <summary>
+            Serializes or deserializes a byte value.
+            </summary>
+            <param name="v">The byte value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.SByte*)">
+            <summary>
+            Serializes or deserializes a signed byte value.
+            </summary>
+            <param name="v">The signed byte value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int16*)">
+            <summary>
+            Serializes or deserializes a short value.
+            </summary>
+            <param name="v">The short value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt16*)">
+            <summary>
+            Serializes or deserializes an unsigned short value.
+            </summary>
+            <param name="v">The unsigned short value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int32*)">
+            <summary>
+            Serializes or deserializes an integer value.
+            </summary>
+            <param name="v">The integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt32*)">
+            <summary>
+            Serializes or deserializes an unsigned 32-bit integer value.
+            </summary>
+            <param name="v">The unsigned 32-bit integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int64*)">
+            <summary>
+            Serializes or deserializes a 64-bit integer value.
+            </summary>
+            <param name="v">The 64-bit integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt64*)">
+            <summary>
+            Serializes or deserializes an unsigned 64-bit integer value.
+            </summary>
+            <param name="v">The unsigned 64-bit integer value to serialize/deserialize.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.UInt32*,System.Int32)">
+            <summary>
+            Serializes or deserializes an unsigned 32-bit integer value with a specified number of bits.
+            </summary>
+            <param name="v">The unsigned 32-bit integer value to serialize/deserialize.</param>
+            <param name="bits">The number of bits to use for serialization/deserialization.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.Serialize(System.Int32*,System.Int32)">
+            <summary>
+            Serializes or deserializes a 32-bit integer value with a specified number of bits.
+            </summary>
+            <param name="v">The 32-bit integer value to serialize/deserialize.</param>
+            <param name="bits">The number of bits to use for serialization/deserialization.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.Byte*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of byte values.
+            </summary>
+            <param name="buffer">The buffer of byte values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.SByte*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of signed byte values.
+            </summary>
+            <param name="buffer">The buffer of signed byte values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.Int16*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of short values.
+            </summary>
+            <param name="buffer">The buffer of short values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.UInt16*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of unsigned short values.
+            </summary>
+            <param name="buffer">The buffer of unsigned short values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.Int32*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of 32-bit integer values.
+            </summary>
+            <param name="buffer">The buffer of 32-bit integer values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.UInt32*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of unsigned 32-bit integer values.
+            </summary>
+            <param name="buffer">The buffer of unsigned 32-bit integer values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.Int64*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of 64-bit integer values.
+            </summary>
+            <param name="buffer">The buffer of 64-bit integer values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
+        </member>
+        <member name="M:Fusion.Protocol.BitStream.SerializeBuffer(System.UInt64*,System.Int32)">
+            <summary>
+            Serializes or deserializes a buffer of unsigned 64-bit integer values.
+            </summary>
+            <param name="buffer">The buffer of unsigned 64-bit integer values to serialize/deserialize.</param>
+            <param name="length">The length of the buffer.</param>
         </member>
         <member name="M:Fusion.Protocol.CommunicatorBase.HandleProtocolPackage(System.Int32,System.Object)">
             <summary>
@@ -1074,6 +3825,16 @@
         <member name="F:Fusion.Protocol.Message.FusionSerializationVersion">
             <summary>
             Stores the Current Fusion Serialization Version
+            </summary>
+        </member>
+        <member name="P:Fusion.Protocol.Message.IsValid">
+            <summary>
+            Signal if this Message is Valid or not
+            </summary>
+        </member>
+        <member name="P:Fusion.Protocol.Message.HasValidVersion">
+            <summary>
+            Signal if this Message has a valid Protocol Version and Fusion Serialization Version
             </summary>
         </member>
         <member name="P:Fusion.Protocol.Message.CustomData">
@@ -1142,6 +3903,11 @@
         <member name="T:Fusion.Protocol.DisconnectReason">
             <summary>
             List all Disconnect reason used by the Plugin to remove an Actor from the Room
+            </summary>
+        </member>
+        <member name="F:Fusion.Protocol.DisconnectReason.None">
+            <summary>
+            No reason
             </summary>
         </member>
         <member name="F:Fusion.Protocol.DisconnectReason.ServerLogic">

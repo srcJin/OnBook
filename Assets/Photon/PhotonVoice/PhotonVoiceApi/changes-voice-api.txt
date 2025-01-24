@@ -1,8 +1,19 @@
 Photon Voice API Change Log
 
+v2.57 (December 13, 2024)
+WebGL:
+   ADDED: WebAudioAudioOut spatial ref and max distances control via AudioSource min and max distances
+FMOD:
+   FIXED: FMOD always used device 0 for recording
+
+v2.56 (August 19, 2024)
+WebGL:
+   FIXED: WebGL Emscripten Malloc._malloc and Malloc._free replaced with _malloc and _free as these symbols were removed from Module in Emscripten 3.1.31
+   CHANGED: deprecated Emscripten Module.dynCall_... replaced with makeDynCall macro
+
 v2.55 (February 26, 2024)
 Core:
-   ADDED: VisionOS support (Opus and WebRTC Audio libraries)
+   ADDED: visionOS support (Opus and WebRTC Audio libraries)
    BREAKING: ILogger.Log*() methods replaced with LogLevel enum and single Log() method accepting logging level
    BREAKING: added ILogger.Level property, that Voice code can check to avoid unnecessary Log() methods calls
    ADDED: LogLevel.Trace logging level

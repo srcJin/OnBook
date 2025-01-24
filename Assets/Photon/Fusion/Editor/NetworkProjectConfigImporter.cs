@@ -10,11 +10,12 @@ namespace Fusion.Editor {
   using UnityEngine;
 
   [ScriptedImporter(3, ExtensionWithoutDot, ImportQueueOffset)]
+  [HelpURL("https://doc.photonengine.com/fusion/current/manual/network-project-config")]
   public class NetworkProjectConfigImporter : ScriptedImporter {
     public const string ExtensionWithoutDot = "fusion";
     public const string Extension = "." + ExtensionWithoutDot;
     public const int ImportQueueOffset = 1000;
-    
+
     public const string FusionPrefabTag            = "FusionPrefab";
     public const string FusionPrefabTagSearchTerm  = "l:FusionPrefab";
     public const string ScriptOrderDependencyName  = "Fusion.ScriptOrderDependency";
@@ -24,7 +25,7 @@ namespace Fusion.Editor {
     [Header("Prefabs")]
     [DrawInline]
     public NetworkPrefabTableOptions PrefabOptions;
-    
+
 #if FUSION_ENABLE_ADDRESSABLES && !FUSION_DISABLE_ADDRESSABLES
     [InitializeOnLoadMethod]
     static void RegisterAddressableEventListeners() {
@@ -43,11 +44,11 @@ namespace Fusion.Editor {
       var root = ScriptableObject.CreateInstance<NetworkProjectConfigAsset>();
       root.Config = config;
       ctx.AddObjectToAsset("root", root);
-      
+
       root.Prefabs = DiscoverPrefabs(ctx);
       root.BehaviourMeta = CreateBehaviourMeta(ctx);
       root.PrefabOptions = PrefabOptions;
-      
+
       ctx.DependsOnCustomDependency(AddressablesDependencyName);
       ctx.DependsOnCustomDependency(ScriptOrderDependencyName);
       ctx.DependsOnCustomDependency(PrefabsDependencyName);
@@ -91,7 +92,7 @@ namespace Fusion.Editor {
 #if FUSION_EDITOR_TRACE
         detailsLog.AppendLine($"{prefabPath} -> {((INetworkPrefabSource)source).Description}");
 #endif
-        
+
         var index = paths.BinarySearch(prefabPath, StringComparer.Ordinal);
         if (index < 0) {
           index = ~index;
@@ -222,11 +223,11 @@ namespace Fusion.Editor {
 
     public static void RefreshNetworkObjectPrefabHash() {
       var hash = new Hash128();
-      
+
       foreach (var it in AssetDatabaseUtils.IterateAssets<GameObject>(label: FusionPrefabTag)) {
         hash.Append(it.guid);
       }
-      
+
       FusionEditorLog.TraceImport($"Refreshing {PrefabsDependencyName} dependency hash: {hash}");
       AssetDatabaseUtils.RegisterCustomDependencyWithMppmWorkaround(PrefabsDependencyName, hash);
       AssetDatabase.Refresh();

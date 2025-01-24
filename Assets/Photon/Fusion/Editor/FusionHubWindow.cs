@@ -57,9 +57,6 @@ namespace Fusion.Editor {
 
       GUI.skin = FusionHubSkin;
 
-      FusionGlobalScriptableObjectUtils.EnsureAssetExists<PhotonAppSettings>();
-      FusionGlobalScriptableObjectUtils.EnsureAssetExists<NetworkProjectConfigAsset>();
-
       _windowPosition = this.position.position;
 
       // full window wrapper

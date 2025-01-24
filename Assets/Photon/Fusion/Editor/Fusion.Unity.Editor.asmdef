@@ -27,7 +27,8 @@
         "Sirenix.OdinInspector.Editor.dll",
         "Sirenix.Utilities.Editor.dll",
         "Sirenix.Utilities.dll",
-        "Sirenix.OdinInspector.Attributes.dll"
+        "Sirenix.OdinInspector.Attributes.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
@@ -56,6 +57,11 @@
             "name": "com.unity.ide.rider",
             "expression": "1.0",
             "define": "FUSION_HAS_JETBRAINS_ATTRIBUTES"
+        },
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "1.0",
+            "define": "FUSION_HAS_NEWTONSOFT_JSON"
         },
         {
             "name": "com.unity.multiplayer.playmode",

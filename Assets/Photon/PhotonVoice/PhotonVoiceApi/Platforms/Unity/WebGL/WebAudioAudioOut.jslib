@@ -7,7 +7,7 @@ mergeInto(LibraryManager.library, {
         }
     },
     
-    PhotonVoice_WebAudioAudioOut_Start: function(handle, sampleRate, channels, bufferSamples, spatialBlend) {
+    PhotonVoice_WebAudioAudioOut_Start: function(handle, sampleRate, channels, bufferSamples, spatialBlend, refDistance, maxDistance) {
         if (!Module.PhotonVoice_WebAudioAudioOut_Global) {
             Module.PhotonVoice_WebAudioAudioOut_Global = {};
             Module.PhotonVoice_WebAudioAudioOut_Global.Sources = new Map();
@@ -29,7 +29,9 @@ mergeInto(LibraryManager.library, {
             // window.addEventListener('mousedown', Module.PhotonVoice_WebAudioAudioOut_Global.ResumeAudioContext);
             // window.addEventListener('touchstart', Module.PhotonVoice_WebAudioAudioOut_Global.ResumeAudioContext);
             
-            const playWorkerFoo = function() {
+            const playWorkerFoo = // minification-friendly "to string conversion", comment out `s for dev
+            `
+            function() {
                 var buffers; // array of ring buffers per channels
                 var bufferLen;
                 var channels;
@@ -103,6 +105,7 @@ mergeInto(LibraryManager.library, {
                 
                 registerProcessor('photon-voice-play-processor', PlayProcessor);
             }
+            `
 
             let ws = playWorkerFoo.toString();
             ws = ws.substring(ws.indexOf("{") + 1, ws.lastIndexOf("}"));
@@ -127,9 +130,10 @@ mergeInto(LibraryManager.library, {
             let spatialBlendNode1;
             let spatialBlendNode2;
             if (spatialBlend > 0) {
-                const options = {
-                }
-                pannerNode = new PannerNode(audioContext, options);
+                pannerNode = new PannerNode(audioContext);
+                pannerNode.distanceModel = "linear";
+                pannerNode.refDistance = refDistance;
+                pannerNode.maxDistance = maxDistance;
                 
                 if (spatialBlend < 1) {
                     spatialBlendNode1 = audioContext.createGain();

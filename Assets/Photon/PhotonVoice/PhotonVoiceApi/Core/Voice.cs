@@ -537,11 +537,12 @@ return;
             this.voiceClient.transport.SendFrame(data, flags, this.evNumber, (byte)this.FramesSent, id, this.channelId, sendFramePar);
 
             this.sendSpacingProfile.Update(false, false);
+#if PV_DEBUG_ECHO_RTT_MEASURE
             if (this.DebugEchoMode)
             {
                 this.eventTimestamps[this.evNumber] = Environment.TickCount;
             }
-
+#endif
             this.evNumber++;
 
             if (fec > 0)
@@ -579,9 +580,9 @@ return;
                 }
             }
         }
-
+#if PV_DEBUG_ECHO_RTT_MEASURE
         internal Dictionary<byte, int> eventTimestamps = new Dictionary<byte, int>();
-
+#endif
         SpacingProfile sendSpacingProfile = new SpacingProfile(1000);
         #endregion
 
@@ -979,7 +980,7 @@ return;
 
             byte maxFrameReadPos = (byte)(frameWritePos - df);
             int nullFramesCnt = 0; // to avoid infinite loop when read frame position does not advance for some reason
-            while (!disposed && nullFramesCnt++ < 10 && (byte)(maxFrameReadPos - frameReadPos) < 127) // maxFrameReadPos >= mFrameReadPos
+            while (!disposed && nullFramesCnt++ < 100 && (byte)(maxFrameReadPos - frameReadPos) < 127) // maxFrameReadPos >= mFrameReadPos
                 {
                 while (configFrameQueue.TryDequeue(out FrameBuffer confFrame))
                 {
@@ -1137,7 +1138,7 @@ return 1;
 return 1;
             }
 
-            // issue null frames if mFrameReadPos is behind the current event frame
+            // issue null frames if frameReadPos is behind the current event frame
             while (frameReadPos != begEv.FrameNum)
             {
                 if (voiceClient.logger.Level >= LogLevel.Trace) voiceClient.logger.Log(LogLevel.Trace, LogPrefix + " ev#" + begEvNum + " fr#" + begEv.FrameNum + " wr#" + frameWritePos + " rd#" + frameReadPos + " missing frame");
@@ -1155,13 +1156,11 @@ return 0;
                 }
             }
 
-            // set mFrameReadPos to the next frame
-            frameReadPos++;
-
             FrameFlags fragMask = (begEv.Flags & FrameFlags.MaskFrag);
-
             if (fragMask == FrameFlags.FragNotEnd)
             {
+                frameReadPos++;
+
                 // assemble fragmented
                 // scan and lock fragments, move read pointer at the last read slot
                 fragmentDetected = true;
@@ -1267,9 +1266,11 @@ return fragCount;
             }
             else if (fragMask == 0) // unfragemented
             {
+                frameReadPos++;
+
                 options.Decoder.Input(ref begEv);
             }
-            else // unexected fragment
+            else // unexpected fragment
             {
                 // if (voiceClient.logger.Level >= LogLevel.Debug) voiceClient.logger.Log(LogLevel.Debug, LogPrefix + " ev#" + begEvNum + " fr#" + begEv.FrameNum + " wr#" + frameWritePos + " Unexpected Fragment" + ", flags: " + begEv.Flags);
                 // we get here when the 1st fragment is lost

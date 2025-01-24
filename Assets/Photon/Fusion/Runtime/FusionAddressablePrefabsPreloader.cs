@@ -11,7 +11,7 @@
 #if FUSION_ENABLE_ADDRESSABLES && !FUSION_DISABLE_ADDRESSABLES
     private List<AsyncOperationHandle<GameObject>> _handles = new List<AsyncOperationHandle<GameObject>>();
 
-    private async System.Threading.Tasks.Task Start() {
+    private async void Start() {
       var config = NetworkProjectConfig.Global;
 
       // there are a few ways to load an asset with Addressables (by label, by IResourceLocation, by address etc.)
@@ -23,7 +23,7 @@
         if (source is NetworkPrefabSourceAddressable addressable) {
           // we can't just LoadAssetAsync() because source does it, too:
           // https://forum.unity.com/threads/1-15-1-assetreference-not-allow-loadassetasync-twice.959910/
-          var key = addressable.Address.RuntimeKey;
+          var key = addressable.RuntimeKey;
           var handle = Addressables.LoadAssetAsync<GameObject>(key);
           await handle.Task;
           _handles.Add(handle);

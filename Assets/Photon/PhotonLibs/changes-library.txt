@@ -4,6 +4,16 @@ www.photonengine.com  -  Join our Discord Server: https://dashboard.photonengine
 
 
 
+Version 4.1.8.11 (17. October 2024 - rev7735)
+    Changed: Internal TryParseAddress method, which failed for URLs without a port. This did not work well with the Realtime API's AddressRewriter and URLs for Discord Activities (which typically use a scheme but not a port).
+    
+Version 4.1.8.10 (14. October 2024 - rev7732)
+    Internal: Preparation to support .Net Standard 2.1 builds.
+    Updated: WebSocket for WebGL exports (WebSocket\WebSocket.jslib) to support Unity's (experimental) option to "Enable Native C/C++ Multithreading".
+
+Version 4.1.8.9 (02. September 2024 - rev7660)
+    No notable changes.
+
 Version 4.1.8.8 (02. August 2024 - rev7638)
     Fixed: TCP specific issue where RTT always goes up. This TCP RTT bug was first in v4.1.8.5 (13. May 2024 - rev7556).
     Changed: SendPing handling for the fix. Pings are again directly sent right away - unless the peer was sending a regular, stand-alone init-request. Then waitForInitResponse is used to prevent sending a ping message early.
@@ -19,7 +29,7 @@ Version 4.1.8.7 (05. July 2024 - rev7622)
 
 Version 4.1.8.6 (25. May 2024 - rev7571)
     No notable changes. The Realtime API has fixes for non-Unity projects.
-    
+
 Version 4.1.8.5 (13. May 2024 - rev7556)
     Changed: TPeer.SendPing() will now enqueue the message instead of sending it immmediately. This makes sure a ping is never sent as first message (which has to be an Init).
     Changed: To re-using a ParameterDictionary for pinging in WS / WSS.

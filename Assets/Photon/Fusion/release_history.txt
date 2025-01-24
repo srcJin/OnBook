@@ -1,3 +1,79 @@
+# 2.0.4
+
+## Stable
+
+### Build 884 (Dec 18, 2024)
+
+**Breaking Changes**
+
+- Requires Photon Voice 2.57 or newer
+- `NetworkSerializeMethodAttribute.MaxSize` is obsolete and no longer functional
+
+**What's New**
+
+- `SceneRef.Parse`
+- `NetworkObject.IsNested` and `NetworkObject.NestingRoot`
+- `INetworkObjectProvider.GetPrefabId`, `INetworkObjectProvider.Shutdown` and `INetworkObjectProvider.Initialize` (with default implementations)
+- `NetworkObjectBakerEditTimeHandlerAttribute` - apply to a method for it to be invoked during baking of a specific `NetworkBehaviour`
+- `NetworkRunner.CloudAddressRewriter` (Support for Realtime AddressRewriter)
+- `NetworkRunner.GetAllNetworkObjects` zero alloc overload
+- `INetworkObjectProvider.GetPrefabId`. `NetworkRunner.Spawn` overloads that accept `NetworkObjectGuid` call this method to translate to the prefab id. Previously config's prefab table was checked; the new method allows for a more flexible approach
+- NetworkObject force remote RenderTimeFrame option
+- `NetworkObjectBaker.PostprocessBehaviour`
+- `NetworkObjectBakerEditTimeHandlerAttribute` - decorate a method with this attribute to enable NetworkBehaviour postprocessing in `NetworkObjectBakerEditTime`
+- `INetworkObjectProvider.Initialize` and `INetworkObjectProvider.Shutdown` (have default empty implementations)
+
+**Changes**
+
+- `AppSettings.NetworkLogging`. Warnings and errors are logged according to the global log level, info messages are output when FUSION_TRACE_REALTIME is defined
+- `NetworkTRSP` render logic now smoothly correct the render error caused by state authority changes
+- `StateAuthorityChanged` callback now called on proxies also
+- `Runner.ActivePlayers` on clients wont allocate a list anymore
+- `FusionUnityLogger` registers itself during edit time as well, with `[InitializeOnLoadMethod]`
+- Photon Realtime SDK to 4.1.8.11
+- AfterRender callback now called on proxy objects
+- `NetworkObjectBaker.PostprocessBehaviour` now returns `true` if the script has been made dirty and requires a prefab update
+- `NetworkAssetSourceStatic.Prefab` -> `NetworkAssetSourceStatic.Object`
+- All Fusion Dlls are now built with NET standard 2.1 profile
+
+**Bug Fixes**
+
+- Fixed: `NetworkRunner.GetPlayerObject` is immediately available after calling `NetworkRunner.SetPlayerObject` in shared mode
+- Fixed: `NetworkTransform` blinking to previous remote position when releasing state authority
+- Fixed: `NetworkButton.SetUp` method setting it down instead
+- Fixed: `OnChangedRender` is not called on private Networked Properties of base types when inheriting
+- Fixed: NullRef when despawning the `NetworkObject` on `StateAuthorityChanged` callback
+- Fixed: RpcInfo.Source in single player mode now correctly points to the source player
+- Fixed: NetworkRunner.SessionInfo Support for Single Player
+- Fixed: Usion Hub high CPU usage
+- Fixed: Improved interpolation delay to reduce jitter in the movement of remote objects
+- Fixed: Lag compensation box overlap broadphase AABB not working correctly when rotated
+- Fixed: Getting a `PropertyReader` for `NetworkObject` properties throwing an exception
+- Fixed: Release state authority on spawned correctly synchronized
+- Fixed: Client stuttering for a few seconds after resuming from suspension
+- Fixed: Possible `NullReferenceException` when shutting down
+- Fixed: SceneInfo not being returned correctly before the first tick in shared mode
+- Fixed: `NetworkProjectConfig.EnqueueIncompleteSynchronousSpawns` works again
+
+# 2.0.3
+
+## Stable
+
+### Build 858 (Sep 10, 2024)
+
+**What's New**
+
+- Flag to enable ClientServer Modes in WebGL builds
+
+**Bug Fixes**
+
+- Fixed: `FusionAddressablePrefablsPreloader.Start` return type changed from `Task` to `void`
+- Fixed: Warning in FusionAddressablePrefabsPreloader
+- Fixed: TaskManager Delay for WebGL Builds
+- Fixed: Destroyed Objects on Host Migration
+- Fixed: NetworkRunner.TryFindBehaviour Out Of Range Exception
+- Fixed: Internal Protocol Message Validation Check
+
 # 2.0.2
 
 ## Stable

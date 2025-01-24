@@ -253,7 +253,6 @@ namespace Fusion.CodeGen {
         };
         fixedBufferFieldType.AddAttribute<CompilerGeneratedAttribute>(asm);
         fixedBufferFieldType.AddAttribute<UnsafeValueTypeAttribute>(asm);
-        fixedBufferFieldType.AddAttribute<PreserveInPluginAttribute>(asm);
         fixedBufferFieldType.AddTo(type);
 
         var elementField = new FieldDefinition("FixedElementField", FieldAttributes.Public, elementType);
@@ -278,7 +277,6 @@ namespace Fusion.CodeGen {
         storageType.AddTo(asm.CecilAssembly);
         storageType.AddInterface<INetworkStruct>(asm);
         storageType.AddAttribute<NetworkStructWeavedAttribute, int>(asm, wordCount);
-        storageType.AddAttribute<PreserveInPluginAttribute>(asm);
 
         FieldDefinition bufferField;
         if (Allocator.REPLICATE_WORD_SIZE == sizeof(int)) {
@@ -323,8 +321,8 @@ namespace Fusion.CodeGen {
       if (type.IsNetworkDictionary(out var keyType, out var valueType)) {
         keyType = asm.Import(keyType);
         valueType = asm.Import(valueType);
-        var keyReaderWriterType = MakeElementReaderWriter(asm, property.DeclaringType, property, keyType);
-        var valueReaderWriterType = MakeElementReaderWriter(asm, property.DeclaringType, property, valueType);
+        var keyReaderWriterType = GetOrMakeElementReaderWriter(asm, property.DeclaringType, property, keyType);
+        var valueReaderWriterType = GetOrMakeElementReaderWriter(asm, property.DeclaringType, property, valueType);
         baseType = asm.Import(typeof(Fusion.Internal.UnityDictionarySurrogate<,,,>)).MakeGenericInstanceType(keyType, keyReaderWriterType, valueType, valueReaderWriterType);
         surrogateName = "UnityDictionarySurrogate@" + keyReaderWriterType.Name + "@" + valueReaderWriterType.Name;
         dataType = TypeReferenceRocks.MakeGenericInstanceType(asm.Import(typeof(SerializableDictionary<,>)), keyType, valueType);
@@ -333,7 +331,7 @@ namespace Fusion.CodeGen {
         });
       } else if (type.IsNetworkArray(out var elementType)) {
         elementType = asm.Import(elementType);
-        var readerWriterType = MakeElementReaderWriter(asm, property.DeclaringType, property, elementType);
+        var readerWriterType = GetOrMakeElementReaderWriter(asm, property.DeclaringType, property, elementType);
         baseType = asm.Import(typeof(Fusion.Internal.UnityArraySurrogate<,>)).MakeGenericInstanceType(elementType, readerWriterType);
         surrogateName = "UnityArraySurrogate@" + readerWriterType.Name;
         dataType = elementType.MakeArrayType();
@@ -342,7 +340,7 @@ namespace Fusion.CodeGen {
         });
       } else if (type.IsNetworkList(out elementType)) {
         elementType = asm.Import(elementType);
-        var readerWriterType = MakeElementReaderWriter(asm, property.DeclaringType, property, elementType);
+        var readerWriterType = GetOrMakeElementReaderWriter(asm, property.DeclaringType, property, elementType);
         baseType = asm.Import(typeof(Fusion.Internal.UnityLinkedListSurrogate<,>)).MakeGenericInstanceType(elementType, readerWriterType);
         surrogateName = "UnityLinkedListSurrogate@" + readerWriterType.Name;
         dataType = elementType.MakeArrayType();
@@ -350,7 +348,7 @@ namespace Fusion.CodeGen {
           GenericArguments = { elementType }
         });
       } else {
-        var readerWriterType = MakeElementReaderWriter(asm, property.DeclaringType, property, property.PropertyType);
+        var readerWriterType = GetOrMakeElementReaderWriter(asm, property.DeclaringType, property, property.PropertyType);
         baseType = asm.Import(typeof(Fusion.Internal.UnityValueSurrogate<,>)).MakeGenericInstanceType(property.PropertyType, readerWriterType);
         surrogateName = "UnityValueSurrogate@" + readerWriterType.Name;
         dataType = property.PropertyType;
@@ -416,9 +414,81 @@ namespace Fusion.CodeGen {
       return surrogateType;
     }
 
-    private TypeDefinition MakeElementReaderWriter(ILWeaverAssembly asm, TypeReference declaringType, ICustomAttributeProvider member, TypeReference elementType) {
+    public static TypeReference GetExistingElementReaderWriter(TypeDefinition declaringType, ICustomAttributeProvider member, NetworkTypeInfo typeInfo) {
+      var result = TryGetExistingElementReaderWriter(declaringType, member, typeInfo);
+      if (result == null) {
+        throw new ILWeaverException($"No reader-writer found for {typeInfo.TypeRef}");
+      }
+      return result;
+    }
+
+    public static TypeReference TryGetExistingElementReaderWriter(TypeReference declaringType, ICustomAttributeProvider member, NetworkTypeInfo typeInfo) {
+      var module = declaringType.Module;
+      if (!typeInfo.CanBeUsedInStructs) {
+        if (!declaringType.Is<NetworkBehaviour>()) {
+          throw new ILWeaverException($"{typeInfo.TypeRef} needs wrapping - such types are only supported as NetworkBehaviour properties.");
+        }
+
+        var interfaceType = module.ImportReference(typeof(IElementReaderWriter<>)).MakeGenericInstanceType(typeInfo.TypeRef);
+        
+        // check if the behaviour implements the interface
+        var currentType = declaringType.Resolve();
+        while (currentType != null) {
+          if (currentType.Interfaces.Any(x => x.InterfaceType.FullName == interfaceType.FullName)) {
+            // already implemented
+            return declaringType;
+          }
+          currentType = currentType.BaseType?.Resolve();
+        }
+        
+        return null;
+      } else {
+
+        switch (typeInfo.TypeRef.FullName) {
+          case "System.Byte"  : return module.ImportReference(typeof(ElementReaderWriterByte));
+          case "System.SByte" : return module.ImportReference(typeof(ElementReaderWriterSByte));
+          case "System.Int16" : return module.ImportReference(typeof(ElementReaderWriterInt16));
+          case "System.UInt16": return module.ImportReference(typeof(ElementReaderWriterUInt16));
+          case "System.Int32" : return module.ImportReference(typeof(ElementReaderWriterInt32));
+          case "System.UInt32": return module.ImportReference(typeof(ElementReaderWriterUInt32));
+          case "System.Int64" : return module.ImportReference(typeof(ElementReaderWriterInt64));
+          case "System.UInt64": return module.ImportReference(typeof(ElementReaderWriterUInt64));
+          case "System.Single": return module.ImportReference(typeof(ElementReaderWriterSingle));
+          case "System.Double": return module.ImportReference(typeof(ElementReaderWriterDouble));
+          case "System.Boolean": return module.ImportReference(typeof(ElementReaderWriterBoolean));
+          //case "System.String": return Import<ReaderWriterString>();
+          case "System.Char": return module.ImportReference(typeof(ElementReaderWriterChar));
+          case "UnityEngine.Vector2": return module.ImportReference(typeof(ElementReaderWriterVector2));
+          case "UnityEngine.Vector3": return module.ImportReference(typeof(ElementReaderWriterVector3));
+          case "UnityEngine.Vector4": return module.ImportReference(typeof(ElementReaderWriterVector4));
+          
+          case "Fusion.NetworkBool": return module.ImportReference(typeof(ElementReaderWriterNetworkBool));
+          case "Fusion.PlayerRef": return module.ImportReference(typeof(ElementReaderWriterPlayerRef));
+          case "Fusion.NetworkId": return module.ImportReference(typeof(ElementReaderWriterNetworkId));
+          case "Fusion.NetworkBehaviourId": return module.ImportReference(typeof(ElementReaderWriterNetworkBehaviourId));
+        }
+        
+        var readerWriterName = "ReaderWriter@" + typeInfo.TypeRef.FullName.Replace(".", "_").Replace("/", "__");
+
+        if (typeInfo.TryGetCapacity(member, out int capacity)) {
+          readerWriterName += $"@Capacity_{capacity}";
+        }
+
+        return module.GetType("Fusion.CodeGen", readerWriterName);
+      }
+    }
+
+    private TypeReference GetOrMakeElementReaderWriter(ILWeaverAssembly asm, TypeReference declaringType, ICustomAttributeProvider member, TypeReference elementType) {
 
       elementType = asm.Import(elementType);
+      var typeInfo = TypeRegistry.GetInfo(elementType);
+
+      var existing = TryGetExistingElementReaderWriter(declaringType, member, typeInfo);
+
+      if (existing != null) {
+        return existing;
+      }
+
 
       var interfaceType = asm.Import(typeof(IElementReaderWriter<>)).MakeGenericInstanceType(elementType);
 
@@ -439,7 +509,6 @@ namespace Fusion.CodeGen {
         readMethod.Parameters.Add(new ParameterDefinition("data", ParameterAttributes.None, dataType));
         readMethod.Parameters.Add(new ParameterDefinition("index", ParameterAttributes.None, indexType));
         readMethod.AddAttribute<MethodImplAttribute, MethodImplOptions>(asm, MethodImplOptions.AggressiveInlining);
-        readMethod.AddAttribute<PreserveInPluginAttribute>(asm);
         readMethod.AddTo(readerWriterType);
 
         var readRefMethod = new MethodDefinition($"{namePrefix}ReadRef",
@@ -449,7 +518,6 @@ namespace Fusion.CodeGen {
         readRefMethod.Parameters.Add(new ParameterDefinition("data", ParameterAttributes.None, dataType));
         readRefMethod.Parameters.Add(new ParameterDefinition("index", ParameterAttributes.None, indexType));
         readRefMethod.AddAttribute<MethodImplAttribute, MethodImplOptions>(asm, MethodImplOptions.AggressiveInlining);
-        readRefMethod.AddAttribute<PreserveInPluginAttribute>(asm);
         readRefMethod.AddTo(readerWriterType);
 
         var writeMethod = new MethodDefinition($"{namePrefix}Write",
@@ -460,7 +528,6 @@ namespace Fusion.CodeGen {
         writeMethod.Parameters.Add(new ParameterDefinition("index", ParameterAttributes.None, indexType));
         writeMethod.Parameters.Add(new ParameterDefinition("val", ParameterAttributes.None, elementType));
         writeMethod.AddAttribute<MethodImplAttribute, MethodImplOptions>(asm, MethodImplOptions.AggressiveInlining);
-        writeMethod.AddAttribute<PreserveInPluginAttribute>(asm);
         writeMethod.AddTo(readerWriterType);
 
         var getElementWordCountMethod = new MethodDefinition($"{namePrefix}GetElementWordCount",
@@ -468,18 +535,16 @@ namespace Fusion.CodeGen {
           asm.Import(typeof(int)));
 
         getElementWordCountMethod.AddAttribute<MethodImplAttribute, MethodImplOptions>(asm, MethodImplOptions.AggressiveInlining);
-        getElementWordCountMethod.AddAttribute<PreserveInPluginAttribute>(asm);
         getElementWordCountMethod.AddTo(readerWriterType);
 
         var getElementHashCodeMethod = new MethodDefinition($"{namePrefix}GetElementHashCode",
           visibility | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual,
           asm.Import(typeof(int)));
-        
+
         getElementHashCodeMethod.Parameters.Add(new ParameterDefinition("val", ParameterAttributes.None, elementType));
         getElementHashCodeMethod.AddAttribute<MethodImplAttribute, MethodImplOptions>(asm, MethodImplOptions.AggressiveInlining);
-        getElementHashCodeMethod.AddAttribute<PreserveInPluginAttribute>(asm);
         getElementHashCodeMethod.AddTo(readerWriterType);
-        
+
         if (isExplicit) {
           readMethod.Overrides.Add(interfaceType.GetGenericInstanceMethodOrThrow(nameof(IElementReaderWriter<int>.Read)));
           readRefMethod.Overrides.Add(interfaceType.GetGenericInstanceMethodOrThrow(nameof(IElementReaderWriter<int>.ReadRef)));
@@ -496,11 +561,11 @@ namespace Fusion.CodeGen {
           il.Append(Instruction.Create(OpCodes.Add));
         };
 
-  
+
         EmitRead(asm, readMethod.Body.GetILProcessor(), elementType, readerWriterType, member, addressGetter, emitRet: true);
         EmitRead(asm, readRefMethod.Body.GetILProcessor(), readRefMethod.ReturnType, readerWriterType, member, addressGetter, emitRet: true, throwForNonUnmanagedRefs: true);
         EmitWrite(asm, writeMethod.Body.GetILProcessor(), elementType, readerWriterType, member, addressGetter, OpCodes.Ldarg_3, emitRet: true);
-        EmitGetHashCode(asm, getElementHashCodeMethod.Body.GetILProcessor(), elementType, readerWriterType, member, addressGetter, 
+        EmitGetHashCode(asm, getElementHashCodeMethod.Body.GetILProcessor(), elementType, readerWriterType, member, addressGetter,
           valueGetter: il => {
             il.Append(Ldarg_1());
           },
@@ -514,10 +579,7 @@ namespace Fusion.CodeGen {
           il.Append(Ldc_I4(elementWordCount));
           il.Append(Ret());
         }
-        
       }
-
-      var typeInfo = TypeRegistry.GetInfo(elementType);
       
       if (!typeInfo.CanBeUsedInStructs) {
         if (!declaringType.Is<NetworkBehaviour>()) {
@@ -528,76 +590,70 @@ namespace Fusion.CodeGen {
         var behaviour = declaringType.Resolve();
         var wordCount = typeInfo.GetMemberWordCount(member, behaviour);
 
-        if (!behaviour.Interfaces.Any(x => x.InterfaceType.FullName == interfaceType.FullName)) {
-          Log.Debug($"Adding interface {behaviour} {interfaceType}");
-          AddIElementReaderWriterImplementation(behaviour, wordCount, isExplicit: true);
-        }
-
+        Log.Debug($"Adding interface {behaviour} {interfaceType}");
+        AddIElementReaderWriterImplementation(behaviour, wordCount, isExplicit: true);
         return behaviour;
       } else {
+        // make there is a built-in reader-writer for this type?
+
         var readerWriterName = "ReaderWriter@" + elementType.FullName.Replace(".", "_").Replace("/", "__");
 
         if (typeInfo.TryGetCapacity(member, out int capacity)) {
           readerWriterName += $"@Capacity_{capacity}";
         }
 
-        var readerWriterTypeDef = asm.CecilAssembly.MainModule.GetType("Fusion.CodeGen", readerWriterName);
-        
         const string GetInstanceMethodName = "GetInstance";
 
+        var readerWriterTypeDef = new TypeDefinition("Fusion.CodeGen", readerWriterName,
+          TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.SequentialLayout | TypeAttributes.BeforeFieldInit, asm.ValueType);
 
-        if (readerWriterTypeDef == null) { 
-          readerWriterTypeDef = new TypeDefinition("Fusion.CodeGen", readerWriterName,
-            TypeAttributes.AnsiClass | TypeAttributes.Sealed | TypeAttributes.SequentialLayout | TypeAttributes.BeforeFieldInit, asm.ValueType);
+        // without this, VS debugger will crash
+        readerWriterTypeDef.PackingSize = 0;
+        readerWriterTypeDef.ClassSize = 1;
 
-          // without this, VS debugger will crash
-          readerWriterTypeDef.PackingSize = 0;
-          readerWriterTypeDef.ClassSize = 1;
+        readerWriterTypeDef.AddTo(asm.CecilAssembly);
 
-          readerWriterTypeDef.AddTo(asm.CecilAssembly);
-          readerWriterTypeDef.AddAttribute<PreserveInPluginAttribute>(asm);
+        var wordCount = typeInfo.GetMemberWordCount(member, readerWriterTypeDef);
+        AddIElementReaderWriterImplementation(readerWriterTypeDef, wordCount);
 
-          var wordCount = typeInfo.GetMemberWordCount(member, readerWriterTypeDef);
-          AddIElementReaderWriterImplementation(readerWriterTypeDef, wordCount);
+        var instanceField = new FieldDefinition("Instance", FieldAttributes.Public | FieldAttributes.Static, interfaceType);
+        instanceField.AddTo(readerWriterTypeDef);
 
-          var instanceField = new FieldDefinition("Instance", FieldAttributes.Public | FieldAttributes.Static, interfaceType);
-          instanceField.AddTo(readerWriterTypeDef);
+        var initializeMethod = new MethodDefinition(GetInstanceMethodName, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig, interfaceType);
+        initializeMethod.AddAttribute<MethodImplAttribute, MethodImplOptions>(asm, MethodImplOptions.AggressiveInlining);
+        initializeMethod.AddTo(readerWriterTypeDef);
 
-          var initializeMethod = new MethodDefinition(GetInstanceMethodName, MethodAttributes.Public | MethodAttributes.Static | MethodAttributes.HideBySig, interfaceType);
-          initializeMethod.AddAttribute<MethodImplAttribute, MethodImplOptions>(asm, MethodImplOptions.AggressiveInlining);
-          initializeMethod.AddTo(readerWriterTypeDef);
+        {
+          var il = initializeMethod.Body.GetILProcessor();
+          var loadFld = Ldsfld(instanceField);
 
-          {
-            var il = initializeMethod.Body.GetILProcessor();
-            var loadFld = Ldsfld(instanceField);
+          var tmpVar = new VariableDefinition(readerWriterTypeDef);
+          il.Body.Variables.Add(tmpVar);
 
-            var tmpVar = new VariableDefinition(readerWriterTypeDef);
-            il.Body.Variables.Add(tmpVar);
+          il.Append(Ldsfld(instanceField));
+          il.Append(Brtrue_S(loadFld));
 
-            il.Append(Ldsfld(instanceField));
-            il.Append(Brtrue_S(loadFld));
+          il.Append(Ldloca_S(tmpVar));
+          il.Append(Initobj(readerWriterTypeDef));
+          il.Append(Ldloc_0());
+          il.Append(Box(readerWriterTypeDef));
+          il.Append(Stsfld(instanceField));
 
-            il.Append(Ldloca_S(tmpVar));
-            il.Append(Initobj(readerWriterTypeDef));
-            il.Append(Ldloc_0());
-            il.Append(Box(readerWriterTypeDef));
-            il.Append(Stsfld(instanceField));
+          il.Append(loadFld);
+          il.Append(Ret());
 
-            il.Append(loadFld);
-            il.Append(Ret());
-          }
         }
 
         return readerWriterTypeDef;
       }
     }
 
-    private void EmitElementReaderWriterLoad(ILProcessor il, TypeDefinition readerWriterType) {
+    private void EmitElementReaderWriterLoad(ILWeaverAssembly asm, ILProcessor il, TypeReference readerWriterType) {
       if (readerWriterType.Is<NetworkBehaviour>()) {
         il.Append(Ldarg_0());
       } else {
-        var getInstanceMethod = readerWriterType.GetMethodOrThrow("GetInstance");
-        il.Append(Call(getInstanceMethod));
+        var getInstanceMethod = readerWriterType.Resolve().GetMethodOrThrow("GetInstance");
+        il.Append(Call(asm.Import(getInstanceMethod)));
       }
     }
    
@@ -694,7 +750,7 @@ namespace Fusion.CodeGen {
       } else {
         using (var ctx = new MethodContext(asm, il.Body.Method, addressGetter: addressGetter)) {
           ctx.LoadElementReaderWriterImpl = (il, type, member) => {
-            EmitElementReaderWriterLoad(il, MakeElementReaderWriter(asm, declaringType, member, type));
+            EmitElementReaderWriterLoad(asm, il, GetOrMakeElementReaderWriter(asm, declaringType, member, type));
           };
 
           TypeRegistry.EmitRead(type, il, ctx, member);
@@ -718,7 +774,7 @@ namespace Fusion.CodeGen {
 
       using (var ctx = new MethodContext(asm, il.Body.Method, addressGetter: addressGetter, valueGetter: (il) => il.Append(Instruction.Create(valueOpCode)))) {
         ctx.LoadElementReaderWriterImpl = (il, type, member) => {
-          EmitElementReaderWriterLoad(il, MakeElementReaderWriter(asm, declaringType, member, type));
+          EmitElementReaderWriterLoad(asm, il, GetOrMakeElementReaderWriter(asm, declaringType, member, type));
         };
         TypeRegistry.EmitWrite(type, il, ctx, member);
         if (emitRet) {
@@ -731,7 +787,7 @@ namespace Fusion.CodeGen {
       
       using (var ctx = new MethodContext(asm, il.Body.Method, addressGetter: null, valueGetter: valueGetter, valueAddrGetter: valueAddrGetter)) {
         ctx.LoadElementReaderWriterImpl = (il, type, member) => {
-          EmitElementReaderWriterLoad(il, MakeElementReaderWriter(asm, declaringType, member, type));
+          EmitElementReaderWriterLoad(asm, il, GetOrMakeElementReaderWriter(asm, declaringType, member, type));
         };
         TypeRegistry.EmitGetHashCode(type, il, ctx, member);
         if (emitRet) {
@@ -1976,6 +2032,7 @@ namespace Fusion.CodeGen {
 #if FUSION_WEAVER && FUSION_HAS_MONO_CECIL
 namespace Fusion.CodeGen {
   using System;
+  using System.Collections.Generic;
   using System.Runtime.CompilerServices;
   using Mono.Cecil;
   using Mono.Cecil.Cil;
@@ -2081,6 +2138,8 @@ namespace Fusion.CodeGen {
         throw new ILWeaverException($"Structs need to implement either {nameof(INetworkStruct)} or {nameof(INetworkInput)}");
       }
 
+      Dictionary<FieldDefinition, PropertyDefinition> fieldToProperty = new();
+      
       // clear all backing fields
       foreach (var property in type.Properties) {
         if (!IsWeavableProperty(property, out var propertyInfo)) {
@@ -2136,7 +2195,8 @@ namespace Fusion.CodeGen {
           var surrogateType = MakeUnitySurrogate(asm, property);
           var storageField = new FieldDefinition($"_{property.Name}", FieldAttributes.Private, fixedBufferInfo);
 
-          TypeRegistry.GetInfo(property.PropertyType).TryGetCapacity(property, out var capacity);
+          var typeInfo = TypeRegistry.GetInfo(property.PropertyType);
+          typeInfo.TryGetCapacity(property, out var capacity);
 
 #if UNITY_EDITOR
           var fixedBufferAttribute = storageField.AddAttribute<FixedBufferPropertyAttribute, TypeReference, TypeReference, int>(asm, property.PropertyType, surrogateType, capacity);
@@ -2174,6 +2234,9 @@ namespace Fusion.CodeGen {
           if (setIL != null) {
             EmitWrite(asm, setIL, property, addressGetter, OpCodes.Ldarg_1);
           }
+
+          fieldToProperty.Add(storageField, property);
+          typeInfo.AddCustomAttributes(property);
           
         } catch (Exception ex) {
           throw new ILWeaverException($"Failed to weave property {property}", ex);
@@ -2192,10 +2255,16 @@ namespace Fusion.CodeGen {
 
         // set offset 
         field.Offset = wordCount * Allocator.REPLICATE_WORD_SIZE;
-
+        
         try {
           // increase block count
-          wordCount += TypeRegistry.GetTypeWordCount(field.FieldType);
+          var fieldWordCount = TypeRegistry.GetTypeWordCount(field.FieldType);
+        
+          if (fieldToProperty.TryGetValue(field, out var property)) {
+            property.AddAttribute<NetworkedWeavedAttribute, int, int>(asm, wordCount, fieldWordCount);
+          }
+          
+          wordCount += fieldWordCount;
         } catch (Exception ex) {
           throw new ILWeaverException($"Failed to get word count of field {field}", ex);
         }
@@ -2519,7 +2588,10 @@ namespace Fusion.CodeGen {
             var typeInfo = TypeRegistry.GetInfo(property.PropertyType);
 
             // inject attribute to poll weaver data during runtime
-            property.AddAttribute<NetworkedWeavedAttribute, int, int>(asm, wordOffset, propertyWordCount);
+            weavedAttribute = property.AddAttribute<NetworkedWeavedAttribute, int, int>(asm, wordOffset, propertyWordCount);
+            typeInfo.AddCustomAttributes(property);
+            
+            //if (typeInfo.ElementWordCount)
 
             if (property.HasAttribute<UnityNonSerializedAttribute>() || propertyInfo.BackingField?.IsNotSerialized == true) {
               // so the property is not serialized, so there will be no backing field.
@@ -3082,7 +3154,7 @@ namespace Fusion.CodeGen {
     ILWeaverImportedType _float;
 
     Dictionary<Type, TypeReference> _types = new Dictionary<Type, TypeReference>();
-
+    
     private ILWeaverImportedType MakeImportedType<T>(ref ILWeaverImportedType field) {
       return MakeImportedType(ref field, typeof(T));
     }
@@ -4330,7 +4402,57 @@ namespace Fusion.CodeGen {
       member.CustomAttributes.Add(attr);
       return attr;
     }
+    
+    public static CustomAttribute AddAttribute<T, A0>(this IMemberDefinition member, ModuleDefinition module, A0 arg0) where T : Attribute {
+      CustomAttribute attr;
+      attr = new CustomAttribute(typeof(T).GetConstructor(module, 1));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A0>(), arg0));
+      member.CustomAttributes.Add(attr);
+      return attr;
+    }
 
+    public static CustomAttribute AddAttribute<T, A0, A1>(this IMemberDefinition member, ModuleDefinition module, A0 arg0, A1 arg1) where T : Attribute {
+      CustomAttribute attr;
+      attr = new CustomAttribute(typeof(T).GetConstructor(module, 2));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A0>(), arg0));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A1>(), arg1));
+      member.CustomAttributes.Add(attr);
+      return attr;
+    }
+
+    public static CustomAttribute AddAttribute<T, A0, A1, A2>(this IMemberDefinition member, ModuleDefinition module, A0 arg0, A1 arg1, A2 arg2) where T : Attribute {
+      CustomAttribute attr;
+      attr = new CustomAttribute(typeof(T).GetConstructor(module, 3));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A0>(), arg0));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A1>(), arg1));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A2>(), arg2));
+      member.CustomAttributes.Add(attr);
+      return attr;
+    }
+    
+    public static CustomAttribute AddAttribute<T, A0, A1, A2, A3>(this IMemberDefinition member, ModuleDefinition module, A0 arg0, A1 arg1, A2 arg2, A3 arg3) where T : Attribute {
+      CustomAttribute attr;
+      attr = new CustomAttribute(typeof(T).GetConstructor(module, 4));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A0>(), arg0));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A1>(), arg1));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A2>(), arg2));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A3>(), arg3));
+      member.CustomAttributes.Add(attr);
+      return attr;
+    }
+
+    public static CustomAttribute AddAttribute<T, A0, A1, A2, A3, A4>(this IMemberDefinition member, ModuleDefinition module, A0 arg0, A1 arg1, A2 arg2, A3 arg3, A4 arg4) where T : Attribute {
+      CustomAttribute attr;
+      attr = new CustomAttribute(typeof(T).GetConstructor(module, 5));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A0>(), arg0));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A1>(), arg1));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A2>(), arg2));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A3>(), arg3));
+      attr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportAttributeType<A4>(), arg4));
+      member.CustomAttributes.Add(attr);
+      return attr;
+    }
+      
     public static CustomAttribute AddAttribute<T, A0, A1, A2, A3>(this IMemberDefinition member, ILWeaverAssembly asm, A0 arg0, A1 arg1, A2 arg2, A3 arg3) where T : Attribute {
       CustomAttribute attr;
       
@@ -4350,6 +4472,14 @@ namespace Fusion.CodeGen {
         return asm.Import<Type>();
       } else {
         return asm.Import<T>();
+      }
+    }
+    
+    private static TypeReference ImportAttributeType<T>(this ModuleDefinition module) {
+      if (typeof(T) == typeof(TypeReference)) {
+        return module.ImportReference(typeof(Type));
+      } else {
+        return module.ImportReference(typeof(T));
       }
     }
 
@@ -4652,7 +4782,7 @@ namespace Fusion.CodeGen {
   using Mono.Cecil;
 
   public interface ILWeaverLogger {
-    void Log(LogType logType, string message, string filePath, int lineNumber);
+    void Log(LogLevel logType, string message, string filePath, int lineNumber);
     void Log(Exception ex);
   }
 
@@ -4672,41 +4802,41 @@ namespace Fusion.CodeGen {
 
     public void AssertMessage(bool condition, string message, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = default) {
       if (!condition) {
-        _logger.Log(LogType.Error, $"Assert failed: {message}", filePath, lineNumber);
+        _logger.Log(LogLevel.Error, $"Assert failed: {message}", filePath, lineNumber);
         throw new AssertException($"{message}{(string.IsNullOrEmpty(filePath) ? "" : $" at {filePath}:{lineNumber}")}");
       }
     }
 
     public void Assert(bool condition, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = default) {
       if (!condition) {
-        _logger.Log(LogType.Error, $"Assert failed", filePath, lineNumber);
+        _logger.Log(LogLevel.Error, $"Assert failed", filePath, lineNumber);
         throw new AssertException($"Assert failed{(string.IsNullOrEmpty(filePath) ? "" : $" at {filePath}:{lineNumber}")}");
       }
     }
 
     [Conditional("FUSION_WEAVER_DEBUG")]
     public void Debug(string message, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = default) {
-      _logger.Log(LogType.Debug, message, filePath, lineNumber);
+      _logger.Log(LogLevel.Debug, message, filePath, lineNumber);
     }
 
 
     
     public void Warn(MethodDefinition method, string message, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = default) {
       TryOverrideLocation(method, ref filePath, ref lineNumber);
-      _logger.Log(LogType.Warn, message, filePath, lineNumber);
+      _logger.Log(LogLevel.Warn, message, filePath, lineNumber);
     }
     
     public void Warn(PropertyDefinition property, string message, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = default) {
       TryOverrideLocation(property.GetMethod, ref filePath, ref lineNumber);
-      _logger.Log(LogType.Warn, message, filePath, lineNumber);
+      _logger.Log(LogLevel.Warn, message, filePath, lineNumber);
     }
     
     public void Warn(string message, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = default) {
-      _logger.Log(LogType.Warn, message, filePath, lineNumber);
+      _logger.Log(LogLevel.Warn, message, filePath, lineNumber);
     }
 
     public void Error(string message, [CallerFilePath] string filePath = null, [CallerLineNumber] int lineNumber = default) {
-      _logger.Log(LogType.Error, message, filePath, lineNumber);
+      _logger.Log(LogLevel.Error, message, filePath, lineNumber);
     }
 
     public void Exception(Exception ex) {
@@ -4822,21 +4952,18 @@ namespace Fusion.CodeGen {
 
     public List<DiagnosticMessage> Messages { get; } = new List<DiagnosticMessage>();
 
-    public void Log(LogType logType, string message, string filePath, int lineNumber) {
+    public void Log(LogLevel logType, string message, string filePath, int lineNumber) {
 
       DiagnosticType diagnosticType;
 
-      if (logType == LogType.Debug) {
+      if (logType == LogLevel.Debug) {
         // there are no debug diagnostic messages, make pretend warnings
         message = $"DEBUG: {message}";
         diagnosticType = DiagnosticType.Warning;
-      } else if (logType == LogType.Info) {
+      } else if (logType == LogLevel.Info) {
         message = $"INFO: {message}";
         diagnosticType = DiagnosticType.Warning;
-      } else if (logType == LogType.Trace) {
-        message = $"TRACE: {message}";
-        diagnosticType = DiagnosticType.Warning;
-      } else if (logType == LogType.Warn) {
+      } else if (logType == LogLevel.Warn) {
         diagnosticType = DiagnosticType.Warning;
       } else {
         diagnosticType = DiagnosticType.Error;
@@ -4854,7 +4981,7 @@ namespace Fusion.CodeGen {
     public void Log(Exception ex) {
       var lines = ex.ToString().Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
       foreach (var line in lines) {
-        Log(LogType.Error, line, null, 0);
+        Log(LogLevel.Error, line, null, 0);
       }
     }
 
@@ -4882,17 +5009,16 @@ namespace Fusion.CodeGen {
 
   public class ILWeaverLoggerUnityDebug : ILWeaverLogger {
 
-    public void Log(LogType logType, string message, string filePath, int lineNumber) {
+    public void Log(LogLevel logType, string message, string filePath, int lineNumber) {
       switch (logType) {
-        case LogType.Debug:
-        case LogType.Trace:
-        case LogType.Info:
+        case LogLevel.Debug:
+        case LogLevel.Info:
           UnityEngine.Debug.Log(message);
           break;
-        case LogType.Warn:
+        case LogLevel.Warn:
           UnityEngine.Debug.LogWarning(message);
           break;
-        case LogType.Error:
+        case LogLevel.Error:
           UnityEngine.Debug.LogError(message);
           break;
       }
@@ -6266,6 +6392,7 @@ namespace Fusion.CodeGen {
     internal delegate void EmitInitDelegate(PropertyDefinition property, ILProcessor processor, TypeReference initType, Action<ILProcessor> emitArg);
     internal delegate void EmitStoreDelegate(PropertyDefinition property, ILProcessor processor, FieldReference field);
     internal delegate TypeReference GetUnitySerializableTypeDelegate(bool isSerializable);
+    
 
     internal static NetworkTypeInfo Create(TypeReference type, 
       GetUnitySerializableTypeDelegate unitySerializableType = null,
@@ -6278,7 +6405,9 @@ namespace Fusion.CodeGen {
       GetCapacityDelegate capacity = null,
       EmitInitDelegate unityInit = null,
       EmitStoreDelegate unityStore = null,
-      NetworkTypeInfoFlags flags = 0) {
+      NetworkTypeInfoFlags flags = 0,
+      TypeReference wrapperType = null,
+      Action<PropertyDefinition> addAttributes = null) {
 
       if (type == null) {
         throw new ArgumentNullException(nameof(type));
@@ -6299,6 +6428,8 @@ namespace Fusion.CodeGen {
         _emitRpcByteCount      = compactByteCount,
         _emitUnityInit         = unityInit,
         _emitUnityStore        = unityStore,
+        _wrapperType           = wrapperType,
+        _addCustomAttributes   = addAttributes,
       };
     }
 
@@ -6309,6 +6440,10 @@ namespace Fusion.CodeGen {
 
     public TypeReference TypeRef { get; private set; }
 
+    public TypeReference WrapperType => _wrapperType;
+    
+    public int? ElementWordCount { get; private set; }
+    
     public bool HasStaticSize => _typeByteSize > 0;
     
     public int StaticByteCount {
@@ -6341,6 +6476,8 @@ namespace Fusion.CodeGen {
     private GetUnitySerializableTypeDelegate _unitySerializableType;
     private EmitInitDelegate                 _emitUnityInit;
     private EmitStoreDelegate                _emitUnityStore;
+    private TypeReference                    _wrapperType;
+    private Action<PropertyDefinition>       _addCustomAttributes;
 
 
     internal virtual void EmitUnityInit(PropertyDefinition property, ILProcessor il, TypeReference initType, Action<ILProcessor> emitArg) {
@@ -6462,6 +6599,10 @@ namespace Fusion.CodeGen {
 
     internal virtual TypeReference GetUnityBackingFieldType(bool isSerializable) {
       return _unitySerializableType?.Invoke(isSerializable) ?? TypeRef;
+    }
+
+    internal void AddCustomAttributes(PropertyDefinition property) {
+      _addCustomAttributes?.Invoke(property);
     }
   }
 }
@@ -6674,60 +6815,46 @@ namespace Fusion.CodeGen {
           il.Append(Ldind_or_Ldobj(prop.PropertyType.GetElementType()));
           il.Append(Stfld(field));
         },
-        flags: NetworkTypeInfoFlags.CantBeUsedInRpcs | NetworkTypeInfoFlags.CantBeUsedInRpcs
+        flags: NetworkTypeInfoFlags.CantBeUsedInRpcs
       );
     }
 
-    private NetworkTypeInfo CreateWrappedMeta(TypeReference type, NetworkTypeWrapInfo WrapInfo) {
-      if (WrapInfo == null) {
-        throw new ArgumentNullException(nameof(WrapInfo));
+    private NetworkTypeInfo CreateWrappedMeta(TypeReference type, NetworkTypeWrapInfo wrapInfo) {
+      if (wrapInfo == null) {
+        throw new ArgumentNullException(nameof(wrapInfo));
       }
 
       NetworkTypeInfoFlags flags = 0;
-      if (WrapInfo.MaxByteCount <= 0 && !WrapInfo.WrapperTypeInfo.CanBeUsedInRpc) {
+      if (!wrapInfo.WrapperTypeInfo.CanBeUsedInRpc) {
         flags |= NetworkTypeInfoFlags.CantBeUsedInRpcs;
       }
-      if (WrapInfo.WrapNeedsRunner || WrapInfo.UnwrapNeedsRunner) {
+      if (wrapInfo.WrapNeedsRunner || wrapInfo.UnwrapNeedsRunner) {
         flags |= NetworkTypeInfoFlags.CantBeUsedInStructs;
       }
 
       return NetworkTypeInfo.Create(type,
+        typeByteSize: wrapInfo.WrapperTypeInfo.StaticByteCount,
         wordCount: (member, declaringType) => {
-          if (WrapInfo.MaxByteCount > 0) {
-            return Native.WordCount(WrapInfo.MaxByteCount, Allocator.REPLICATE_WORD_SIZE);
-          } else {
-            return WrapInfo.WrapperTypeInfo.GetMemberWordCount(member, declaringType);
-          }
+          return wrapInfo.WrapperTypeInfo.StaticWordCount;
         },
         read: (member, il, context) => {
-          if (WrapInfo.IsRaw || WrapInfo.UnwrapByRef) {
-
-
+          if (wrapInfo.UnwrapByRef) {
+            
             var nop = il.AppendReturn(Nop());
 
-            if (WrapInfo.UnwrapNeedsRunner) {
+            if (wrapInfo.UnwrapNeedsRunner) {
               il.AppendMacro(context.LoadRunner());
             }
 
             il.AppendMacro(context.LoadAddress());
-
-            if (!WrapInfo.IsRaw) {
-              il.Append(Ldind_or_Ldobj(WrapInfo.WrapperType));
-            }
-
-            il.AppendMacro(context.GetTargetVariableAddrOrTemp(WrapInfo.TargetType, il, out var variable, before: nop));
-            il.Append(Call(WrapInfo.UnwrapMethod.GetCallable()));
-
-            if (WrapInfo.IsRaw) {
-              il.AppendMacro(context.VerifyRawNetworkUnwrap(type, WrapInfo.MaxByteCount));
-              il.AppendMacro(context.AddOffset());
-            } else {
-              il.AppendMacro(context.AddOffset(WrapInfo.WrapperTypeInfo.StaticByteCount));
-            }
-
+            il.Append(Ldind_or_Ldobj(wrapInfo.WrapperType));
+            il.AppendMacro(context.GetTargetVariableAddrOrTemp(wrapInfo.TargetType, il, out var variable, before: nop));
+            il.Append(Call(wrapInfo.UnwrapMethod.GetCallable()));
+            il.AppendMacro(context.AddOffset(wrapInfo.WrapperTypeInfo.StaticByteCount));
+              
             if (variable != null) {
               il.Append(Ldloc(variable));
-              if (!WrapInfo.TargetType.Is(type)) {
+              if (!wrapInfo.TargetType.Is(type)) {
                 il.Append(Cast(type));
               }
             }
@@ -6735,85 +6862,47 @@ namespace Fusion.CodeGen {
             il.Remove(nop);
 
           } else {
-            if (WrapInfo.UnwrapNeedsRunner) {
+            if (wrapInfo.UnwrapNeedsRunner) {
               il.AppendMacro(context.LoadRunner());
             }
 
             il.AppendMacro(context.LoadAddress());
-            il.Append(Ldind_or_Ldobj(WrapInfo.WrapperType));
-            il.Append(Call(WrapInfo.UnwrapMethod.GetCallable()));
+            il.Append(Ldind_or_Ldobj(wrapInfo.WrapperType));
+            il.Append(Call(wrapInfo.UnwrapMethod.GetCallable()));
 
-            if (!WrapInfo.TargetType.Is(type)) {
+            if (!wrapInfo.TargetType.Is(type)) {
               il.Append(Cast(type));
             }
 
-            il.AppendMacro(context.AddOffset(WrapInfo.WrapperTypeInfo.StaticByteCount));
+            il.AppendMacro(context.AddOffset(wrapInfo.WrapperTypeInfo.StaticByteCount));
           }
         },
         write: (member, il, context) => {
           // this is to do the store later on
-          if (!WrapInfo.IsRaw) {
-            il.AppendMacro(context.LoadAddress());
-          }
-
+          il.AppendMacro(context.LoadAddress());
+          
           // actual args start here
-
-          if (WrapInfo.WrapNeedsRunner) {
+          if (wrapInfo.WrapNeedsRunner) {
             il.AppendMacro(context.LoadRunner());
           }
 
           il.AppendMacro(context.LoadValue());
-          if (WrapInfo.IsRaw) {
-            il.AppendMacro(context.LoadAddress());
-          }
-
-          il.Append(Call(WrapInfo.WrapMethod.GetCallable()));
-
-          if (WrapInfo.IsRaw) {
-            il.AppendMacro(context.VerifyRawNetworkWrap(type, WrapInfo.MaxByteCount));
-            il.AppendMacro(context.AddOffset());
-          } else {
-            il.Append(Stind_or_Stobj(WrapInfo.WrapperType));
-            il.AppendMacro(context.AddOffset(WrapInfo.WrapperTypeInfo.StaticByteCount));
-          }
+          il.Append(Call(wrapInfo.WrapMethod.GetCallable()));
+          il.Append(Stind_or_Stobj(wrapInfo.WrapperType));
+          il.AppendMacro(context.AddOffset(wrapInfo.WrapperTypeInfo.StaticByteCount));
         },
         getHashCode: (member, il, context) => {
-          
-          if (WrapInfo.IsRaw) {
-            if (WrapInfo.WrapNeedsRunner) {
+          using var nestedContext = new MethodContext(context.Assembly, context.Method, valueGetter: il => {
+            if (wrapInfo.WrapNeedsRunner) {
               il.AppendMacro(context.LoadRunner());
             }
             il.AppendMacro(context.LoadValue());
-            
-            var bufferVariable = context.AddVariable(context.Assembly.Import(typeof(byte)).MakePointerType());
-            var bytesWrittenVariable = context.AddVariable(context.Assembly.Import(typeof(int)));
-            il.Append(Ldc_I4(WrapInfo.MaxByteCount));
-            il.Append(Conv_U());
-            il.Append(Instruction.Create(OpCodes.Localloc));
-            il.Append(Stloc(bufferVariable));
-            il.Append(Ldloc(bufferVariable));
-            
-            il.Append(Call(WrapInfo.WrapMethod.GetCallable()));
-            il.Append(Stloc(bytesWrittenVariable));
-            
-            il.Append(Ldloc(bufferVariable));
-            il.Append(Ldloc(bytesWrittenVariable));
-
-            var getArrayHashCode = context.Assembly.ReadWriteUtils.GetMethod(nameof(ReadWriteUtilsForWeaver.GetByteArrayHashCode), argsCount: 2);
-            il.Append(Call(getArrayHashCode));
-            
-          } else {
-            using var nestedContext = new MethodContext(context.Assembly, context.Method, valueGetter: il => {
-              if (WrapInfo.WrapNeedsRunner) {
-                il.AppendMacro(context.LoadRunner());
-              }
-              il.AppendMacro(context.LoadValue());
-              il.Append(Call(WrapInfo.WrapMethod.GetCallable()));
-            });
-            WrapInfo.WrapperTypeInfo.EmitGetHashCode(il, nestedContext, member);
-          }
+            il.Append(Call(wrapInfo.WrapMethod.GetCallable()));
+          });
+          wrapInfo.WrapperTypeInfo.EmitGetHashCode(il, nestedContext, member);
         },
-        flags: flags
+        flags: flags,
+        wrapperType: wrapInfo.WrapperType
       );
     }
 
@@ -6826,6 +6915,12 @@ namespace Fusion.CodeGen {
 
       var elementInfo               = GetInfo(elementType);
       var unitySerializableType     = elementType.MakeArrayType();
+      
+      TypeReference wrapperType = null;
+      if (elementInfo.WrapperType != null) {
+        var genericType = isList ? _module.ImportReference(typeof(NetworkLinkedList<>)) : _module.ImportReference(typeof(NetworkArray<>));
+        wrapperType = TypeReferenceRocks.MakeGenericInstanceType(genericType, elementInfo.WrapperType);
+      }
 
       return NetworkTypeInfo.Create(type,
         wordCount: (member, declaringType) => {
@@ -6866,7 +6961,19 @@ namespace Fusion.CodeGen {
           il.Append(Ldflda(field));
           il.Append(Call(m));
         },
-        flags: NetworkTypeInfoFlags.CantBeUsedInRpcs
+        flags: NetworkTypeInfoFlags.CantBeUsedInRpcs,
+        wrapperType: wrapperType,
+        addAttributes: property => {
+          var capacity = GetCapacity(property, DefaultContainerCapacity);
+          var elementWordCount = elementInfo.GetMemberWordCount(property, property.DeclaringType);
+          var elementReaderWriter = ILWeaver.GetExistingElementReaderWriter(property.DeclaringType, property, elementInfo);
+
+          if (isList) {
+            property.AddAttribute<NetworkedWeavedLinkedListAttribute, int, int, TypeReference>(_module, capacity, elementWordCount, elementReaderWriter);
+          } else {
+            property.AddAttribute<NetworkedWeavedArrayAttribute, int, int, TypeReference>(_module, capacity, elementWordCount, elementReaderWriter);
+          }
+        }
       );
     }
 
@@ -6887,6 +6994,12 @@ namespace Fusion.CodeGen {
           return TypeReferenceRocks.MakeGenericInstanceType(_module.ImportReference(typeof(Dictionary<,>)), keyType, valueType);
         }
       };
+      
+      TypeReference wrapperType = null;
+      if (keyInfo.WrapperType != null || valueInfo.WrapperType != null) {
+        var genericType = _module.ImportReference(typeof(NetworkDictionary<,>));
+        wrapperType = TypeReferenceRocks.MakeGenericInstanceType(genericType, keyInfo.WrapperType ?? keyType, valueInfo.WrapperType ?? valueType);
+      }
 
       NetworkTypeInfo.GetCapacityDelegate getCapacity = member => Primes.GetNextPrime(Math.Max(1, GetCapacity(member, DefaultCollectionCapacity)));
       return NetworkTypeInfo.Create(type,
@@ -6942,7 +7055,16 @@ namespace Fusion.CodeGen {
           il.Append(Ldflda(field));
           il.Append(Call(m));
         },
-        flags: NetworkTypeInfoFlags.CantBeUsedInRpcs
+        flags: NetworkTypeInfoFlags.CantBeUsedInRpcs,
+        wrapperType: wrapperType,
+        addAttributes: property => {
+          var capacity = getCapacity(property);
+          var keyWordCount = keyInfo.GetMemberWordCount(property, property.DeclaringType);
+          var valueWordCount = valueInfo.GetMemberWordCount(property, property.DeclaringType);
+          var keyReaderWriter = ILWeaver.GetExistingElementReaderWriter(property.DeclaringType, property, keyInfo);
+          var valueReaderWriter = ILWeaver.GetExistingElementReaderWriter(property.DeclaringType, property, valueInfo);
+          property.AddAttribute<NetworkedWeavedDictionaryAttribute, int, int, int, TypeReference, TypeReference>(_module, capacity, keyWordCount, valueWordCount, keyReaderWriter, valueReaderWriter);
+        }
       );
     }
 
@@ -7019,7 +7141,8 @@ namespace Fusion.CodeGen {
             il.Append(Call(writeMethod));
             il.AppendMacro(c.AddOffset(sizeof(int)));
           },
-          typeByteSize: sizeof(int)
+          typeByteSize: NetworkBool.SIZE,
+          wrapperType: _module.ImportReference(typeof(NetworkBool))
         ));
       }
 
@@ -7068,13 +7191,14 @@ namespace Fusion.CodeGen {
 
         var t = _module.ImportReference(typeof(string));
 
+        string GetCacheFieldName(PropertyDefinition prop) => $"cache_{prop.Name}";
+        
         FieldDefinition GetCacheField(PropertyDefinition prop) {
-          var name = $"cache_{prop.Name}";
+          var name = GetCacheFieldName(prop);
           var field = prop.DeclaringType.Fields.SingleOrDefault(x => x.Name == name && x.FieldType.IsSame(t));
           if (field == null) {
             field = new FieldDefinition($"cache_{prop.Name}", FieldAttributes.Private, t);
             field.AddTo(prop.DeclaringType);
-            field.AddAttribute<PreserveInPluginAttribute>();
           }
           return field;
         }
@@ -7146,7 +7270,12 @@ namespace Fusion.CodeGen {
             il.Append(Call(getUtf8ByteCount));
           },
           capacity: member => GetCapacity(member, DefaultStringCapacity),
-          flags: NetworkTypeInfoFlags.HasDynamicRpcSize
+          flags: NetworkTypeInfoFlags.HasDynamicRpcSize,
+          addAttributes: property => {
+            property.AddAttribute<NetworkedWeavedStringAttribute, int, string>(_module, 
+              GetCapacity(property, DefaultStringCapacity),
+              property.DeclaringType.IsValueType ? "" : GetCacheFieldName(property));
+          }
         ));
       }
 
@@ -7165,15 +7294,7 @@ namespace Fusion.CodeGen {
     }
 
     const int DefaultCollectionCapacity = 1;
-
-
-    internal static int GetCapacity(PropertyDefinition property, int defaultCapacity) {
-      if (property.TryGetAttribute<CapacityAttribute>(out var attr)) {
-        return attr.GetAttributeArgument<int>(0);
-      } else {
-        return defaultCapacity;
-      }
-    }
+    
 
     bool TryGetNetworkWrapperType(TypeReference type, out NetworkTypeWrapInfo result) {
       if (type == null) {
@@ -7182,33 +7303,21 @@ namespace Fusion.CodeGen {
 
       var definition = type.Resolve();
 
-      int rawByteCount = 0;
-
       bool wrapNeedsRunner = false;
       
       if (definition.GetSingleOrDefaultMethodWithAttribute<NetworkSerializeMethodAttribute>(out var wrapAttribute, out var wrapMethod)) {
         int argsStart = 0;
-        wrapAttribute.TryGetAttributeProperty<int>(nameof(NetworkSerializeMethodAttribute.MaxSize), out rawByteCount);
 
         try {
           if (wrapMethod.ThrowIfParameterCountLessThan(1).Parameters[0].ParameterType.Is<NetworkRunner>()) {
             wrapNeedsRunner = true;
             argsStart = 1;
           }
-
-          if (rawByteCount > 0) {
-            wrapMethod.ThrowIfNotStatic()
-                      .ThrowIfNotPublic()
-                      .ThrowIfParameterCount(argsStart + 2)
-                      .ThrowIfParameter(argsStart + 0, type)
-                      .ThrowIfParameter(argsStart + 1, typeof(byte*))
-                      .ThrowIfReturnType(typeof(int));
-          } else {
-            wrapMethod.ThrowIfNotStatic()
-                      .ThrowIfNotPublic()
-                      .ThrowIfParameterCount(argsStart + 1)
-                      .ThrowIfParameter(argsStart + 0, type);
-          }
+          
+          wrapMethod.ThrowIfNotStatic()
+                    .ThrowIfNotPublic()
+                    .ThrowIfParameterCount(argsStart + 1)
+                    .ThrowIfParameter(argsStart + 0, type);
         } catch (Exception ex) {
           throw new ILWeaverException($"Method marked with {nameof(NetworkSerializeMethodAttribute)} has an invalid signature", ex);
         }
@@ -7234,29 +7343,20 @@ namespace Fusion.CodeGen {
             unwrapMethod.ThrowIfParameterCountLessThan(1)
                         .ThrowIfParameter(0, typeof(NetworkRunner));
           }
+          
+          unwrapMethod.ThrowIfNotStatic()
+                      .ThrowIfNotPublic()
+                      .ThrowIfParameter(argsStart + 0, wrapMethod.ReturnType);
 
-          if (rawByteCount > 0) {
-            unwrapMethod.ThrowIfNotStatic()
-                        .ThrowIfNotPublic()
-                        .ThrowIfReturnType(typeof(int))
-                        .ThrowIfParameterCount(argsStart + 2)
-                        .ThrowIfParameter(argsStart + 0, typeof(byte*))
+          if (unwrapMethod.Parameters.Count == 2 + argsStart) {
+            unwrapMethod.ThrowIfReturnType(typeof(void))
                         .ThrowIfParameter(argsStart + 1, type, isByReference: true);
             unwrapByRef = true;
           } else {
-            unwrapMethod.ThrowIfNotStatic()
-                        .ThrowIfNotPublic()
-                        .ThrowIfParameter(argsStart + 0, wrapMethod.ReturnType);
-
-            if (unwrapMethod.Parameters.Count == 2 + argsStart) {
-              unwrapMethod.ThrowIfReturnType(typeof(void))
-                          .ThrowIfParameter(argsStart + 1, type, isByReference: true);
-              unwrapByRef = true;
-            } else {
-              unwrapMethod.ThrowIfParameterCount(argsStart + 1);
-              unwrapMethod.ThrowIfReturnType(type);
-            }
+            unwrapMethod.ThrowIfParameterCount(argsStart + 1);
+            unwrapMethod.ThrowIfReturnType(type);
           }
+          
         } catch (Exception ex) {
           throw new ILWeaverException($"Method marked with {nameof(NetworkDeserializeMethodAttribute)} has an invalid signature", ex);
         }
@@ -7271,10 +7371,9 @@ namespace Fusion.CodeGen {
           UnwrapNeedsRunner = unwrapNeedsRunner,
           UnwrapMethod = _module.ImportReference(unwrapMethod),
           WrapMethod = _module.ImportReference(wrapMethod),
-          MaxByteCount = rawByteCount,
           UnwrapByRef = unwrapByRef,
-          WrapperType = rawByteCount > 0 ? null : _module.ImportReference(wrapMethod.ReturnType),
-          WrapperTypeInfo = rawByteCount > 0 ? null : GetInfo(wrapMethod.ReturnType),
+          WrapperType = _module.ImportReference(wrapMethod.ReturnType),
+          WrapperTypeInfo = GetInfo(wrapMethod.ReturnType),
           TargetType = _module.ImportReference(definition),
         };
         return true;
@@ -7295,17 +7394,6 @@ namespace Fusion.CodeGen {
         }
       }
       return defaultCapacity;
-    }
-
-    public static bool TryGetCapacity(ICustomAttributeProvider member, out int capacity) {
-      if (member.TryGetAttribute<CapacityAttribute>(out var attr)) {
-        if (attr.TryGetAttributeArgument<int>(0, out var result)) {
-          capacity = result;
-          return true;
-        }
-      }
-      capacity = 0;
-      return false;
     }
   }
 }
@@ -7330,8 +7418,6 @@ namespace Fusion.CodeGen {
     public bool            WrapNeedsRunner;
     public bool            UnwrapNeedsRunner;
     public bool            UnwrapByRef;
-    public int             MaxByteCount;
-    public bool            IsRaw => MaxByteCount > 0; 
   }
 }
 #endif

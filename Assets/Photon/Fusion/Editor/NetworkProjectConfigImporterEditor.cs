@@ -10,7 +10,8 @@ namespace Fusion.Editor {
   [CustomEditor(typeof(NetworkProjectConfigImporter))]
   internal class NetworkProjectConfigImporterEditor : ScriptedImporterEditor {
 
-    private Exception _initializeException;
+    private Exception         _initializeException;
+    private LogSettingsDrawer _logSettingsDrawer;
 
     private static bool _versionExpanded;
     private static string _version;
@@ -45,7 +46,9 @@ namespace Fusion.Editor {
           EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(NetworkProjectConfigImporter.PrefabOptions)));
           
           EditorGUILayout.Space();
-
+          EditorGUILayout.LabelField("Log", EditorStyles.boldLabel);
+          _logSettingsDrawer.DrawLayout(this, true);
+          
           EditorGUILayout.Space();
           EditorGUILayout.LabelField("Auto-Generated", EditorStyles.boldLabel);
 

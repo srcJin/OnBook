@@ -37,14 +37,20 @@
             Fills the given MemoryStatisticsSnapshot object with memory allocation statistics.
             </summary>
         </member>
-        <member name="M:Fusion.Allocator.CanAllocSizeAssert_Temp(System.Int32)">
+        <member name="M:Fusion.Allocator.Alloc(Fusion.Allocator*,System.Int32)">
             <summary>
-            Check size of bytes to be allocated
+            Allocates a memory segment of the specified size from the allocator.
             </summary>
-            <param name="size">Number of bytes to be allocated</param>
-            <returns>True if size is valid, false otherwise.</returns>
-            <exception cref="T:Fusion.AssertException">If size is less than 1</exception>
-            <exception cref="T:Fusion.AssertException">If size is bigger than <see cref="P:Fusion.Allocator.Config.BlockByteSize"/></exception>
+            <param name="a">Pointer to the allocator.</param>
+            <param name="size">Size of the memory segment to allocate.</param>
+            <returns>Pointer to the allocated memory segment.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown if the size is less than 1 or greater than or equal to the block byte size.</exception>
+            <exception cref="T:System.OutOfMemoryException">Thrown if all buckets are full and memory cannot be allocated.</exception>
+        </member>
+        <member name="M:Fusion.Allocator.Block.ToString">
+            <summary>
+            Returns a string representation of the block.
+            </summary>
         </member>
         <member name="T:Fusion.Allocator.Config">
             <summary>
@@ -447,6 +453,25 @@
             <param name="wordOffset"><see cref="P:Fusion.NetworkedWeavedAttribute.WordOffset"/></param>
             <param name="wordCount"><see cref="P:Fusion.NetworkedWeavedAttribute.WordCount"/></param>
         </member>
+        <member name="T:Fusion.NetworkedWeavedStringAttribute">
+            <summary>
+            An attribute emitted by the weaver to mark a string field as networked.
+            </summary>
+        </member>
+        <member name="M:Fusion.NetworkedWeavedStringAttribute.#ctor(System.Int32,System.String)">
+            <param name="capacity">Max capacity of the string (in characters)</param>
+            <param name="cacheFieldName">Name of the field that servers as cache</param>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedStringAttribute.Capacity">
+            <summary>
+            Max capacity of the string (in characters)
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedStringAttribute.CacheFieldName">
+            <summary>
+            Name of the field that servers as cache
+            </summary>
+        </member>
         <member name="T:Fusion.NetworkInputWeavedAttribute">
             <summary>
             Network Input Weaved Attribute
@@ -575,7 +600,12 @@
         </member>
         <member name="M:Fusion.PreserveInPluginAttribute.#ctor">
             <summary>
-            PreserveInPluginAttribute Constructor
+            
+            </summary>
+        </member>
+        <member name="P:Fusion.PreserveInPluginAttribute.KeepNonStateMembers">
+            <summary>
+            
             </summary>
         </member>
         <member name="T:Fusion.RenderAttribute">
@@ -1126,11 +1156,6 @@
             </summary>
             <returns>True if in same Subnet</returns>
         </member>
-        <member name="M:Fusion.CloudServices.InitRelayLogs">
-            <summary>
-            Initilize the Log system from the Realtime SDK to use the Fusion Log System
-            </summary>
-        </member>
         <member name="M:Fusion.CloudServices.UpdateSessionInfo(Fusion.SessionInfo,Fusion.Photon.Realtime.RoomInfo,System.String)">
             <summary>
             Converts a <see cref="T:Fusion.Photon.Realtime.RoomInfo"/> to a <see cref="T:Fusion.SessionInfo"/>
@@ -1429,56 +1454,6 @@
             </summary>
             <returns>Formatted <see cref="T:Fusion.SessionInfo"/></returns>
         </member>
-        <member name="T:Fusion.IAfterAllTicks">
-            <summary>
-            Interface for <see cref="M:Fusion.IAfterAllTicks.AfterAllTicks(System.Boolean,System.Int32)"/> callback. 
-            Called after the re-simulation loop (when applicable), and also after the forward simulation loop.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IAfterAllTicks.AfterAllTicks(System.Boolean,System.Int32)">
-            <summary>
-            Called after the re-simulation loop (when applicable), and also after the forward simulation loop.
-            Only called on Updates where re-simulation or forward ticks are processed.
-            </summary>
-            <param name="resimulation">True if this is being called during the re-simulation loop. False if during the forward simulation loop.</param>
-            <param name="tickCount">How many re-simulation or forward ticks are going to be processed.</param>
-        </member>
-        <member name="T:Fusion.IAfterClientPredictionReset">
-            <summary>
-            Callback interface for <see cref="M:Fusion.IAfterClientPredictionReset.AfterClientPredictionReset"/>.
-            Called at the very start of the resimulation loop (on clients with prediction enabled), 
-            immediately after state is set to the latest server snapshot.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IAfterClientPredictionReset.AfterClientPredictionReset">
-            <summary>
-            Called at the very start of the resimulation loop (on clients with prediction enabled), 
-            immediately after state is set to the latest server snapshot.
-            </summary>
-        </member>
-        <member name="T:Fusion.IAfterHostMigration">
-            <summary>
-            Used to mark NetworkBehaviors that need to be react after a Host Migration process
-            </summary>
-        </member>
-        <member name="M:Fusion.IAfterHostMigration.AfterHostMigration">
-            <summary>
-            Invoked after the Host Migration happens in order to setup non-networked data on NetworkBehaviors
-            </summary>
-        </member>
-        <member name="T:Fusion.IAfterRender">
-            <summary>
-            Interface for <see cref="M:Fusion.IAfterRender.AfterRender"/> callback.
-            Called after the render loop.
-            </summary>
-        </member>
-        <member name="M:Fusion.IAfterRender.AfterRender">
-            <summary>
-            Called after the render loop.
-            </summary>
-        </member>
         <member name="T:Fusion.IAfterSpawned">
             <summary>
             Interface for <see cref="M:Fusion.IAfterSpawned.AfterSpawned"/> callback.
@@ -1488,117 +1463,6 @@
         <member name="M:Fusion.IAfterSpawned.AfterSpawned">
             <summary>
             Called after the object is spawned.
-            </summary>
-        </member>
-        <member name="T:Fusion.IAfterTick">
-            <summary>
-            Interface for <see cref="M:Fusion.IAfterTick.AfterTick"/> callback. 
-            Called after each tick simulation completes.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IAfterTick.AfterTick">
-            <summary>
-            Called after each tick simulation completes.
-            </summary>
-        </member>
-        <member name="T:Fusion.IAfterUpdate">
-            <summary>
-            Interface for the <see cref="M:Fusion.IAfterUpdate.AfterUpdate"/> callback, which is called at the end of each Fusion Update segment. 
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IAfterUpdate.AfterUpdate">
-            <summary>
-            Called at the end of the Fusion Update loop, before all Unity MonoBehaviour.Update() callbacks.
-            </summary>
-        </member>
-        <member name="T:Fusion.IBeforeAllTicks">
-            <summary>
-            Interface for <see cref="M:Fusion.IBeforeAllTicks.BeforeAllTicks(System.Boolean,System.Int32)"/> callback. 
-            Called before the re-simulation loop (when applicable), and also before the forward simulation loop.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IBeforeAllTicks.BeforeAllTicks(System.Boolean,System.Int32)">
-            <summary>
-            Called before the re-simulation loop (when applicable), and also before the forward simulation loop. 
-            Only called on Updates where re-simulation or forward ticks are processed.
-            </summary>
-            <param name="resimulation">True if this is being called during the re-simulation loop. False if during the forward simulation loop.</param>
-            <param name="tickCount">How many re-simulation or forward ticks are going to be processed.</param>
-        </member>
-        <member name="T:Fusion.IBeforeClientPredictionReset">
-            <summary>
-            Callback interface for <see cref="M:Fusion.IBeforeClientPredictionReset.BeforeClientPredictionReset"/>.
-            Called at the very start of the re-simulation loop (on clients with prediction enabled), 
-            before state is set to the latest server snapshot.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IBeforeClientPredictionReset.BeforeClientPredictionReset">
-            <summary>
-            Called at the very start of the re-simulation loop (on clients with prediction enabled), 
-            before state is set to the latest server snapshot.
-            </summary>
-        </member>
-        <member name="T:Fusion.IBeforeCopyPreviousState">
-            <summary>
-            Interface for <see cref="M:Fusion.IBeforeCopyPreviousState.BeforeCopyPreviousState"/> callback.
-            Called before the copy of the previous state.
-            </summary>
-        </member>
-        <member name="M:Fusion.IBeforeCopyPreviousState.BeforeCopyPreviousState">
-            <summary>
-            Called before the copy of the previous state.
-            </summary>
-        </member>
-        <member name="T:Fusion.IBeforeHitboxRegistration">
-            <summary>
-            Interface for <see cref="M:Fusion.IBeforeHitboxRegistration.BeforeHitboxRegistration"/> callback.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IBeforeHitboxRegistration.BeforeHitboxRegistration">
-            <summary>
-            Called immediately before the <see cref="T:Fusion.HitboxManager"/> registers hitboxes in a snapshot.
-            </summary>
-        </member>
-        <member name="T:Fusion.IBeforeSimulation">
-            <summary>
-            Interface for <see cref="M:Fusion.IBeforeSimulation.BeforeSimulation(System.Int32)"/> callback. 
-            Called before both the re-simulation (when applicable) and forward simulation loops.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IBeforeSimulation.BeforeSimulation(System.Int32)">
-            <summary>
-            Called before both the re-simulation (when applicable) and forward simulation loops.
-            Only called on updates that have forward ticks to process.
-            </summary>
-            <param name="forwardTickCount">How many forward ticks are going to be processed.</param>
-        </member>
-        <member name="T:Fusion.IBeforeTick">
-            <summary>
-            Interface for <see cref="M:Fusion.IBeforeTick.BeforeTick"/> callback. 
-            Called before each tick is simulated.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IBeforeTick.BeforeTick">
-            <summary>
-            Called before each tick is simulated.
-            </summary>
-        </member>
-        <member name="T:Fusion.IBeforeUpdate">
-            <summary>
-            Interface for the <see cref="M:Fusion.IBeforeUpdate.BeforeUpdate"/> callback, which is called at the beginning of each Fusion Update segment. 
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IBeforeUpdate.BeforeUpdate">
-            <summary>
-            Called at the start of the Fusion Update loop, before the Fusion simulation loop.
             </summary>
         </member>
         <member name="T:Fusion.IDespawned">
@@ -1613,6 +1477,16 @@
             </summary>
             <param name="runner">NetworkRunner that despawned the <see cref="T:Fusion.NetworkBehaviour"/>.</param>
             <param name="hasState">Whether the <see cref="T:Fusion.NetworkBehaviour"/> has state.</param>
+        </member>
+        <member name="T:Fusion.ISpawned">
+            <summary>
+            Interface for handling the event when an object is spawned.
+            </summary>
+        </member>
+        <member name="M:Fusion.ISpawned.Spawned">
+            <summary>
+            Method to be called when an object is spawned.
+            </summary>
         </member>
         <member name="T:Fusion.IInterestEnter">
             <summary>
@@ -1646,6 +1520,201 @@
             Method to be called when a local prefab is created.
             </summary>
         </member>
+        <member name="T:Fusion.IRemotePrefabCreated">
+            <summary>
+            Interface for handling the event when a remote prefab is created.
+            </summary>
+        </member>
+        <member name="M:Fusion.IRemotePrefabCreated.RemotePrefabCreated">
+            <summary>
+            Method to be called when a remote prefab is created.
+            </summary>
+        </member>
+        <member name="T:Fusion.ISimulationEnter">
+            <summary>
+            Interface for <see cref="M:Fusion.ISimulationEnter.SimulationEnter"/> callback.
+            Called when the <see cref="T:Fusion.NetworkObject"/> joins AreaOfInterest.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.ISimulationEnter.SimulationEnter">
+            <summary>
+            Called when the <see cref="T:Fusion.NetworkObject"/> joins AreaOfInterest.
+            Object is now receiving snapshot updates.
+            Object will execute <see cref="T:Fusion.NetworkBehaviour"/> FixedUpdateNetwork() and Render() methods until the object leaves simulation.
+            </summary>
+        </member>
+        <member name="T:Fusion.ISimulationExit">
+            <summary>
+            Interface for the <see cref="M:Fusion.ISimulationExit.SimulationExit"/> callback.
+            Called when the <see cref="T:Fusion.NetworkObject"/> leaves AreaOfInterest. 
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.ISimulationExit.SimulationExit">
+            <summary>
+            Called when the <see cref="T:Fusion.NetworkObject"/> leaves AreaOfInterest. 
+            Object is no longer receiving snapshot updates.
+            Object will stop executing <see cref="T:Fusion.NetworkBehaviour"/> FixedUpdateNetwork() and Render() methods until the object rejoins simulation.
+            </summary>
+        </member>
+        <member name="T:Fusion.IStateAuthorityChanged">
+            <summary>
+            Interface for handling the event when the state authority changes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IStateAuthorityChanged.StateAuthorityChanged">
+            <summary>
+            Method to be called when the state authority changes.
+            </summary>
+        </member>
+        <member name="T:Fusion.IInputAuthorityGained">
+            <summary>
+            Interface for handling the event when the input authority is gained.
+            </summary>
+        </member>
+        <member name="M:Fusion.IInputAuthorityGained.InputAuthorityGained">
+            <summary>
+            Method to be called when the input authority is gained.
+            </summary>
+        </member>
+        <member name="T:Fusion.IInputAuthorityLost">
+            <summary>
+            Interface for handling the event when the input authority is lost.
+            </summary>
+        </member>
+        <member name="M:Fusion.IInputAuthorityLost.InputAuthorityLost">
+            <summary>
+            Method to be called when the input authority is lost.
+            </summary>
+        </member>
+        <member name="T:Fusion.IBeforeCopyPreviousState">
+            <summary>
+            Interface for <see cref="M:Fusion.IBeforeCopyPreviousState.BeforeCopyPreviousState"/> callback.
+            Called before the copy of the previous state.
+            </summary>
+        </member>
+        <member name="M:Fusion.IBeforeCopyPreviousState.BeforeCopyPreviousState">
+            <summary>
+            Called before the copy of the previous state.
+            </summary>
+        </member>
+        <member name="T:Fusion.IBeforeClientPredictionReset">
+            <summary>
+            Callback interface for <see cref="M:Fusion.IBeforeClientPredictionReset.BeforeClientPredictionReset"/>.
+            Called at the very start of the re-simulation loop (on clients with prediction enabled), 
+            before state is set to the latest server snapshot.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IBeforeClientPredictionReset.BeforeClientPredictionReset">
+            <summary>
+            Called at the very start of the re-simulation loop (on clients with prediction enabled), 
+            before state is set to the latest server snapshot.
+            </summary>
+        </member>
+        <member name="T:Fusion.IAfterClientPredictionReset">
+            <summary>
+            Callback interface for <see cref="M:Fusion.IAfterClientPredictionReset.AfterClientPredictionReset"/>.
+            Called at the very start of the resimulation loop (on clients with prediction enabled), 
+            immediately after state is set to the latest server snapshot.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IAfterClientPredictionReset.AfterClientPredictionReset">
+            <summary>
+            Called at the very start of the resimulation loop (on clients with prediction enabled), 
+            immediately after state is set to the latest server snapshot.
+            </summary>
+        </member>
+        <member name="T:Fusion.IBeforeUpdateRemotePrefabs">
+            <summary>
+            Invoked before updating remote prefabs
+            </summary>
+        </member>
+        <member name="M:Fusion.IBeforeUpdateRemotePrefabs.BeforeUpdateRemotePrefabs">
+            <summary>
+            Invoked before updating remote prefabs
+            </summary>
+        </member>
+        <member name="T:Fusion.IAfterUpdateRemotePrefabs">
+            <summary>
+            Invoked after updating remote prefabs
+            </summary>
+        </member>
+        <member name="M:Fusion.IAfterUpdateRemotePrefabs.AfterUpdateRemotePrefabs">
+            <summary>
+            Invoked after updating remote prefabs
+            </summary>
+        </member>
+        <member name="T:Fusion.IBeforeTick">
+            <summary>
+            Interface for <see cref="M:Fusion.IBeforeTick.BeforeTick"/> callback. 
+            Called before each tick is simulated.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IBeforeTick.BeforeTick">
+            <summary>
+            Called before each tick is simulated.
+            </summary>
+        </member>
+        <member name="T:Fusion.IAfterTick">
+            <summary>
+            Interface for <see cref="M:Fusion.IAfterTick.AfterTick"/> callback. 
+            Called after each tick simulation completes.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IAfterTick.AfterTick">
+            <summary>
+            Called after each tick simulation completes.
+            </summary>
+        </member>
+        <member name="T:Fusion.IBeforeAllTicks">
+            <summary>
+            Interface for <see cref="M:Fusion.IBeforeAllTicks.BeforeAllTicks(System.Boolean,System.Int32)"/> callback. 
+            Called before the re-simulation loop (when applicable), and also before the forward simulation loop.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IBeforeAllTicks.BeforeAllTicks(System.Boolean,System.Int32)">
+            <summary>
+            Called before the re-simulation loop (when applicable), and also before the forward simulation loop. 
+            Only called on Updates where re-simulation or forward ticks are processed.
+            </summary>
+            <param name="resimulation">True if this is being called during the re-simulation loop. False if during the forward simulation loop.</param>
+            <param name="tickCount">How many re-simulation or forward ticks are going to be processed.</param>
+        </member>
+        <member name="T:Fusion.IAfterAllTicks">
+            <summary>
+            Interface for <see cref="M:Fusion.IAfterAllTicks.AfterAllTicks(System.Boolean,System.Int32)"/> callback. 
+            Called after the re-simulation loop (when applicable), and also after the forward simulation loop.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IAfterAllTicks.AfterAllTicks(System.Boolean,System.Int32)">
+            <summary>
+            Called after the re-simulation loop (when applicable), and also after the forward simulation loop.
+            Only called on Updates where re-simulation or forward ticks are processed.
+            </summary>
+            <param name="resimulation">True if this is being called during the re-simulation loop. False if during the forward simulation loop.</param>
+            <param name="tickCount">How many re-simulation or forward ticks are going to be processed.</param>
+        </member>
+        <member name="T:Fusion.IBeforeSimulation">
+            <summary>
+            Interface for <see cref="M:Fusion.IBeforeSimulation.BeforeSimulation(System.Int32)"/> callback. 
+            Called before both the re-simulation (when applicable) and forward simulation loops.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IBeforeSimulation.BeforeSimulation(System.Int32)">
+            <summary>
+            Called before both the re-simulation (when applicable) and forward simulation loops.
+            Only called on updates that have forward ticks to process.
+            </summary>
+            <param name="forwardTickCount">How many forward ticks are going to be processed.</param>
+        </member>
         <member name="T:Fusion.IPlayerJoined">
             <summary>
             Interface for handling the event when a player joins the game.
@@ -1668,14 +1737,48 @@
             </summary>
             <param name="player">The player who left the game.</param>
         </member>
-        <member name="T:Fusion.IRemotePrefabCreated">
+        <member name="T:Fusion.IBeforeHitboxRegistration">
             <summary>
-            Interface for handling the event when a remote prefab is created.
+            Interface for <see cref="M:Fusion.IBeforeHitboxRegistration.BeforeHitboxRegistration"/> callback.
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
             </summary>
         </member>
-        <member name="M:Fusion.IRemotePrefabCreated.RemotePrefabCreated">
+        <member name="M:Fusion.IBeforeHitboxRegistration.BeforeHitboxRegistration">
             <summary>
-            Method to be called when a remote prefab is created.
+            Called immediately before the <see cref="T:Fusion.HitboxManager"/> registers hitboxes in a snapshot.
+            </summary>
+        </member>
+        <member name="T:Fusion.IAfterUpdate">
+            <summary>
+            Interface for the <see cref="M:Fusion.IAfterUpdate.AfterUpdate"/> callback, which is called at the end of each Fusion Update segment. 
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IAfterUpdate.AfterUpdate">
+            <summary>
+            Called at the end of the Fusion Update loop, before all Unity MonoBehaviour.Update() callbacks.
+            </summary>
+        </member>
+        <member name="T:Fusion.IBeforeUpdate">
+            <summary>
+            Interface for the <see cref="M:Fusion.IBeforeUpdate.BeforeUpdate"/> callback, which is called at the beginning of each Fusion Update segment. 
+            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
+            </summary>
+        </member>
+        <member name="M:Fusion.IBeforeUpdate.BeforeUpdate">
+            <summary>
+            Called at the start of the Fusion Update loop, before the Fusion simulation loop.
+            </summary>
+        </member>
+        <member name="T:Fusion.IAfterRender">
+            <summary>
+            Interface for <see cref="M:Fusion.IAfterRender.AfterRender"/> callback.
+            Called after the render loop.
+            </summary>
+        </member>
+        <member name="M:Fusion.IAfterRender.AfterRender">
+            <summary>
+            Called after the render loop.
             </summary>
         </member>
         <member name="T:Fusion.ISceneLoadDone">
@@ -1688,6 +1791,32 @@
             Method to be called when a scene load operation is completed.
             </summary>
             <param name="sceneInfo">The information about the loaded scene.</param>
+        </member>
+        <member name="T:Fusion.ISceneLoadStart">
+            <summary>
+            Interface for handling the event when a scene load operation is started.
+            </summary>
+        </member>
+        <member name="M:Fusion.ISceneLoadStart.SceneLoadStart(Fusion.SceneRef)">
+            <summary>
+            Method to be called when a scene load operation is started.
+            </summary>
+            <param name="sceneRef">Reference to the scene that is being loaded.</param>
+        </member>
+        <member name="T:Fusion.IAfterHostMigration">
+            <summary>
+            Used to mark NetworkBehaviors that need to be react after a Host Migration process
+            </summary>
+        </member>
+        <member name="M:Fusion.IAfterHostMigration.AfterHostMigration">
+            <summary>
+            Invoked after the Host Migration happens in order to setup non-networked data on NetworkBehaviors
+            </summary>
+        </member>
+        <member name="T:Fusion.IPublicFacingInterface">
+            <summary>
+            Tag Interface for all public facing Fusion interfaces
+            </summary>
         </member>
         <member name="T:Fusion.SceneLoadDoneArgs">
             <summary>
@@ -1723,83 +1852,15 @@
             <param name="scene">The loaded Unity scene.</param>
             <param name="rootGameObjects">Array of root GameObjects present in the loaded Unity scene.</param>
         </member>
-        <member name="T:Fusion.ISceneLoadStart">
+        <member name="T:Fusion.IExportedWordCount">
             <summary>
-            Interface for handling the event when a scene load operation is started.
+            Used in plugin. Indicates that <see cref="P:Fusion.NetworkBehaviour.DynamicWordCount"/> is exported and can be assigned from
+            serialized data.
             </summary>
         </member>
-        <member name="M:Fusion.ISceneLoadStart.SceneLoadStart(Fusion.SceneRef)">
+        <member name="P:Fusion.IExportedWordCount.WordCount">
             <summary>
-            Method to be called when a scene load operation is started.
-            </summary>
-            <param name="sceneRef">Reference to the scene that is being loaded.</param>
-        </member>
-        <member name="T:Fusion.ISimulationEnter">
-            <summary>
-            Interface for <see cref="M:Fusion.ISimulationEnter.SimulationEnter"/> callback.
-            Called when the <see cref="T:Fusion.NetworkObject"/> joins AreaOfInterest.
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.ISimulationEnter.SimulationEnter">
-            <summary>
-            Called when the <see cref="T:Fusion.NetworkObject"/> joins AreaOfInterest.
-            Object is now receiving snapshot updates.
-            Object will execute <see cref="T:Fusion.NetworkBehaviour"/> FixedUpdateNetwork() and Render() methods until the object leaves simulation.
-            </summary>
-        </member>
-        <member name="T:Fusion.ISimulationExit">
-            <summary>
-            Interface for the <see cref="M:Fusion.ISimulationExit.SimulationExit"/> callback.
-            Called when the <see cref="T:Fusion.NetworkObject"/> leaves AreaOfInterest. 
-            Implement this interface on <see cref="T:Fusion.SimulationBehaviour"/> and <see cref="T:Fusion.NetworkBehaviour"/> classes.
-            </summary>
-        </member>
-        <member name="M:Fusion.ISimulationExit.SimulationExit">
-            <summary>
-            Called when the <see cref="T:Fusion.NetworkObject"/> leaves AreaOfInterest. 
-            Object is no longer receiving snapshot updates.
-            Object will stop executing <see cref="T:Fusion.NetworkBehaviour"/> FixedUpdateNetwork() and Render() methods until the object rejoins simulation.
-            </summary>
-        </member>
-        <member name="T:Fusion.ISpawned">
-            <summary>
-            Interface for handling the event when an object is spawned.
-            </summary>
-        </member>
-        <member name="M:Fusion.ISpawned.Spawned">
-            <summary>
-            Method to be called when an object is spawned.
-            </summary>
-        </member>
-        <member name="T:Fusion.IStateAuthorityChanged">
-            <summary>
-            Interface for handling the event when the state authority changes.
-            </summary>
-        </member>
-        <member name="M:Fusion.IStateAuthorityChanged.StateAuthorityChanged">
-            <summary>
-            Method to be called when the state authority changes.
-            </summary>
-        </member>
-        <member name="T:Fusion.IInputAuthorityGained">
-            <summary>
-            Interface for handling the event when the input authority is gained.
-            </summary>
-        </member>
-        <member name="M:Fusion.IInputAuthorityGained.InputAuthorityGained">
-            <summary>
-            Method to be called when the input authority is gained.
-            </summary>
-        </member>
-        <member name="T:Fusion.IInputAuthorityLost">
-            <summary>
-            Interface for handling the event when the input authority is lost.
-            </summary>
-        </member>
-        <member name="M:Fusion.IInputAuthorityLost.InputAuthorityLost">
-            <summary>
-            Method to be called when the input authority is lost.
+            Word count read from serialized data.
             </summary>
         </member>
         <member name="T:Fusion.NetworkBehaviour">
@@ -1888,11 +1949,6 @@
             </summary>
             <param name="replicate">The default state of this behaviour</param>
         </member>
-        <member name="M:Fusion.NetworkBehaviour.ResetState">
-            <summary>
-            Resets the state of the object to the original state 
-            </summary>
-        </member>
         <member name="M:Fusion.NetworkBehaviour.CopyStateFrom(Fusion.NetworkBehaviour)">
             <summary>
             Copies entire state of passed in source <see cref="T:Fusion.NetworkBehaviour"/>
@@ -1902,6 +1958,11 @@
         <member name="M:Fusion.NetworkBehaviour.FixedUpdateNetwork">
             <summary>
             Fixed update callback for networked behaviours.
+            </summary>
+        </member>
+        <member name="M:Fusion.NetworkBehaviour.ResetState">
+            <summary>
+            Resets the state of the object to the original state 
             </summary>
         </member>
         <member name="M:Fusion.NetworkBehaviour.CopyBackingFieldsToState(System.Boolean)">
@@ -2233,14 +2294,6 @@
             <param name="data">The byte pointer to write the serialized data to.</param>
             <returns>The size of the serialized data in bytes.</returns>
         </member>
-        <member name="M:Fusion.NetworkBehaviour.NetworkSerialize(Fusion.NetworkBehaviour,System.Byte*)">
-            <summary>
-            Serializes a NetworkBehaviour into a byte array.
-            </summary>
-            <param name="obj">The NetworkBehaviour to be serialized.</param>
-            <param name="data">The byte pointer to write the serialized data to.</param>
-            <returns>The size of the serialized data in bytes.</returns>
-        </member>
         <member name="M:Fusion.NetworkBehaviour.NetworkDeserialize(Fusion.NetworkRunner,System.Byte*,Fusion.NetworkBehaviour@)">
             <summary>
             Deserializes a NetworkBehaviour from a byte array.
@@ -2255,6 +2308,13 @@
             Converts a NetworkBehaviour to a NetworkBehaviourId.
             </summary>
             <param name="runner">The NetworkRunner associated with the NetworkBehaviour.</param>
+            <param name="obj">The NetworkBehaviour to be converted.</param>
+            <returns>A NetworkBehaviourId representing the NetworkBehaviour. If the NetworkBehaviour is null or its NetworkObject's Id is default, returns a default NetworkBehaviourId.</returns>
+        </member>
+        <member name="M:Fusion.NetworkBehaviour.NetworkWrap(Fusion.NetworkBehaviour)">
+            <summary>
+            Converts a NetworkBehaviour to a NetworkBehaviourId.
+            </summary>
             <param name="obj">The NetworkBehaviour to be converted.</param>
             <returns>A NetworkBehaviourId representing the NetworkBehaviour. If the NetworkBehaviour is null or its NetworkObject's Id is default, returns a default NetworkBehaviourId.</returns>
         </member>
@@ -3104,11 +3164,6 @@
             The Animator being synced. If unset, will attempt to find one on this GameObject.
             </summary>
         </member>
-        <member name="F:Fusion.NetworkMecanimAnimator.TotalWords">
-            <summary>
-            The number of words allocated per snapshot for serialization of the Animator. (One Word is 32 bits, or 4 bytes).
-            </summary>
-        </member>
         <member name="F:Fusion.NetworkMecanimAnimator.ApplyTiming">
             <summary>
             The source of the State which is applied in Render.
@@ -3129,10 +3184,30 @@
             Triggers found in the current AnimatorController, converted to hashes.
             </summary>
         </member>
+        <member name="F:Fusion.NetworkMecanimAnimator.TotalWords">
+            <summary>
+            The number of words allocated per snapshot for serialization of the Animator. (One Word is 32 bits, or 4 bytes.)
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkMecanimAnimator._animatorData">
+            <summary>
+            Animator data captured on the first invocation of EnsureInitialized().
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkMecanimAnimator._isInitialized">
+            <summary>
+            Have <see cref="F:Fusion.NetworkMecanimAnimator._animatorData"/> and <see cref="F:Fusion.NetworkMecanimAnimator.Animator"/> been initialized?
+            </summary>
+        </member>
         <member name="F:Fusion.NetworkMecanimAnimator.BITS_PER_BOOL">
             <summary>
             To ensure triggers are synced consistently, 1 bit is used for true/false and 3 more are used
             to differentiate the state (these are incremented with every change to the underlying bool).
+            </summary>
+        </member>
+        <member name="T:Fusion.NetworkMecanimAnimator.AnimatorData">
+            <summary>
+            Capture of Animator data.
             </summary>
         </member>
         <member name="M:Fusion.NetworkMecanimAnimator.Spawned">
@@ -3372,6 +3447,15 @@
             A reference to the networked data of this <see cref="T:Fusion.NetworkTRSP"/>.
             </summary>
         </member>
+        <member name="F:Fusion.NetworkTRSP._stateAuthorityChangeErrorCorrectionDelta">
+            <summary>
+            Specify the delta used to correct the render error when state authority changes.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkTRSP.reenabledTick">
+            <summary>The tick on which this <see cref="T:Fusion.NetworkTRSP"/> was last re-enabled (right after Spawned doesn't count).</summary>
+            <remarks>Used to override interpolation alpha for the tick after being re-enabled.</remarks>
+        </member>
         <member name="M:Fusion.NetworkTRSP.SetAreaOfInterestOverride(Fusion.NetworkObject)">
             <summary>
             Manually set the <see cref="T:Fusion.NetworkObject"/> used as the AreaOfInterestOverride.
@@ -3395,6 +3479,11 @@
             <param name="behaviour">Only pass a NetworkTRSP derived class that is on the same Transform as its associated <see cref="T:Fusion.NetworkObject"/>,
             as AreaOfInterestOverride is only applicable when <see cref="P:Fusion.NetworkTRSP.IsMainTRSP"/> is true.</param>.
             <param name="parent">The direct parent of the </param>
+        </member>
+        <member name="M:Fusion.NetworkTRSP.OnEnable">
+            <summary>
+            <see cref="M:Fusion.SimulationBehaviour.OnDestroy"/>
+            </summary>
         </member>
         <member name="M:Fusion.NetworkTRSP.Render(Fusion.NetworkTRSP,UnityEngine.Transform,System.Boolean,System.Boolean,System.Boolean,Fusion.Tick@)">
             <summary>
@@ -4303,6 +4392,11 @@
             </summary>
             <param name="center">The center point of the AABB.</param>
             <param name="extents">The extents (half-widths) of the AABB.</param>
+        </member>
+        <member name="M:Fusion.LagCompensation.AABB.#ctor(UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3)">
+            <summary>
+            Constructs an AABB from a center point that encapsulate two other points.
+            </summary>
         </member>
         <member name="T:Fusion.LagCompensation.PositionRotationQueryParams">
             <summary>
@@ -5655,6 +5749,384 @@
             </summary>
             <param name="builder">The string builder to append to.</param>
         </member>
+        <member name="T:Fusion.ElementReaderWriterByte">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterByte.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterByte.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterByte.Write(System.Byte*,System.Int32,System.Byte)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterByte.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterByte.GetElementHashCode(System.Byte)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterByte.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterSByte">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSByte.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSByte.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSByte.Write(System.Byte*,System.Int32,System.SByte)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSByte.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSByte.GetElementHashCode(System.SByte)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSByte.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterInt16">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt16.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt16.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt16.Write(System.Byte*,System.Int32,System.Int16)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt16.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt16.GetElementHashCode(System.Int16)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt16.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterUInt16">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt16.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt16.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt16.Write(System.Byte*,System.Int32,System.UInt16)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt16.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt16.GetElementHashCode(System.UInt16)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt16.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterInt32">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt32.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt32.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt32.Write(System.Byte*,System.Int32,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt32.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt32.GetElementHashCode(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt32.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterUInt32">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt32.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt32.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt32.Write(System.Byte*,System.Int32,System.UInt32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt32.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt32.GetElementHashCode(System.UInt32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt32.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterInt64">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt64.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt64.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt64.Write(System.Byte*,System.Int32,System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt64.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt64.GetElementHashCode(System.Int64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterInt64.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterUInt64">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt64.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt64.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt64.Write(System.Byte*,System.Int32,System.UInt64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt64.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt64.GetElementHashCode(System.UInt64)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterUInt64.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterSingle">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSingle.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSingle.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSingle.Write(System.Byte*,System.Int32,System.Single)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSingle.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSingle.GetElementHashCode(System.Single)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterSingle.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterDouble">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterDouble.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterDouble.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterDouble.Write(System.Byte*,System.Int32,System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterDouble.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterDouble.GetElementHashCode(System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterDouble.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterVector2">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector2.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector2.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector2.Write(System.Byte*,System.Int32,UnityEngine.Vector2)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector2.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector2.GetElementHashCode(UnityEngine.Vector2)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector2.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterVector3">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector3.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector3.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector3.Write(System.Byte*,System.Int32,UnityEngine.Vector3)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector3.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector3.GetElementHashCode(UnityEngine.Vector3)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector3.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterVector4">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector4.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector4.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector4.Write(System.Byte*,System.Int32,UnityEngine.Vector4)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector4.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector4.GetElementHashCode(UnityEngine.Vector4)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterVector4.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterChar">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterChar.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterChar.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterChar.Write(System.Byte*,System.Int32,System.Char)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterChar.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterChar.GetElementHashCode(System.Char)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterChar.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterNetworkBool">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBool.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBool.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBool.Write(System.Byte*,System.Int32,Fusion.NetworkBool)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBool.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBool.GetElementHashCode(Fusion.NetworkBool)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBool.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterPlayerRef">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterPlayerRef.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterPlayerRef.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterPlayerRef.Write(System.Byte*,System.Int32,Fusion.PlayerRef)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterPlayerRef.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterPlayerRef.GetElementHashCode(Fusion.PlayerRef)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterPlayerRef.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterNetworkId">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkId.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkId.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkId.Write(System.Byte*,System.Int32,Fusion.NetworkId)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkId.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkId.GetElementHashCode(Fusion.NetworkId)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkId.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
+        <member name="T:Fusion.ElementReaderWriterNetworkBehaviourId">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBehaviourId.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBehaviourId.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBehaviourId.Write(System.Byte*,System.Int32,Fusion.NetworkBehaviourId)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBehaviourId.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBehaviourId.GetElementHashCode(Fusion.NetworkBehaviourId)">
+            <inheritdoc />
+        </member>
+        <member name="M:Fusion.ElementReaderWriterNetworkBehaviourId.GetInstance">
+            <summary>Returns boxed static instance.</summary>
+        </member>
         <member name="T:Fusion.FloatCompressed">
             <summary>
             Represents a compressed float value for network transmission.
@@ -6634,17 +7106,6 @@
             </para>
             </summary>
         </member>
-        <member name="T:Fusion.LogSimpleUnity">
-            <summary>
-            Log Simple Unity
-            </summary>
-        </member>
-        <member name="M:Fusion.LogSimpleUnity.Log(Fusion.LogType,System.Object,Fusion.LogContext@)">
-            <inheritdoc cref="M:Fusion.ILogger.Log(Fusion.LogType,System.Object,Fusion.LogContext@)"/>
-        </member>
-        <member name="M:Fusion.LogSimpleUnity.LogException(System.Exception,Fusion.LogContext@)">
-            <inheritdoc cref="M:Fusion.ILogger.LogException(System.Exception,Fusion.LogContext@)"/>
-        </member>
         <member name="T:Fusion.NetworkArray`1">
             <summary>
             Fusion type for networking arrays. 
@@ -6848,6 +7309,29 @@
             </summary>
             <param name="index">The zero-based index of the element to get or set.</param>
         </member>
+        <member name="T:Fusion.NetworkedWeavedArrayAttribute">
+            <summary>
+            Attribute applied to an array property by the weaver.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedArrayAttribute.Capacity">
+            <summary>
+            Array capacity.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedArrayAttribute.ElementWordCount">
+            <summary>
+            Word count of each element.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedArrayAttribute.ElementReaderWriterType">
+            <summary>
+            ReaderWriter type for the element.
+            </summary>
+        </member>
+        <member name="M:Fusion.NetworkedWeavedArrayAttribute.#ctor(System.Int32,System.Int32,System.Type)">
+            <summary/>
+        </member>
         <member name="T:Fusion.NetworkArrayReadOnly`1">
             <summary>
             Provides a read-only view of a network array.
@@ -6873,6 +7357,9 @@
             <summary>
             Represents a boolean value that can be networked.
             </summary>
+        </member>
+        <member name="F:Fusion.NetworkBool.SIZE">
+            <summary>The size of the NetworkBool structure in bytes.</summary>
         </member>
         <member name="M:Fusion.NetworkBool.#ctor(System.Boolean)">
             <summary>
@@ -7233,6 +7720,35 @@
             </summary>
             <param name="item">The item to add to the dictionary.</param>
         </member>
+        <member name="T:Fusion.NetworkedWeavedDictionaryAttribute">
+            <summary>
+            Attribute applied to a dictionary property by the weaver.
+            </summary>
+        </member>
+        <member name="M:Fusion.NetworkedWeavedDictionaryAttribute.#ctor(System.Int32,System.Int32,System.Int32,System.Type,System.Type)">
+            <summary/>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedDictionaryAttribute.Capacity">
+            <summary>
+            Capacity of the dictionary.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedDictionaryAttribute.KeyWordCount">
+            <summary>
+            Word count for the key.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedDictionaryAttribute.ValueWordCount">
+            <summary>
+            Word count for the value.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedDictionaryAttribute.KeyReaderWriterType">
+            <summary/>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedDictionaryAttribute.ValueReaderWriterType">
+            <summary/>
+        </member>
         <member name="T:Fusion.NetworkDictionaryReadOnly`2">
             <summary>
             A read-only version of <see cref="T:Fusion.NetworkDictionary`2"/>.
@@ -7423,6 +7939,29 @@
             Adds an item to the networked linked list.
             </summary>
             <param name="item">The item to add to the linked list.</param>
+        </member>
+        <member name="T:Fusion.NetworkedWeavedLinkedListAttribute">
+            <summary>
+            Attribute applied to a list property by the weaver.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedLinkedListAttribute.Capacity">
+            <summary>
+            List capacity.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedLinkedListAttribute.ElementWordCount">
+            <summary>
+            Word count of each element.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkedWeavedLinkedListAttribute.ElementReaderWriterType">
+            <summary>
+            ReaderWriter type for the element.
+            </summary>
+        </member>
+        <member name="M:Fusion.NetworkedWeavedLinkedListAttribute.#ctor(System.Int32,System.Int32,System.Type)">
+            <summary/>
         </member>
         <member name="T:Fusion.NetworkLinkedListReadOnly`1">
             <summary>
@@ -8059,6 +8598,11 @@
             A constant representing the raw index value for the master client.
             </summary>
         </member>
+        <member name="P:Fusion.PlayerRef.Invalid">
+            <summary>
+            Invalid player ref. Used to differentiate no player ref (None) from an invalid one.
+            </summary>
+        </member>
         <member name="P:Fusion.PlayerRef.None">
             <summary>
             None player
@@ -8260,36 +8804,6 @@
             </summary>
             <param name="data">The memory location to read from.</param>
             <returns>The Quaternion value read from the memory location.</returns>
-        </member>
-        <member name="M:Fusion.ReadWriteUtils.WriteEmptyNetworkBehaviourRef(System.Int32*)">
-            <summary>
-            Writes an empty NetworkBehaviour reference to the provided memory location.
-            </summary>
-            <param name="data">The memory location to write to.</param>
-        </member>
-        <member name="M:Fusion.ReadWriteUtils.WriteNullBehaviourRef(System.Int32*)">
-            <summary>
-            Writes a null NetworkBehaviour reference to the provided memory location.
-            </summary>
-            <param name="data">The memory location to write to.</param>
-        </member>
-        <member name="M:Fusion.ReadWriteUtils.WriteNetworkBehaviourRef(System.Int32*,Fusion.NetworkRunner,Fusion.NetworkBehaviour)">
-            <summary>
-            Writes a NetworkBehaviour reference to the provided memory location.
-            </summary>
-            <param name="data">The memory location to write to.</param>
-            <param name="runner">The NetworkRunner associated with the NetworkBehaviour.</param>
-            <param name="reference">The NetworkBehaviour reference to write.</param>
-        </member>
-        <member name="M:Fusion.ReadWriteUtils.ReadNetworkBehaviourRef(System.Int32*,Fusion.NetworkRunner,System.Boolean@)">
-            <summary>
-            Reads a NetworkBehaviour reference from the provided memory location.
-            Null is considered valid (0,1).
-            </summary>
-            <param name="data">The memory location to read from.</param>
-            <param name="runner">The NetworkRunner associated with the NetworkBehaviour.</param>
-            <param name="isValid">Out parameter indicating whether the read operation was valid.</param>
-            <returns>The NetworkBehaviour reference read from the memory location.</returns>
         </member>
         <member name="T:Fusion.ReadWriteUtilsForWeaver">
             <summary>
@@ -8720,6 +9234,13 @@
             <param name="brackets">If true, the string will be enclosed in brackets.</param>
             <param name="prefix">If true, the string will be prefixed with "Scene:".</param>
             <returns>A string that represents the current SceneRef, formatted according to the provided parameters.</returns>
+        </member>
+        <member name="M:Fusion.SceneRef.Parse(System.String)">
+            <summary>
+            Parses a SceneRef from a string.
+            </summary>
+            <param name="str"></param>
+            <returns></returns>
         </member>
         <member name="M:Fusion.SceneRef.op_Equality(Fusion.SceneRef,Fusion.SceneRef)">
             <summary>
@@ -9430,6 +9951,21 @@
             The largest value in the series.
             </summary>
         </member>
+        <member name="P:Fusion.TimeSeries.Median">
+            <summary>
+            The median value in the series.
+            </summary>
+        </member>
+        <member name="P:Fusion.TimeSeries.MeanAbsDev">
+            <summary>
+            The mean absolute deviation from the mean.
+            </summary>
+        </member>
+        <member name="P:Fusion.TimeSeries.MedianAbsDev">
+            <summary>
+            The median absolute deviation from the median.
+            </summary>
+        </member>
         <member name="M:Fusion.TimeSeries.Smoothed(System.Double)">
             <summary>
             Returns the exponentially-weighted average of the series (with smoothing factor <c>alpha</c>).
@@ -9922,10 +10458,25 @@
             Returns if <see cref="P:Fusion.Simulation.LocalPlayer"/> is neither the Input nor State Source for this network entity.
             </summary>
         </member>
+        <member name="P:Fusion.NetworkObject.IsNested">
+            <summary>
+            Returns true if this object is nested in a prefab instance.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkObject.NestingRoot">
+            <summary>
+            Returns root of this prefab instance, if this object is nested.
+            </summary>
+        </member>
         <member name="P:Fusion.NetworkObject.RenderTimeframe">
             <summary>
             Returns the <see cref="T:Fusion.RenderTimeframe"/> for this <see cref="T:Fusion.NetworkBehaviour"/> instance,
             indicating what snapshot data will be used to render it.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkObject.ForceRemoteRenderTimeframe">
+            <summary>
+            Force the <see cref="P:Fusion.NetworkObject.RenderTimeframe"/> used to <see cref="F:Fusion.RenderTimeframe.Remote"/>
             </summary>
         </member>
         <member name="P:Fusion.NetworkObject.RenderSource">
@@ -10089,7 +10640,9 @@
         </member>
         <member name="F:Fusion.NetworkObjectFlags.MasterClientObject">
             <summary>
-            Flag indicating that the network object is a master client object.
+            Shared Mode only. The current Master client always has State Authority for this object.
+            If the Master client leaves the new Master client automatically becomes the State Authority
+            for it.
             </summary>
         </member>
         <member name="F:Fusion.NetworkObjectFlags.DestroyWhenStateAuthorityLeaves">
@@ -10532,6 +11085,13 @@
             Gets the Id of the NetworkObjectHeader this struct points to.
             </summary>
         </member>
+        <member name="M:Fusion.NetworkObjectHeaderPtr.op_Implicit(Fusion.NetworkObjectHeader*)~Fusion.NetworkObjectHeaderPtr">
+            <summary>
+            
+            </summary>
+            <param name="ptr"></param>
+            <returns></returns>
+        </member>
         <member name="T:Fusion.NetworkObjectHeader">
             <summary>
             Network object header information for a <see cref="T:Fusion.NetworkObject"/>.
@@ -10717,6 +11277,15 @@
         <member name="P:Fusion.NetworkObjectMeta.Id">
             <summary>Get the NetworkId of this object.</summary>
         </member>
+        <member name="P:Fusion.NetworkObjectMeta.NestingRoot">
+            <summary>Get the NetworkId of the root object in the nesting hierarchy.</summary>
+        </member>
+        <member name="P:Fusion.NetworkObjectMeta.NestingKey">
+            <summary>The nesting key of the network object.</summary>
+        </member>
+        <member name="P:Fusion.NetworkObjectMeta.Flags">
+            <summary> The flags indicating various states or properties of the network object. </summary>
+        </member>
         <member name="P:Fusion.NetworkObjectMeta.StateAuthority">
             <summary>Get the Player that has state authority over this object.</summary>
         </member>
@@ -10820,6 +11389,26 @@
             </summary>
             <param name="runner">The NetworkRunner that manages the network objects.</param>
             <param name="context">The context that provides information for releasing the network object instance.</param>
+        </member>
+        <member name="M:Fusion.INetworkObjectProvider.GetPrefabId(Fusion.NetworkRunner,Fusion.NetworkObjectGuid)">
+            <summary>
+            Translates guid into prefab id.
+            </summary>
+            <param name="runner"></param>
+            <param name="prefabGuid"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fusion.INetworkObjectProvider.Shutdown(Fusion.NetworkRunner)">
+            <summary>
+            
+            </summary>
+            <param name="networkRunner"></param>
+        </member>
+        <member name="M:Fusion.INetworkObjectProvider.Initialize(Fusion.NetworkRunner)">
+            <summary>
+            
+            </summary>
+            <param name="networkRunner"></param>
         </member>
         <member name="T:Fusion.NetworkPrefabAcquireContext">
             <summary>
@@ -10939,6 +11528,9 @@
         <member name="M:Fusion.NetworkObjectProviderDummy.ReleaseInstance(Fusion.NetworkRunner,Fusion.NetworkObjectReleaseContext@)">
             <inheritdoc cref="M:Fusion.INetworkObjectProvider.ReleaseInstance(Fusion.NetworkRunner,Fusion.NetworkObjectReleaseContext@)"/>
         </member>
+        <member name="M:Fusion.NetworkObjectProviderDummy.GetPrefabId(Fusion.NetworkRunner,Fusion.NetworkObjectGuid)">
+            <inheritdoc cref="M:Fusion.INetworkObjectProvider.GetPrefabId(Fusion.NetworkRunner,Fusion.NetworkObjectGuid)"/>
+        </member>
         <member name="T:Fusion.NetworkObjectSortKeyComparer">
             <summary>
             This class is used to compare two NetworkObject instances based on their SortKey.
@@ -11041,6 +11633,13 @@
             </returns>
             <exception cref="T:System.ArgumentException">Thrown when the provided SceneRef is not valid.</exception>
             <exception cref="T:System.ArgumentOutOfRangeException">Thrown when the provided object index is out of range.</exception>
+        </member>
+        <member name="M:Fusion.NetworkObjectTypeId.FromSceneObjectId(Fusion.NetworkSceneObjectId)">
+            <summary>
+            Creates a NetworkObjectTypeId from a NetworkSceneObjectId.
+            </summary>
+            <param name="sceneObjectId"></param>
+            <returns></returns>
         </member>
         <member name="P:Fusion.NetworkObjectTypeId.AsSceneObjectId">
             <summary>
@@ -12516,6 +13115,28 @@
             Returns the global instance of a lag compensation buffer <see cref="T:Fusion.HitboxManager"/>.
             </summary>
         </member>
+        <member name="F:Fusion.NetworkRunner._remotePrefabsWaitingForSpawnedCallback">
+            <summary>
+            Remote prefabs are instantiated after an entire packet is read; this is to ensure
+            references are resolved correctly immediately. This is a buffer for all the instantiated instances
+            that await their spawned callbacks.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunner._remoteCreateQueue">
+            <summary>
+            Queue of NetworkIds that have been received and wait for NOs to be created.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunner._remoteCreateNestedQueue">
+            <summary>
+            Queue of nested NetworkIds that have been received and wait for NOs to be created.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunner._remoteDestroyQueue">
+            <summary>
+            Queue of NetworkIds that have been received and wait for NOs to be destroyed.
+            </summary>
+        </member>
         <member name="M:Fusion.NetworkRunner.Disconnect(Fusion.PlayerRef,System.Byte[])">
             <summary>
             Disconnects a player from the server.
@@ -12670,6 +13291,12 @@
             </summary>
             <returns>A list of NetworkObject instances.</returns>
         </member>
+        <member name="M:Fusion.NetworkRunner.GetAllNetworkObjects(System.Collections.Generic.List{Fusion.NetworkObject})">
+            <summary>
+            Populate a list with all network objects in the simulation.
+            </summary>
+            <param name="result">The list to which the network objects will be added.</param>
+        </member>
         <member name="M:Fusion.NetworkRunner.GetAllBehaviours``1(System.Collections.Generic.List{``0})">
             <summary>
             Add on the list all behaviours of the desired type that are registered on the <see cref="T:Fusion.NetworkRunner"/>.
@@ -12805,6 +13432,18 @@
             Returns the unconverted unsafe <see cref="T:Fusion.NetworkInput"/> for the indicated player.
             </summary>
         </member>
+        <member name="M:Fusion.NetworkRunner.RequestStateAuthority(Fusion.NetworkId)">
+            <summary>
+            Requests state authority for a specified <see cref="T:Fusion.NetworkId"/> on shared mode.
+            </summary>
+            <param name="id">The NetworkId for which state authority is being requested.</param>
+        </member>
+        <member name="M:Fusion.NetworkRunner.ReleaseStateAuthority(Fusion.NetworkId)">
+            <summary>
+            Releases state authority for a given <see cref="T:Fusion.NetworkId"/> on shared mode.
+            </summary>
+            <param name="id">The NetworkId for which state authority needs to be released.</param>
+        </member>
         <member name="M:Fusion.NetworkRunner.TryGetInputForPlayer``1(Fusion.PlayerRef,``0@)">
             <summary>
             Outputs the <see cref="T:Fusion.NetworkInput"/> from player, translated to the indicated <see cref="T:Fusion.INetworkInput"/>.
@@ -12875,6 +13514,7 @@
         <member name="M:Fusion.NetworkRunner.SetIsSimulated(Fusion.NetworkObject,System.Boolean)">
             <summary>
             Sets the simulation state for this object, if it takes part in the NetworkFixedUpdate, etc.
+            In shared mode a client cannot change the simulation state of <see cref="T:Fusion.NetworkObject"/>s it does not have state authority over.
             </summary>
             <param name="obj">the object to change state for</param>
             <param name="simulate">true if it should be simulated, false if otherwise</param>
@@ -13611,6 +14251,9 @@
             Signal if the Local Peer is in a Room and is the Room Master Client
             </summary>
         </member>
+        <member name="F:Fusion.NetworkRunner.CloudAddressRewriter">
+            <inheritdoc cref="F:Fusion.Photon.Realtime.LoadBalancingClient.AddressRewriter"/>
+        </member>
         <member name="F:Fusion.NetworkRunner._startGameOperation">
             <summary>
             Completion Source for the startup Photon Cloud Operations
@@ -13749,17 +14392,8 @@
         <member name="F:Fusion.NetworkDelegates.OnShutdown">
             <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnShutdown(Fusion.NetworkRunner,Fusion.ShutdownReason)"/>
         </member>
-        <member name="F:Fusion.NetworkDelegates.OnConnectedToServer">
-            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnConnectedToServer(Fusion.NetworkRunner)"/>
-        </member>
         <member name="F:Fusion.NetworkDelegates.OnDisconnectedFromServer">
             <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnDisconnectedFromServer(Fusion.NetworkRunner,Fusion.Sockets.NetDisconnectReason)"/>
-        </member>
-        <member name="F:Fusion.NetworkDelegates.OnSceneLoadDone">
-            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnSceneLoadDone(Fusion.NetworkRunner)"/>
-        </member>
-        <member name="F:Fusion.NetworkDelegates.OnSceneLoadStart">
-            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnSceneLoadStart(Fusion.NetworkRunner)"/>
         </member>
         <member name="F:Fusion.NetworkDelegates.OnConnectRequest">
             <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnConnectRequest(Fusion.NetworkRunner,Fusion.NetworkRunnerCallbackArgs.ConnectRequest,System.Byte[])"/>
@@ -13769,15 +14403,6 @@
         </member>
         <member name="F:Fusion.NetworkDelegates.OnUserSimulationMessage">
             <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnUserSimulationMessage(Fusion.NetworkRunner,Fusion.SimulationMessagePtr)"/>
-        </member>
-        <member name="F:Fusion.NetworkDelegates.OnSessionListUpdated">
-            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnSessionListUpdated(Fusion.NetworkRunner,System.Collections.Generic.List{Fusion.SessionInfo})"/>
-        </member>
-        <member name="F:Fusion.NetworkDelegates.OnCustomAuthenticationResponse">
-            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnCustomAuthenticationResponse(Fusion.NetworkRunner,System.Collections.Generic.Dictionary{System.String,System.Object})"/>
-        </member>
-        <member name="F:Fusion.NetworkDelegates.OnHostMigration">
-            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnHostMigration(Fusion.NetworkRunner,Fusion.HostMigrationToken)"/>
         </member>
         <member name="F:Fusion.NetworkDelegates.OnReliableDataReceived">
             <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnReliableDataReceived(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.Sockets.ReliableKey,System.ArraySegment{System.Byte})"/>
@@ -13790,6 +14415,24 @@
         </member>
         <member name="F:Fusion.NetworkDelegates.OnObjectEnterAOI">
             <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnObjectEnterAOI(Fusion.NetworkRunner,Fusion.NetworkObject,Fusion.PlayerRef)"/>
+        </member>
+        <member name="F:Fusion.NetworkDelegates.OnConnectedToServer">
+            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnConnectedToServer(Fusion.NetworkRunner)"/>
+        </member>
+        <member name="F:Fusion.NetworkDelegates.OnSceneLoadDone">
+            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnSceneLoadDone(Fusion.NetworkRunner)"/>
+        </member>
+        <member name="F:Fusion.NetworkDelegates.OnSceneLoadStart">
+            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnSceneLoadStart(Fusion.NetworkRunner)"/>
+        </member>
+        <member name="F:Fusion.NetworkDelegates.OnSessionListUpdated">
+            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnSessionListUpdated(Fusion.NetworkRunner,System.Collections.Generic.List{Fusion.SessionInfo})"/>
+        </member>
+        <member name="F:Fusion.NetworkDelegates.OnCustomAuthenticationResponse">
+            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnCustomAuthenticationResponse(Fusion.NetworkRunner,System.Collections.Generic.Dictionary{System.String,System.Object})"/>
+        </member>
+        <member name="F:Fusion.NetworkDelegates.OnHostMigration">
+            <inheritdoc cref="M:Fusion.INetworkRunnerCallbacks.OnHostMigration(Fusion.NetworkRunner,Fusion.HostMigrationToken)"/>
         </member>
         <member name="T:Fusion.NetworkEvents">
             <summary>
@@ -14042,7 +14685,7 @@
         </member>
         <member name="F:Fusion.NetworkProjectConfig.NetworkIdIsObjectName">
             <summary>
-            Signal if the <see cref="T:Fusion.NetworkId"/> of the <see cref="T:Fusion.NetworkObject"/> should be included on the name of the <see cref="T:UnityEngine.GameObject"/>.
+            Signal if the <see cref="T:Fusion.NetworkId"/> of the <see cref="T:Fusion.NetworkObject"/> should be included on the name of the GameObject
             </summary>
         </member>
         <member name="F:Fusion.NetworkProjectConfig.HideNetworkObjectInactivityGuard">
@@ -14050,6 +14693,13 @@
             Inactive <see cref="T:Fusion.NetworkObject"/> need special handling in case they get destroyed without ever being activated. This is achieved
             with adding a nested GameObject called "NetworkObjectInactivityGuard" that tracks the OnDestroy message. <see cref="F:Fusion.NetworkProjectConfig.HideNetworkObjectInactivityGuard"/>
             can be used to control whether these guards are visible in the hierarchy or not.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkProjectConfig.AllowClientServerModesInWebGL">
+            <summary>
+            Allow the use of Client-Server modes in WebGL builds. This is not recommended, as it can lead to degraded performance.
+            Client-Server modes are not supported in WebGL builds by default, this setting allows its usage despite the limitations.
+            Read more about the limitations of WebGL builds in the Fusion documentation at https://doc.photonengine.com/fusion/v2/fusion-intro.
             </summary>
         </member>
         <member name="F:Fusion.NetworkProjectConfig.PrefabTable">
@@ -14132,6 +14782,9 @@
             <summary>
             Make a copy of the <see cref="T:Fusion.NetworkProjectConfig"/>.
             </summary>
+        </member>
+        <member name="M:Fusion.NetworkProjectConfig.SanityCheck">
+            <inheritdoc cref="M:Fusion.IConfigurationSanityCheck.SanityCheck"/>
         </member>
         <member name="M:Fusion.NetworkProjectConfig.ToString">
             <summary>
@@ -14529,34 +15182,12 @@
             Callback from a <see cref="T:Fusion.NetworkRunner"/> when a player has disconnected.
             </summary>
         </member>
-        <member name="M:Fusion.INetworkRunnerCallbacks.OnInput(Fusion.NetworkRunner,Fusion.NetworkInput)">
-            <summary>
-            Callback from <see cref="T:Fusion.NetworkRunner"/> that polls for user inputs.
-            The <see cref="T:Fusion.NetworkInput"/> that is supplied expects:
-            <code> 
-            input.Set(new CustomINetworkInput() { /* your values */ });
-            </code>
-            </summary>
-        </member>
-        <member name="M:Fusion.INetworkRunnerCallbacks.OnInputMissing(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.NetworkInput)">
-            <summary>
-            Callback from <see cref="T:Fusion.NetworkRunner"/> when an input is missing.
-            </summary>
-            <param name="runner">NetworkRunner reference</param>
-            <param name="player">PlayerRef reference which the input is missing from</param>
-            <param name="input">NetworkInput reference which is missing</param>
-        </member>
         <member name="M:Fusion.INetworkRunnerCallbacks.OnShutdown(Fusion.NetworkRunner,Fusion.ShutdownReason)">
             <summary>
             Called when the runner is shutdown
             </summary>
             <param name="runner">The runner being shutdown</param>
             <param name="shutdownReason">Describes the reason Fusion was Shutdown</param>
-        </member>
-        <member name="M:Fusion.INetworkRunnerCallbacks.OnConnectedToServer(Fusion.NetworkRunner)">
-            <summary>
-            Callback when <see cref="T:Fusion.NetworkRunner"/> successfully connects to a server or host.
-            </summary>
         </member>
         <member name="M:Fusion.INetworkRunnerCallbacks.OnDisconnectedFromServer(Fusion.NetworkRunner,Fusion.Sockets.NetDisconnectReason)">
             <summary>
@@ -14583,6 +15214,46 @@
             <param name="runner">The runner this message is for</param>
             <param name="message">The message pointer</param>
         </member>
+        <member name="M:Fusion.INetworkRunnerCallbacks.OnReliableDataReceived(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.Sockets.ReliableKey,System.ArraySegment{System.Byte})">
+            <summary>
+            Callback is invoked when a Reliable Data Stream has been received
+            </summary>
+            <param name="runner">NetworkRunner reference</param>
+            <param name="player">Which PlayerRef the stream was sent from</param>
+            <param name="key">ReliableKey reference that identifies the data stream</param>
+            <param name="data">Data received</param>
+        </member>
+        <member name="M:Fusion.INetworkRunnerCallbacks.OnReliableDataProgress(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.Sockets.ReliableKey,System.Single)">
+            <summary>
+            Callback is invoked when a Reliable Data Stream is being received, reporting its progress
+            </summary>
+            <param name="runner">NetworkRunner reference</param>
+            <param name="player">Which PlayerRef the stream is being sent from</param>
+            <param name="key">ReliableKey reference that identifies the data stream</param>
+            <param name="progress">Progress of the stream</param>
+        </member>
+        <member name="M:Fusion.INetworkRunnerCallbacks.OnInput(Fusion.NetworkRunner,Fusion.NetworkInput)">
+            <summary>
+            Callback from <see cref="T:Fusion.NetworkRunner"/> that polls for user inputs.
+            The <see cref="T:Fusion.NetworkInput"/> that is supplied expects:
+            <code> 
+            input.Set(new CustomINetworkInput() { /* your values */ });
+            </code>
+            </summary>
+        </member>
+        <member name="M:Fusion.INetworkRunnerCallbacks.OnInputMissing(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.NetworkInput)">
+            <summary>
+            Callback from <see cref="T:Fusion.NetworkRunner"/> when an input is missing.
+            </summary>
+            <param name="runner">NetworkRunner reference</param>
+            <param name="player">PlayerRef reference which the input is missing from</param>
+            <param name="input">NetworkInput reference which is missing</param>
+        </member>
+        <member name="M:Fusion.INetworkRunnerCallbacks.OnConnectedToServer(Fusion.NetworkRunner)">
+            <summary>
+            Callback when <see cref="T:Fusion.NetworkRunner"/> successfully connects to a server or host.
+            </summary>
+        </member>
         <member name="M:Fusion.INetworkRunnerCallbacks.OnSessionListUpdated(Fusion.NetworkRunner,System.Collections.Generic.List{Fusion.SessionInfo})">
             <summary>
             This callback is invoked when a new List of Sessions is received from Photon Cloud
@@ -14604,24 +15275,6 @@
             <param name="runner">The runner this object exists on</param>
             <param name="hostMigrationToken">Migration Token that stores all necessary information to restart the Fusion Runner</param>
         </member>
-        <member name="M:Fusion.INetworkRunnerCallbacks.OnReliableDataReceived(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.Sockets.ReliableKey,System.ArraySegment{System.Byte})">
-            <summary>
-            Callback is invoked when a Reliable Data Stream has been received
-            </summary>
-            <param name="runner">NetworkRunner reference</param>
-            <param name="player">Which PlayerRef the stream was sent from</param>
-            <param name="key">ReliableKey reference that identifies the data stream</param>
-            <param name="data">Data received</param>
-        </member>
-        <member name="M:Fusion.INetworkRunnerCallbacks.OnReliableDataProgress(Fusion.NetworkRunner,Fusion.PlayerRef,Fusion.Sockets.ReliableKey,System.Single)">
-            <summary>
-            Callback is invoked when a Reliable Data Stream is being received, reporting its progress
-            </summary>
-            <param name="runner">NetworkRunner reference</param>
-            <param name="player">Which PlayerRef the stream is being sent from</param>
-            <param name="key">ReliableKey reference that identifies the data stream</param>
-            <param name="progress">Progress of the stream</param>
-        </member>
         <member name="M:Fusion.INetworkRunnerCallbacks.OnSceneLoadDone(Fusion.NetworkRunner)">
             <summary>
             Callback is invoked when a Scene Load has finished
@@ -14633,6 +15286,111 @@
             Callback is invoked when a Scene Load has started
             </summary>
             <param name="runner">NetworkRunner reference</param>
+        </member>
+        <member name="T:Fusion.NetworkRunnerInitializeArgs">
+            <summary>
+            Represents the initialization arguments for the NetworkRunner.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.Scene">
+            <summary>
+            Gets or sets the network scene information.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.Address">
+            <summary>
+            Gets or sets the network address.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.PublicAddress">
+            <summary>
+            Gets or sets the public network address.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.PlayerCount">
+            <summary>
+            Gets or sets the player count.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.SimulationMode">
+            <summary>
+            Gets or sets the simulation mode.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.InputWordCount">
+            <summary>
+            Gets or sets the input word count.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.SceneInfoWordCount">
+            <summary>
+            Gets or sets the scene information word count.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.Config">
+            <summary>
+            Gets or sets the network project configuration.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.OnGameStarted">
+            <summary>
+            Gets or sets the action to be called when the game starts.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.ObjectProvider">
+            <summary>
+            Gets or sets the network object provider.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.SceneManager">
+            <summary>
+            Gets or sets the network scene manager.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.Updater">
+            <summary>
+            Gets or sets the network runner updater.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.ObjectInitializer">
+            <summary>
+            Gets or sets the network object initializer.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.CustomCallbackInterfaces">
+            <summary>
+            Gets or sets the custom callback interfaces.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.ConnectionToken">
+            <summary>
+            Gets or sets the connection token.
+            </summary>
+        </member>
+        <member name="P:Fusion.NetworkRunnerInitializeArgs.IsSinglePlayer">
+            <summary>
+            Gets a value indicating whether the game is in single-player mode.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.ResumeId">
+            <summary>
+            Gets or sets the resume network ID for host migration.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.ResumeTick">
+            <summary>
+            Gets or sets the resume tick for host migration.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.ResumeState">
+            <summary>
+            Gets or sets the resume state for host migration.
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkRunnerInitializeArgs.HostMigrationResume">
+            <summary>
+            Gets or sets the action to be called when host migration resumes.
+            </summary>
         </member>
         <member name="T:Fusion.NetworkRunnerUpdaterDefault">
             <summary>
@@ -15280,6 +16038,35 @@
             Returns the hash code of the <see cref="T:Fusion.NetworkSceneLoadId"/>
             </summary>
         </member>
+        <member name="M:Fusion.NetworkSceneLoadId.op_Equality(Fusion.NetworkSceneLoadId,Fusion.NetworkSceneLoadId)">
+            <summary>
+            
+            </summary>
+            <param name="left"></param>
+            <param name="right"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fusion.NetworkSceneLoadId.op_Inequality(Fusion.NetworkSceneLoadId,Fusion.NetworkSceneLoadId)">
+            <summary>
+            
+            </summary>
+            <param name="left"></param>
+            <param name="right"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fusion.NetworkSceneLoadId.op_Implicit(System.Byte)~Fusion.NetworkSceneLoadId">
+            <summary>
+            
+            </summary>
+            <param name="value"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Fusion.NetworkSceneLoadId.ToString">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Fusion.NetworkLoadSceneParameters">
             <summary>
             Parameters for loading a scene
@@ -15503,11 +16290,24 @@
             Index of the object in the scene or any other form of unique identifier.
             </summary>
         </member>
-        <member name="F:Fusion.NetworkSceneObjectId.SceneLoadId">
+        <member name="P:Fusion.NetworkSceneObjectId.SceneLoadId">
+            <summary>
+            Use <see cref="F:Fusion.NetworkSceneObjectId.LoadId"/>
+            </summary>
+        </member>
+        <member name="F:Fusion.NetworkSceneObjectId.LoadId">
             <summary>
             Unique identifier of a specific scene load. Needs to be used when loading multiple scenes with the same <see cref="T:Fusion.SceneRef"/> or reloading a scene.
             For example, <see cref="T:Fusion.NetworkSceneInfo"/> increments its internal LoadId every time a new scene is added.
             </summary>
+        </member>
+        <member name="M:Fusion.NetworkSceneObjectId.#ctor(Fusion.SceneRef,System.Int32,Fusion.NetworkSceneLoadId)">
+            <summary>
+            TODO
+            </summary>
+            <param name="scene"></param>
+            <param name="objectId"></param>
+            <param name="loadId"></param>
         </member>
         <member name="P:Fusion.NetworkSceneObjectId.IsValid">
             <summary>
@@ -15895,6 +16695,12 @@
             Signal if the Simulation is currently running
             </summary>
         </member>
+        <member name="P:Fusion.Simulation.IsSceneInfoReady">
+            <summary>
+            In shared mode, scene info is only reliable after the initial tick. Before that
+            initial scene info data needs to be used.
+            </summary>
+        </member>
         <member name="P:Fusion.Simulation.LocalAddress">
             <summary>
             Bound Address of the internal socket
@@ -16196,9 +17002,9 @@
             <summary>Mask for culled messages.</summary>
         </member>
         <member name="T:Fusion.Topologies">
-            <summary>
+             <summary>
             
-            </summary>
+             </summary>
         </member>
         <member name="F:Fusion.Topologies.ClientServer">
             <summary>
@@ -16210,15 +17016,20 @@
             Relay based shared world model
             </summary>
         </member>
+        <member name="M:Fusion.IConfigurationSanityCheck.SanityCheck">
+            <summary>
+            Sanity check the configuration to a valid state.
+            </summary>
+        </member>
         <member name="T:Fusion.SimulationConfig">
             <summary>
             Project configuration settings specific to how the Simulation class behaves.
             </summary>
         </member>
         <member name="T:Fusion.SimulationConfig.InputTransferModes">
-            <summary>
+             <summary>
             
-            </summary>
+             </summary>
         </member>
         <member name="F:Fusion.SimulationConfig.InputTransferModes.Redundancy">
             <summary>
@@ -16227,12 +17038,12 @@
         </member>
         <member name="F:Fusion.SimulationConfig.InputTransferModes.RedundancyUncompressed">
             <summary>
-            Send redundant input, use for games with small input structs (like fps games) and high player count 
+            Send redundant input, use for games with small input structs (like fps games) and high player count
             </summary>
         </member>
         <member name="F:Fusion.SimulationConfig.InputTransferModes.LatestState">
             <summary>
-            Only send latest input state, useful for VR, etc. 
+            Only send latest input state, useful for VR, etc.
             </summary>
         </member>
         <member name="T:Fusion.SimulationConfig.DataConsistency">
@@ -16240,30 +17051,30 @@
             </summary>
         </member>
         <member name="F:Fusion.SimulationConfig.DataConsistency.Full">
-            <summary>
-            <para>
-            When a <see cref="T:Fusion.NetworkBehaviour"/>'s data changes, the server will send all properties
-            whose changes have not been acknowledged.
-            </para>
+             <summary>
+             <para>
+             When a <see cref="T:Fusion.NetworkBehaviour"/>'s data changes, the server will send all properties
+             whose changes have not been acknowledged.
+             </para>
             
-            <para>
-            This option consumes more bandwidth, but guarantees that each <see cref="T:Fusion.NetworkBehaviour"/>
-            has consistent state.
-            </para>
-            </summary>
+             <para>
+             This option consumes more bandwidth, but guarantees that each <see cref="T:Fusion.NetworkBehaviour"/>
+             has consistent state.
+             </para>
+             </summary>
         </member>
         <member name="F:Fusion.SimulationConfig.DataConsistency.Eventual">
-            <summary>
-            <para>
-            When a <see cref="T:Fusion.NetworkBehaviour"/>'s data changes, the server will only send the newly
-            changed properties.
-            </para>
+             <summary>
+             <para>
+             When a <see cref="T:Fusion.NetworkBehaviour"/>'s data changes, the server will only send the newly
+             changed properties.
+             </para>
             
-            <para>
-            This option consumes less bandwidth, but a <see cref="T:Fusion.NetworkBehaviour"/> may have
-            inconsistent state at times (some properties up-to-date but not others).
-            </para>
-            </summary>
+             <para>
+             This option consumes less bandwidth, but a <see cref="T:Fusion.NetworkBehaviour"/> may have
+             inconsistent state at times (some properties up-to-date but not others).
+             </para>
+             </summary>
         </member>
         <member name="T:Fusion.SimulationConfig.SimulationTimeMode">
             <summary>
@@ -16284,7 +17095,7 @@
             <summary>Input Data Word Count</summary>
         </member>
         <member name="F:Fusion.SimulationConfig.ReplicationFeatures">
-            <summary>Features to enabled to replication such as area of interest, etc.</summary>
+            <summary>Scheduling is the default.</summary>
         </member>
         <member name="P:Fusion.SimulationConfig.SchedulingEnabled">
             <summary>Signal if scheduling is enabled</summary>
@@ -16331,9 +17142,9 @@
             </summary>
         </member>
         <member name="P:Fusion.SimulationConfig.InputTotalWordCount">
-            <summary>
+             <summary>
             
-            </summary>
+             </summary>
         </member>
         <member name="F:Fusion.SimulationConfig.EnableSerializers">
             <summary>
@@ -16341,9 +17152,12 @@
             </summary>
         </member>
         <member name="M:Fusion.SimulationConfig.Init(System.Nullable{System.Int32},System.Nullable{System.Int32})">
-            <summary>
+             <summary>
             
-            </summary>
+             </summary>
+        </member>
+        <member name="M:Fusion.SimulationConfig.SanityCheck">
+            <inheritdoc cref="M:Fusion.IConfigurationSanityCheck.SanityCheck"/>
         </member>
         <member name="T:Fusion.HeapConfiguration">
             <summary>
@@ -16374,6 +17188,9 @@
             <summary>
             ToString
             </summary>
+        </member>
+        <member name="M:Fusion.HeapConfiguration.SanityCheck">
+            <inheritdoc cref="M:Fusion.IConfigurationSanityCheck.SanityCheck"/>
         </member>
         <member name="T:Fusion.NetworkConfiguration">
             <summary>
@@ -16454,6 +17271,9 @@
             Convert this <see cref="T:Fusion.NetworkProjectConfig"/> into a <see cref="T:Fusion.Sockets.NetConfig"/> using the <see cref="T:Fusion.Sockets.NetAddress"/> as reference.
             </summary>
         </member>
+        <member name="M:Fusion.NetworkConfiguration.SanityCheck">
+            <inheritdoc cref="M:Fusion.IConfigurationSanityCheck.SanityCheck"/>
+        </member>
         <member name="T:Fusion.NetworkSimulationConfiguration">
             <summary>
             Configuration for network conditions simulation (induced latency and loss).
@@ -16532,6 +17352,9 @@
             Creates a new <see cref="T:Fusion.Sockets.NetConfigSimulation"/> based on the current configuration.
             </summary>
             <returns>A new <see cref="T:Fusion.Sockets.NetConfigSimulation"/> based on the current configuration.</returns>
+        </member>
+        <member name="M:Fusion.NetworkSimulationConfiguration.SanityCheck">
+            <inheritdoc cref="M:Fusion.IConfigurationSanityCheck.SanityCheck"/>
         </member>
         <member name="T:Fusion.TimeSyncConfiguration">
             <summary>
@@ -17147,6 +17970,27 @@
         </member>
         <member name="M:Fusion.NetworkStructUtils.GetWordCount(System.Type)">
             <inheritdoc cref="M:Fusion.NetworkStructUtils.GetWordCount``1"/>
+        </member>
+        <member name="T:ElementReaderWriterBoolean">
+            <inheritdoc />
+        </member>
+        <member name="M:ElementReaderWriterBoolean.Read(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:ElementReaderWriterBoolean.ReadRef(System.Byte*,System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:ElementReaderWriterBoolean.Write(System.Byte*,System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:ElementReaderWriterBoolean.GetElementWordCount">
+            <inheritdoc />
+        </member>
+        <member name="M:ElementReaderWriterBoolean.GetElementHashCode(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:ElementReaderWriterBoolean.GetInstance">
+            <summary>Returns boxed static instance.</summary>  
         </member>
     </members>
 </doc>

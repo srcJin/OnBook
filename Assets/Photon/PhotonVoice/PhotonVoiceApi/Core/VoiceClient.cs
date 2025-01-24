@@ -141,7 +141,6 @@ namespace Photon.Voice
         /// <summary>Lost frames simulation ratio.</summary>
         public int DebugLostPercent { get; set; }
 
-        private int prevRtt = 0;
         /// <summary>Iterates through copy of all local voices list.</summary>
         public IEnumerable<LocalVoice> LocalVoices
         {
@@ -711,8 +710,12 @@ namespace Photon.Voice
         }
 
         Random rnd = new Random();
+#if PV_DEBUG_ECHO_RTT_MEASURE
+        private int prevRtt = 0;
+#endif
         public void onFrame(int playerId, byte voiceId, byte evNumber, ref FrameBuffer receivedBytes, bool isLocalPlayer)
         {
+#if PV_DEBUG_ECHO_RTT_MEASURE
             if (isLocalPlayer)
             {
                 // rtt measurement in debug echo mode
@@ -732,7 +735,7 @@ namespace Photon.Voice
                 }
                 //internal Dictionary<byte, DateTime> localEventTimestamps = new Dictionary<byte, DateTime>();
             }
-
+#endif
             if (this.DebugLostPercent > 0 && rnd.Next(100) < this.DebugLostPercent)
             {
                 this.logger.Log(LogLevel.Warning, "[PV] Debug Lost Sim: 1 packet dropped");

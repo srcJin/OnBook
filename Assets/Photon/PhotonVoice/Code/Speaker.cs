@@ -178,7 +178,9 @@ namespace Photon.Voice.Unity
     #if UNITY_2021_2_OR_NEWER // requires ES6
             webOutAudioSource = this.GetComponent<AudioSource>();
             double initSpatialBlend = webOutAudioSource != null ? webOutAudioSource.spatialBlend : 0;
-            webOut = new WebAudioAudioOut(this.playDelayConfig, initSpatialBlend, this.Logger, string.Empty, true);
+            double refDistance = webOutAudioSource != null ? webOutAudioSource.minDistance : 0;
+            double maxDistance = webOutAudioSource != null ? webOutAudioSource.maxDistance : 0;
+            webOut = new WebAudioAudioOut(this.playDelayConfig, initSpatialBlend, refDistance, maxDistance, this.Logger, string.Empty, true);
             if (initSpatialBlend > 0)
             {
                 var al = FindObjectOfType<AudioListener>();
@@ -198,7 +200,9 @@ namespace Photon.Voice.Unity
             return new AudioOutDummy<float>();
     #endif
 #endif
+#pragma warning disable CS0162 // Unreachable code detected (UNITY_WEBGL)
             return new UnityAudioOut(this.GetComponent<AudioSource>(), this.playDelayConfig, this.Logger, string.Empty, true);
+#pragma warning restore CS0162
         }
 
         internal bool Link(RemoteVoiceLink stream)
@@ -327,7 +331,7 @@ namespace Photon.Voice.Unity
 
                 // Speaker position
                 p = gameObject.transform.position;
-                webOut.SetPosition(p.x, p.y, p.z);
+                webOut.SetPosition(p.x, -p.y, p.z);
             }
 #endif
         }

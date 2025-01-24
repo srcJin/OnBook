@@ -313,6 +313,10 @@ namespace Photon.Realtime
             {
                 op[ParameterCode.Add] = opParams.ExpectedUsers;
             }
+            if (opParams.Ticket != null)
+            {
+                op[ParameterCode.Ticket] = opParams.Ticket;
+            }
 
             if (opParams.OnGameServer)
             {
@@ -371,6 +375,10 @@ namespace Photon.Realtime
             if (opParams.ExpectedUsers != null && opParams.ExpectedUsers.Length > 0)
             {
                 op[ParameterCode.Add] = opParams.ExpectedUsers;
+            }
+            if (opParams.Ticket != null)
+            {
+                op[ParameterCode.Ticket] = opParams.Ticket;
             }
 
             if (opParams.OnGameServer)
@@ -444,6 +452,10 @@ namespace Photon.Realtime
             if (opJoinRandomRoomParams.ExpectedUsers != null && opJoinRandomRoomParams.ExpectedUsers.Length > 0)
             {
                 opParameters[ParameterCode.Add] = opJoinRandomRoomParams.ExpectedUsers;
+            }
+            if (opJoinRandomRoomParams.Ticket != null)
+            {
+                opParameters[ParameterCode.Ticket] = opJoinRandomRoomParams.Ticket;
             }
 
             opParameters[ParameterCode.AllowRepeats] = true; // enables temporary queueing for low ccu matchmaking situations
@@ -1127,6 +1139,8 @@ namespace Photon.Realtime
         protected internal JoinMode JoinMode;
         /// <summary>A list of users who are expected to join the room along with this client. Reserves slots for rooms with MaxPlayers value.</summary>
         public string[] ExpectedUsers;
+        /// <summary>Ticket for matchmaking. Provided by a plugin / server and contains a list of party members who should join the same room (among other things).</summary>
+        public object Ticket;
     }
 
 

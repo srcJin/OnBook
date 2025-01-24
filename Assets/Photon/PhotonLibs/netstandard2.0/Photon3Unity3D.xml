@@ -503,11 +503,11 @@
         </member>
         <member name="M:ExitGames.Client.Photon.IPhotonSocket.TryParseAddress(System.String,System.String@,System.UInt16@,System.String@,System.String@)">
              <summary>
-             Separates the given address into address (host name or IP) and port. Port must be included after colon!
+             Separates the given address into host (name or IP), port, scheme and path. This is more about splitting the parts, than detecting invalid cases.
              </summary>
              <remarks>
-             This method expects any address to include a port. The final ':' in addressAndPort has to separate it.
-             IPv6 addresses have multiple colons and <b>must use brackets</b> to separate address from port.
+             The out scheme may be empty for IP addresses (UDP and TCP). For these protocols, the url should include a port.
+             IPv6 addresses <b>must use brackets</b> to separate address from port.
             
              Examples:
                  ns.exitgames.com:5058

@@ -1,21 +1,5 @@
 #if !FUSION_DEV
 
-#region Assets/Photon/Fusion/Runtime/AssemblyAttributes/FusionAssemblyAttributes.Common.cs
-
-// merged AssemblyAttributes
-
-#region RegisterResourcesLoader.cs
-
-// register a default loader; it will attempt to load the asset from their default paths if they happen to be Resources
-[assembly: Fusion.FusionGlobalScriptableObjectResource(typeof(Fusion.FusionGlobalScriptableObject), Order = 2000, AllowFallback = true)]
-
-#endregion
-
-
-
-#endregion
-
-
 #region Assets/Photon/Fusion/Runtime/FusionAssetSource.Common.cs
 
 // merged AssetSource
@@ -28,6 +12,7 @@ namespace Fusion {
   using UnityEngine;
   using UnityEngine.AddressableAssets;
   using UnityEngine.ResourceManagement.AsyncOperations;
+  using static InternalLogStreams;
 
   /// <summary>
   /// An Addressables-based implementation of the asset source pattern. The asset is loaded from the Addressables system.
@@ -89,13 +74,13 @@ namespace Fusion {
 
     /// <inheritdoc cref="NetworkAssetSourceResource{T}.WaitForResult"/>
     public T WaitForResult() {
-      Debug.Assert(_op.IsValid());
+      Assert.Check(_op.IsValid());
       if (!_op.IsDone) {
         try {
           _op.WaitForCompletion();
         } catch (Exception e) when (!Application.isPlaying && typeof(Exception) == e.GetType()) {
-          Debug.LogError($"An exception was thrown when loading asset: {RuntimeKey}; since this method " +
-            $"was called from the editor, it may be due to the fact that Addressables don't have edit-time load support. Please use EditorInstance instead.");
+          LogError?.Log($"An exception was thrown when loading asset: {RuntimeKey}; since this method " +
+                        $"was called from the editor, it may be due to the fact that Addressables don't have edit-time load support. Please use EditorInstance instead.");
           throw;
         }
       }
@@ -104,12 +89,12 @@ namespace Fusion {
         throw new InvalidOperationException($"Failed to load asset: {RuntimeKey}", _op.OperationException);
       }
       
-      Debug.AssertFormat(_op.Result != null, "_op.Result != null");
+      Assert.Check(_op.Result != null, "_op.Result != null");
       return ValidateResult(_op.Result);
     }
     
     private void LoadInternal(bool synchronous) {
-      Debug.Assert(!_op.IsValid());
+      Assert.Check(!_op.IsValid());
 
       _op = Addressables.LoadAssetAsync<UnityEngine.Object>(RuntimeKey);
       if (!_op.IsValid()) {
@@ -250,7 +235,7 @@ namespace Fusion {
     /// </summary>
     /// <returns>The loaded asset</returns>
     public T WaitForResult() {
-      Debug.Assert(_state != null);
+      Assert.Check(_state != null);
       if (_state is ResourceRequest asyncOp) {
         if (asyncOp.isDone) {
           FinishAsyncOp(asyncOp);
@@ -304,7 +289,7 @@ namespace Fusion {
     }
     
     private void LoadInternal(bool synchronous) {
-      Debug.Assert(_state == null);
+      Assert.Check(_state == null);
       try {
         if (synchronous) {
           _state = string.IsNullOrEmpty(SubObjectName) ? UnityResources.Load<T>(ResourcePath) : LoadNamedResource(ResourcePath, SubObjectName);
@@ -523,6 +508,7 @@ namespace Fusion {
   using UnityEngine.AddressableAssets;
   using UnityEngine.ResourceManagement.AsyncOperations;
 #endif
+  using static InternalLogStreams;
   
   /// <summary>
   /// If applied at the assembly level, allows <see cref="FusionGlobalScriptableObject{T}"/> to be loaded with Addressables.
@@ -555,10 +541,11 @@ namespace Fusion {
         return new (instance, x => Addressables.Release(op));
       }
       
-      Log.Trace($"Failed to load addressable at address {Address} for type {type.FullName}: {op.OperationException}");
+      
+      LogTrace?.Log($"Failed to load addressable at address {Address} for type {type.FullName}: {op.OperationException}");
       return default;
 #else
-      Log.Trace($"Addressables are not enabled. Unable to load addressable for {type.FullName}");
+      LogTrace?.Log($"Addressables are not enabled. Unable to load addressable for {type.FullName}");
       return default;
 #endif
     }
@@ -577,6 +564,7 @@ namespace Fusion {
   using UnityEngine;
   using UnityEngine.Scripting;
   using Object = UnityEngine.Object;
+  using static InternalLogStreams;
   
   /// <summary>
   /// If applied at the assembly level, allows <see cref="FusionGlobalScriptableObject{T}"/> to be loaded with Resources.
@@ -614,7 +602,7 @@ namespace Fusion {
         string defaultAssetPath = attribute.DefaultPath;
         var indexOfResources = defaultAssetPath.LastIndexOf("/Resources/", StringComparison.OrdinalIgnoreCase);
         if (indexOfResources < 0) {
-          Log.Trace($"The default path {defaultAssetPath} does not contain a /Resources/ folder. Unable to load resource for {type.FullName}.");
+          LogTrace?.Log($"The default path {defaultAssetPath} does not contain a /Resources/ folder. Unable to load resource for {type.FullName}.");
           return default;
         }
 
@@ -631,7 +619,7 @@ namespace Fusion {
 
       var instance = UnityEngine.Resources.Load(resourcePath, type);
       if (!instance) {
-        Log.Trace($"Unable to load resource at path {resourcePath} for type {type.FullName}");
+        LogTrace?.Log($"Unable to load resource at path {resourcePath} for type {type.FullName}");
         return default;
       }
 
@@ -721,6 +709,144 @@ namespace Fusion {
       if (_inner is IDisposable disposable) {
         disposable.Dispose();
       }
+    }
+  }
+}
+
+#endregion
+
+
+#region Assets/Photon/Fusion/Runtime/FusionLogInitializer.Partial.cs
+
+﻿namespace Fusion {
+  using System.Text;
+  using System.Threading;
+  using UnityEngine;
+
+  partial class FusionLogInitializer {
+    static partial void InitializeUnityLoggerUser(ref FusionUnityLogger logger);
+    
+    static FusionUnityLogger CreateLogger(bool isDarkMode) {
+      return new FusionUnityLogger(System.Threading.Thread.CurrentThread, isDarkMode);
+    }
+  }
+
+  /// <summary>
+  /// Fusion logger implementation for Unity.
+  /// </summary>
+  public class FusionUnityLogger : FusionUnityLoggerBase {
+
+    /// <summary>
+    /// Is true, the active runner's tick will be logged.
+    /// </summary>
+    public bool LogActiveRunnerTick = false;
+    
+    /// <inheritdoc/>
+    public FusionUnityLogger(Thread mainThread, bool isDarkMode) : base(mainThread, isDarkMode) {
+    }
+    
+    /// <inheritdoc/>
+    protected override (string, Object) CreateMessage(in LogContext context) {
+      var sb = GetThreadSafeStringBuilder(out var isMainThread);
+      Debug.Assert(sb.Length == 0);
+      
+      var obj = context.Source?.GetUnityObject();
+      
+      try {
+        AppendPrefix(sb, context.Flags, context.Prefix);
+
+        var pos = sb.Length;
+        if (obj != null) {
+          if (obj is NetworkRunner runner) {
+            TryAppendRunnerPrefix(sb, runner);
+          } else if (obj is NetworkObject networkObject) {
+            TryAppendNetworkObjectPrefix(sb, networkObject);
+          } else if (obj is SimulationBehaviour simulationBehaviour) {
+            TryAppendSimulationBehaviourPrefix(sb, simulationBehaviour);
+          } else {
+            AppendNameThreadSafe(sb, obj); 
+          }
+        }
+
+        if (LogActiveRunnerTick) {
+          for (var enumerator = NetworkRunner.GetInstancesEnumerator(); enumerator.MoveNext();) {
+            var runner = enumerator.Current;
+            if (runner == null || !runner.IsSimulationUpdating) {
+              continue;
+            }
+            sb.Append($"[Tick {(int)runner.Tick}{(runner.IsFirstTick ? "F" : "")}{(runner.Stage == 0 ? "" : $" {runner.Stage}")}] ");
+          }
+        }
+        
+        if (sb.Length > pos) {
+          sb.Append(": ");
+        }
+        
+        sb.Append(context.Message);
+        return (sb.ToString(), isMainThread ? obj : null);
+      } finally {
+        sb.Clear();
+      }
+    }
+    
+    bool TryAppendRunnerPrefix(StringBuilder builder, NetworkRunner runner) {
+      if ((object)runner == null) {
+        return false;
+      }
+      if (runner.Config?.PeerMode != NetworkProjectConfig.PeerModes.Multiple) {
+        return false;
+      }
+
+      AppendNameThreadSafe(builder, runner);
+
+      var localPlayer = runner.LocalPlayer;
+      if (localPlayer.IsRealPlayer) {
+        builder.Append("[P").Append(localPlayer.PlayerId).Append("]");
+      } else {
+        builder.Append("[P-]");
+      }
+      
+      return true;
+    }
+    
+    bool TryAppendNetworkObjectPrefix(StringBuilder builder, NetworkObject networkObject) {
+      if ((object)networkObject == null) {
+        return false;
+      }
+
+      AppendNameThreadSafe(builder, networkObject);
+      
+      if (networkObject.Id.IsValid) {
+        builder.Append(" ");
+        builder.Append(networkObject.Id.ToString());
+      }
+      
+      int pos = builder.Length;
+      if (TryAppendRunnerPrefix(builder, networkObject.Runner)) {
+        builder.Insert(pos, '@');
+      }
+
+      return true;
+    }
+    
+    bool TryAppendSimulationBehaviourPrefix(StringBuilder builder, SimulationBehaviour simulationBehaviour) {
+      if ((object)simulationBehaviour == null) {
+        return false;
+      }
+
+      AppendNameThreadSafe(builder, simulationBehaviour);
+      
+      if (simulationBehaviour is NetworkBehaviour nb && nb.Id.IsValid) {
+        builder.Append(" ");
+        builder.Append(nb.Id.ToString());
+      }
+      
+      int pos = builder.Length;
+      if (TryAppendRunnerPrefix(builder, simulationBehaviour.Runner)) {
+        builder.Insert(pos, '@');
+      }
+
+      return true;
     }
   }
 }
@@ -825,338 +951,53 @@ namespace Fusion {
 #endregion
 
 
-#region Assets/Photon/Fusion/Runtime/FusionUnityLogger.cs
+#region Assets/Photon/Fusion/Runtime/FusionTraceChannelsExtensions.cs
+
+
 
 namespace Fusion {
-  using System;
-  using System.Collections;
-  using System.Collections.Generic;
-  using System.Runtime.CompilerServices;
-  using System.Runtime.ExceptionServices;
-  using System.Text;
-  using System.Threading;
-  using UnityEditor;
-  using UnityEngine;
-  using UnityEngine.Serialization;
-  using Object = UnityEngine.Object;
-
-  [Serializable]
-  public partial class FusionUnityLogger : Fusion.ILogger {
-
-    /// <summary>
-    /// Implement this to modify values of this logger.
-    /// </summary>
-    /// <param name="logger"></param>
-    static partial void InitializePartial(ref FusionUnityLogger logger);
-
-    StringBuilder  _builder    = new StringBuilder();
-    Thread _mainThread;
-
-    public string NameUnavailableObjectDestroyedLabel = "(destroyed)";
-    public string NameUnavailableInWorkerThreadLabel = "";
-
-    /// <summary>
-    /// If true, all messages will be prefixed with [Fusion] tag
-    /// </summary>
-    public bool UseGlobalPrefix;
-
-    /// <summary>
-    /// If true, some parts of messages will be enclosed with &lt;color&gt; tags.
-    /// </summary>
-    public bool UseColorTags;
-
-    /// <summary>
-    /// If true, each log message that has a source parameter will be prefixed with a hash code of the source object. 
-    /// </summary>
-    public bool AddHashCodePrefix;
-    
-    /// <summary>
-    /// Color of the global prefix (see <see cref="UseGlobalPrefix"/>).
-    /// </summary>
-    public string GlobalPrefixColor;
-
-    /// <summary>
-    /// Min Random Color
-    /// </summary>
-    public Color32 MinRandomColor;
-    
-    /// <summary>
-    /// Max Random Color
-    /// </summary>
-    public Color32 MaxRandomColor;
-
-    /// <summary>
-    /// Server Color
-    /// </summary>
-    public Color ServerColor;
-
-    public FusionUnityLogger(Thread mainThread) {
-
-      _mainThread = mainThread;
-      
-      bool isDarkMode = false;
-#if UNITY_EDITOR
-      isDarkMode = UnityEditor.EditorGUIUtility.isProSkin;
+  static class TraceChannelsExtensions {
+    public static TraceChannels AddChannelsFromDefines(this TraceChannels traceChannels) {
+#if FUSION_TRACE_GLOBAL
+      traceChannels |= TraceChannels.Global;
 #endif
-
-      MinRandomColor = isDarkMode ? new Color32(158, 158, 158, 255) : new Color32(30, 30, 30, 255);
-      MaxRandomColor = isDarkMode ? new Color32(255, 255, 255, 255) : new Color32(90, 90, 90, 255);
-      ServerColor    = isDarkMode ? new Color32(255, 255, 158, 255) : new Color32(30, 90, 200, 255);
-
-      UseColorTags = true;
-      UseGlobalPrefix = true;
-      GlobalPrefixColor = Color32ToRGBString(isDarkMode ? new Color32(115, 172, 229, 255) : new Color32(20, 64, 120, 255));
-    }
-
-    public void Log(LogType logType, object message, in LogContext logContext) {
-
-      Debug.Assert(_builder.Length == 0);
-      string fullMessage;
-
-      var obj = logContext.Source as UnityEngine.Object;
-
-      try {
-        if (logType == LogType.Debug) {
-          _builder.Append("[DEBUG] ");
-        } else if (logType == LogType.Trace) {
-          _builder.Append("[TRACE] ");
-        }
-
-        if (UseGlobalPrefix) {
-          if (UseColorTags) {
-            _builder.Append("<color=");
-            _builder.Append(GlobalPrefixColor);
-            _builder.Append(">");
-          }
-          _builder.Append("[Fusion");
-
-          if (!string.IsNullOrEmpty(logContext.Prefix)) {
-            _builder.Append("/");
-            _builder.Append(logContext.Prefix);
-          }
-
-          _builder.Append("]");
-
-          if (UseColorTags) {
-            _builder.Append("</color>");
-          }
-          _builder.Append(" ");
-        } else {
-          if (!string.IsNullOrEmpty(logContext.Prefix)) {
-            _builder.Append(logContext.Prefix);
-            _builder.Append(": ");
-          }
-        }
-
-        if (obj) {
-          var pos = _builder.Length;
-          if (obj is NetworkRunner runner) {
-            TryAppendRunnerPrefix(_builder, runner);
-          } else if (obj is NetworkObject networkObject) {
-            TryAppendNetworkObjectPrefix(_builder, networkObject);
-          } else if (obj is SimulationBehaviour simulationBehaviour) {
-            TryAppendSimulationBehaviourPrefix(_builder, simulationBehaviour);
-          } else {
-            AppendNameThreadSafe(_builder, obj); 
-          }
-          if (_builder.Length > pos) {
-            _builder.Append(": ");
-          }
-        }
-        _builder.Append(message);
-        
-        fullMessage = _builder.ToString();
-      } finally {
-        _builder.Clear();
-      }
-
-      switch (logType) {
-        case LogType.Error:
-          Debug.LogError(fullMessage, IsInMainThread ? obj : null);
-          break;
-        case LogType.Warn:
-          Debug.LogWarning(fullMessage, IsInMainThread ? obj : null);
-          break;
-        default:
-          Debug.Log(fullMessage, IsInMainThread ? obj : null);
-          break;
-      }
-    }
-
-    public void LogException(Exception ex, in LogContext logContext) {
-      Log(LogType.Error, $"{ex.GetType()} <i>See next error log entry for details.</i>", in logContext);
-      
-#if UNITY_EDITOR
-      // this is to force console window double click to take you where the exception
-      // has been thrown, not where it has been logged
-      var edi = ExceptionDispatchInfo.Capture(ex);
-      var thread = new Thread(() => {
-        edi.Throw();
-      });
-      thread.Start();
-      thread.Join();
-#else
-      if (logContext.Source is UnityEngine.Object obj) {
-        Debug.LogException(ex, obj);
-      } else {
-        Debug.LogException(ex);
-      }
+#if FUSION_TRACE_STUN
+      traceChannels |= TraceChannels.Stun;
 #endif
-    }
-
-    int GetRandomColor(int seed) => GetRandomColor(seed, MinRandomColor, MaxRandomColor, ServerColor);
-
-    int GetColorSeed(string name) {
-      int hash = 0;
-      for (var i = 0; i < name.Length; ++i) {
-        hash = hash * 31 + name[i];
-      }
-
-      return hash;
-    }
-
-    static int GetRandomColor(int seed, Color32 min, Color32 max, Color32 svr) {
-      var random = new NetworkRNG(seed);
-      int r, g, b;
-      // -1 indicates host/client - give it a more pronounced color.
-      if (seed == -1) {
-        r = svr.r;
-        g = svr.g;
-        b = svr.b;
-      } else {
-        r = random.RangeInclusive(min.r, max.r);
-        g = random.RangeInclusive(min.g, max.g);
-        b = random.RangeInclusive(min.b, max.b);
-      }
-
-      r = Mathf.Clamp(r, 0, 255);
-      g = Mathf.Clamp(g, 0, 255);
-      b = Mathf.Clamp(b, 0, 255);
-
-      int rgb = (r << 16) | (g << 8) | b;
-      return rgb;
-    }
-
-    static int Color32ToRGB24(Color32 c) {
-      return (c.r << 16) | (c.g << 8) | c.b;
-    }
-
-    static string Color32ToRGBString(Color32 c) {
-      return string.Format("#{0:X6}", Color32ToRGB24(c));
-    }
-
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void Initialize() {
-      if (Fusion.Log.Initialized) {
-        return;
-      }
-
-      var logger = new FusionUnityLogger(Thread.CurrentThread);
-
-      // Optional override of default values
-      InitializePartial(ref logger);
-
-      if (logger != null) {
-        Fusion.Log.Init(logger);
-      }
-    }
-    
-    private void AppendNameThreadSafe(StringBuilder builder, UnityEngine.Object obj) {
-      
-      if  ((object)obj == null) throw new ArgumentNullException(nameof(obj));
-      
-      string name;
-      bool isDestroyed = obj == null;
-      
-      if (isDestroyed) {
-        name = NameUnavailableObjectDestroyedLabel;
-      } else if (!IsInMainThread) {
-        name = NameUnavailableInWorkerThreadLabel;
-      } else {
-        name = obj.name;
-      }
-      
-      if (UseColorTags) {
-        int colorSeed = GetColorSeed(name);
-        builder.AppendFormat("<color=#{0:X6}>", GetRandomColor(colorSeed));
-      }
-
-      if (AddHashCodePrefix) {
-        builder.AppendFormat("{0:X8}", obj.GetHashCode());
-      }
-
-      if (name?.Length > 0) {
-        if (AddHashCodePrefix) {
-          builder.Append(" ");
-        }
-        builder.Append(name);  
-      }
-
-      if (UseColorTags) {
-        builder.Append("</color>");
-      }
-    }
-
-    private bool IsInMainThread => _mainThread == Thread.CurrentThread;
-
-    bool TryAppendRunnerPrefix(StringBuilder builder, NetworkRunner runner) {
-      if ((object)runner == null) {
-        return false;
-      }
-      if (runner.Config?.PeerMode != NetworkProjectConfig.PeerModes.Multiple) {
-        return false;
-      }
-
-      AppendNameThreadSafe(builder, runner);
-
-      var localPlayer = runner.LocalPlayer;
-      if (localPlayer.IsRealPlayer) {
-        builder.Append("[P").Append(localPlayer.PlayerId).Append("]");
-      } else {
-        builder.Append("[P-]");
-      }
-      
-      return true;
-    }
-    
-    bool TryAppendNetworkObjectPrefix(StringBuilder builder, NetworkObject networkObject) {
-      if ((object)networkObject == null) {
-        return false;
-      }
-
-      AppendNameThreadSafe(builder, networkObject);
-      
-      if (networkObject.Id.IsValid) {
-        builder.Append(" ");
-        builder.Append(networkObject.Id.ToString());
-      }
-      
-      int pos = builder.Length;
-      if (TryAppendRunnerPrefix(builder, networkObject.Runner)) {
-        builder.Insert(pos, '@');
-      }
-
-      return true;
-    }
-    
-    bool TryAppendSimulationBehaviourPrefix(StringBuilder builder, SimulationBehaviour simulationBehaviour) {
-      if ((object)simulationBehaviour == null) {
-        return false;
-      }
-
-      AppendNameThreadSafe(builder, simulationBehaviour);
-      
-      if (simulationBehaviour is NetworkBehaviour nb && nb.Id.IsValid) {
-        builder.Append(" ");
-        builder.Append(nb.Id.ToString());
-      }
-      
-      int pos = builder.Length;
-      if (TryAppendRunnerPrefix(builder, simulationBehaviour.Runner)) {
-        builder.Insert(pos, '@');
-      }
-
-      return true;
+#if FUSION_TRACE_OBJECT
+      traceChannels |= TraceChannels.Object;
+#endif
+#if FUSION_TRACE_NETWORK
+      traceChannels |= TraceChannels.Network;
+#endif
+#if FUSION_TRACE_PREFAB
+      traceChannels |= TraceChannels.Prefab;
+#endif
+#if FUSION_TRACE_SCENEINFO
+      traceChannels |= TraceChannels.SceneInfo;
+#endif
+#if FUSION_TRACE_SCENEMANAGER
+      traceChannels |= TraceChannels.SceneManager;
+#endif
+#if FUSION_TRACE_SIMULATIONMESSAGE
+      traceChannels |= TraceChannels.SimulationMessage;
+#endif
+#if FUSION_TRACE_HOSTMIGRATION
+      traceChannels |= TraceChannels.HostMigration;
+#endif
+#if FUSION_TRACE_ENCRYPTION
+      traceChannels |= TraceChannels.Encryption;
+#endif
+#if FUSION_TRACE_DUMMYTRAFFIC
+      traceChannels |= TraceChannels.DummyTraffic;
+#endif
+#if FUSION_TRACE_REALTIME
+      traceChannels |= TraceChannels.Realtime;
+#endif
+#if FUSION_TRACE_MEMORYTRACK
+      traceChannels |= TraceChannels.MemoryTrack;
+#endif
+      return traceChannels;
     }
   }
 }
@@ -1644,6 +1485,129 @@ namespace Fusion {
 #endregion
 
 
+#region FusionLogInitializer.cs
+
+namespace Fusion {
+  using System;
+  using UnityEngine;
+  
+#if UNITY_EDITOR
+  using UnityEditor;
+  using UnityEditor.Build;
+#endif
+  
+  /// <summary>
+  /// Initializes the logging system for Fusion. Use <see cref="InitializeUser"/> to completely override the log level and trace channels or
+  /// to provide a custom logger. Use <see cref="InitializeUnityLoggerUser"/> to override default Unity logger settings.
+  /// </summary>
+  public static partial class FusionLogInitializer {
+#if UNITY_EDITOR
+    static LogLevel GetEditorLogLevel() {
+      var currentBuildTarget = EditorUserBuildSettings.activeBuildTarget;
+      var currentBuildTargetGroup = BuildPipeline.GetBuildTargetGroup(currentBuildTarget);
+      var currentNamedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(currentBuildTargetGroup);
+      var defines = PlayerSettings.GetScriptingDefineSymbols(currentNamedBuildTarget).Split(";");
+      
+      const string LogLevelNone  = "FUSION_LOGLEVEL_NONE";
+      const string LogLevelError = "FUSION_LOGLEVEL_ERROR";
+      const string LogLevelWarn  = "FUSION_LOGLEVEL_WARN";
+      const string LogLevelInfo  = "FUSION_LOGLEVEL_INFO";
+      const string LogLevelDebug = "FUSION_LOGLEVEL_DEBUG";
+      const string LogLevelTrace = "FUSION_LOGLEVEL_TRACE";
+      
+      (string, LogLevel)[] logLevelDefines = {
+        (LogLevelNone, LogLevel.None),
+        (LogLevelError, LogLevel.Error),
+        (LogLevelWarn, LogLevel.Warn),
+        (LogLevelInfo, LogLevel.Info),
+        (LogLevelDebug, LogLevel.Debug),
+      };
+      
+      string defaultLogLevelDefine = LogLevelInfo;
+      
+      if (Array.IndexOf(defines, LogLevelTrace) >= 0) {
+        FusionEditorLog.Warn($"{LogLevelTrace} is not supported in Fusion. Replacing with {LogLevelDebug}.");
+        ArrayUtility.Remove(ref defines, LogLevelTrace);
+        defaultLogLevelDefine = LogLevelDebug;
+      }
+      
+      LogLevel? foundLogLevel = null;
+      foreach (var (define, logLevel) in logLevelDefines) {
+        if (Array.IndexOf(defines, define) < 0) {
+          continue;
+        }
+
+        foundLogLevel = logLevel;
+        break;
+      }
+      
+      if (foundLogLevel == null) {
+        if (Application.isPlaying) {
+          FusionEditorLog.Log($"No log level define set for Fusion. Setting default: {defaultLogLevelDefine}");
+        }
+        
+        ArrayUtility.Add(ref defines, defaultLogLevelDefine);
+        PlayerSettings.SetScriptingDefineSymbols(currentNamedBuildTarget, string.Join(";", defines));
+        
+        return LogLevel.Info;
+      } else {
+        return foundLogLevel.Value;
+      }
+    }
+#endif
+    
+    /// <summary>
+    /// Initializes the logging system for Fusion. This method is called automatically when the assembly is loaded.
+    /// </summary>
+#if UNITY_EDITOR
+    [UnityEditor.InitializeOnLoadMethod]
+#endif
+    [RuntimeInitializeOnLoadMethod]
+    public static void Initialize() {
+      var isDark = false;
+#if UNITY_EDITOR
+      isDark = UnityEditor.EditorGUIUtility.isProSkin;
+      FusionEditorLog.Initialize(isDark);
+#endif
+      
+      LogLevel logLevel =
+#if FUSION_LOGLEVEL_DEBUG || FUSION_LOGLEVEL_TRACE
+        LogLevel.Debug;
+#elif FUSION_LOGLEVEL_INFO
+        LogLevel.Info;
+#elif FUSION_LOGLEVEL_WARN
+        LogLevel.Warn;
+#elif FUSION_LOGLEVEL_ERROR
+        LogLevel.Error;
+#elif FUSION_LOGLEVEL_NONE
+        LogLevel.None;
+#elif UNITY_EDITOR
+        GetEditorLogLevel();
+#else
+        LogLevel.None;
+      FusionEditorLog.LogWarning($"No log level define set for Fusion, treating as FUSION_LOGLEVEL_NONE (disabled completely).");
+#endif
+      
+      TraceChannels traceChannels = default;
+      traceChannels = traceChannels.AddChannelsFromDefines();
+      InitializeUser(ref logLevel, ref traceChannels);
+
+      if (Log.IsInitialized) {
+        return;
+      }
+
+      var logger = CreateLogger(isDarkMode: isDark);
+      InitializeUnityLoggerUser(ref logger);
+      Log.Initialize(logLevel, logger.CreateLogStream, traceChannels);
+    }
+    
+    static partial void InitializeUser(ref LogLevel logLevel, ref TraceChannels traceChannels);
+  }
+}
+
+#endregion
+
+
 #region FusionMppm.cs
 
 namespace Fusion {
@@ -1974,6 +1938,10 @@ namespace Fusion {
 #region FusionUnityExtensions.cs
 
 namespace Fusion {
+#if UNITY_2022_1_OR_NEWER && !UNITY_2022_2_OR_NEWER
+  using UnityEngine;
+#endif
+
   /// <summary>
   /// Provides backwards compatibility for Unity API.
   /// </summary>
@@ -2080,7 +2048,7 @@ namespace Fusion {
     private TransformPathCache _pathCache                      = new TransformPathCache();
     private List<NetworkBehaviour> _arrayBufferNB    = new List<NetworkBehaviour>();
     private List<NetworkObject> _arrayBufferNO       = new List<NetworkObject>();
-
+    
     public struct Result {
       public bool HadChanges { get; }
       public int ObjectCount { get; }
@@ -2106,6 +2074,16 @@ namespace Fusion {
       return 0;
     }
 
+    /// <summary>
+    /// Postprocesses the behaviour. Returns true if the object was marked dirty.
+    /// </summary>
+    /// <param name="behaviour"></param>
+    /// <returns></returns>
+    protected virtual bool PostprocessBehaviour(SimulationBehaviour behaviour) {
+      // do nothing
+      return false;
+    }
+    
     [System.Diagnostics.Conditional("FUSION_EDITOR_TRACE")]
     protected static void Trace(string msg) {
       Debug.Log($"[Fusion/NetworkObjectBaker] {msg}");
@@ -2177,6 +2155,8 @@ namespace Fusion {
               if (script is NetworkBehaviour nb) {
                 _arrayBufferNB.Add(nb);
               }
+              
+              objDirty |= PostprocessBehaviour(script);
               
               _allSimulationBehaviours.RemoveAt(scriptIndex);
 

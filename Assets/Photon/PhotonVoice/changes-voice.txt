@@ -1,5 +1,34 @@
 Photon Voice 2 Change Log
 
+v2.57 (December 13, 2024)
+   PUN2: v2.45 (PUN2.45) 
+   RT/lib: v4.1.8.8
+   PhotonVoiceApi: revision 7794
+   Unity: 2019.4.39 or higher
+WebGL:
+   ADDED: WebAudioAudioOut spatial ref and max distances control via AudioSource min and max distances
+FMOD:
+   FIXED: FMOD always used device 0 for recording
+Fusion:
+   FIXED: `LogLevel` related errors after importing Fusion 2.0.3
+
+v2.56 (August 19, 2024)
+   PUN2: v2.45 (PUN2.45) 
+   RT/lib: v4.1.8.8
+   PhotonVoiceApi: revision 7650
+   Unity: 2019.4.39 or higher
+   UPDATED: Photon3Unity3D.dll, Photon Realtime (LoadBalancing), Photon Chat to v4.1.8.8
+Unity:
+   FIXED: VoiceFollowClient leaves the room instead of disconnecting the server when follows the "not in room" leader's state: disconnect left the player in the room in an inactive state preventing subsequent connection with the same UserId
+   CHNAGED: LoggerImpl cashes VoiceLogger.LogLevel in SetVoiceLogger() and Log() and uses the cashed value if Log() is called after the VoiceLogger instance is destroyed
+   NOTE: this mitigates but not completely fixes the wrong logging level during scene unload if the global VoiceLogger is destroyed earlier than the logging component; use local VoiceLogger instances to avoid this
+   CHANGED: do not create a voice settings file in the voice install sub-folder if voice is installed in the Packages folder (and then potentially not writable)
+FMOD:
+   ADDED: SpeakerFMOD event is always attached to the game object to support a spatializer in case it's attached to the event
+WebGL:
+   FIXED: WebAudioMicIn allocated a native buffer for captured audio 4 times larger than required
+   FIXED: WebGL Speaker did not negate its position 'y' component
+
 v2.55 (February 26, 2024)
    PUN2: v2.45 (PUN2.45) 
    RT/lib: v4.1.8.0
@@ -7,7 +36,7 @@ v2.55 (February 26, 2024)
    Unity: 2019.4.39 or higher
    UPDATED: Photon3Unity3D.dll, Photon Realtime (LoadBalancing) to v4.1.8.0
    UPDATED: PUN to v2.45
-   ADDED: VisionOS support (Opus and WebRTC Audio libraries)
+   ADDED: visionOS support (Opus and WebRTC Audio libraries)
 Core:
    BREAKING: ILogger.Log*() methods replaced with LogLevel enum and single Log() method accepting logging level
    BREAKING: added ILogger.Level property, that Voice code can check to avoid unnecessary Log() methods calls

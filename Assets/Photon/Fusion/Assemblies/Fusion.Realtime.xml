@@ -9,6 +9,16 @@
             Wrapper for realtime region information.
             </summary>
         </member>
+        <member name="F:Fusion.RegionInfo.RegionCode">
+            <summary>
+            The code of the region.
+            </summary>
+        </member>
+        <member name="F:Fusion.RegionInfo.RegionPing">
+            <summary>
+            The ping of the region.
+            </summary>
+        </member>
         <member name="T:Fusion.FusionRealtimeProxy">
             <summary>
             Class to provide access to some realtime operations and API.
@@ -435,7 +445,7 @@
         <member name="F:Fusion.Photon.Realtime.AppSettings.EnableLobbyStatistics">
             <summary>If true, the client will request the list of currently available lobbies.</summary>
         </member>
-        <member name="F:Fusion.Photon.Realtime.AppSettings.NetworkLogging">
+        <member name="P:Fusion.Photon.Realtime.AppSettings.NetworkLogging">
             <summary>Log level for the network lib.</summary>
         </member>
         <member name="P:Fusion.Photon.Realtime.AppSettings.IsMasterServerAddress">
@@ -458,6 +468,13 @@
             <summary>Checks if a string is a Guid by attempting to create one.</summary>
             <param name="val">The potential guid to check.</param>
             <returns>True if new Guid(val) did not fail.</returns>
+        </member>
+        <member name="M:Fusion.Photon.Realtime.AppSettings.CopyTo(Fusion.Photon.Realtime.AppSettings)">
+            <summary>
+            Copy the values of the current instance into another instance.
+            </summary>
+            <param name="d">The destination instance.</param>
+            <returns>The destination instance with the copied values.</returns>
         </member>
         <member name="M:Fusion.Photon.Realtime.AppSettings.GetCopy">
             <summary>
@@ -959,18 +976,20 @@
              </remarks>
         </member>
         <member name="P:Fusion.Photon.Realtime.LoadBalancingClient.EnableProtocolFallback">
-             <summary>Enables a fallback to another protocol in case a connect to the Name Server fails.</summary>
+             <summary>Enables the fallback to WSS, should the initial connect to the Name Server fail. Some exceptions apply.</summary>
              <remarks>
-             When connecting to the Name Server fails for a first time, the client will select an alternative
-             network protocol and re-try to connect.
+             For security reasons, a fallback to another protocol is not done when using WSS or AuthMode.AuthOnceWss.
+             That would compromise the expected security.
+            
+             If the fallback is impossible or if that connection also fails, the app logic must handle the case.
+             It might even make sense to just try the same connection settings once more (or ask the user to do something about
+             the network connectivity, firewalls, etc).
             
              The fallback will use the default Name Server port as defined by ProtocolToNameServerPort.
-            
-             The fallback for TCP is UDP. All other protocols fallback to TCP.
              </remarks>
         </member>
         <member name="P:Fusion.Photon.Realtime.LoadBalancingClient.CurrentServerAddress">
-            <summary>The currently used server address (if any). The type of server is define by Server property.</summary>
+            <summary>The currently used server address (if any). The type of server is defined by Server property.</summary>
         </member>
         <member name="P:Fusion.Photon.Realtime.LoadBalancingClient.MasterServerAddress">
             <summary>Your Master Server address. In PhotonCloud, call ConnectToRegionMaster() to find your Master Server.</summary>
@@ -981,6 +1000,13 @@
         </member>
         <member name="P:Fusion.Photon.Realtime.LoadBalancingClient.GameServerAddress">
             <summary>The game server's address for a particular room. In use temporarily, as assigned by master.</summary>
+        </member>
+        <member name="F:Fusion.Photon.Realtime.LoadBalancingClient.AddressRewriter">
+            <summary>Provides a custom function to re-write server addresses in case the client must use a third party relay.</summary>
+            <remarks>
+            Discord Activities can only communicate with the domain discord.com.
+            A forwarding system based on paths is used to replace addresses that are not on that domain.
+            </remarks>
         </member>
         <member name="P:Fusion.Photon.Realtime.LoadBalancingClient.Server">
             <summary>The server this client is currently connected or connecting to.</summary>
@@ -1240,12 +1266,12 @@
         </member>
         <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.GetNameServerAddress">
             <summary>
-            Gets the NameServer Address (with prefix and port), based on the set protocol (this.LoadBalancingPeer.UsedProtocol).
+            Gets the NameServer Address (with prefix and port), based on the set protocol (this.LoadBalancingPeer.TransportProtocol).
             </summary>
             <returns>NameServer Address (with prefix and port).</returns>
         </member>
         <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.ToProtocolAddress(System.String,System.Int32,ExitGames.Client.Photon.ConnectionProtocol)">
-            <summary>Build URI from address, use Scheme, Host and Path but set the port as defined by port-field or default port.</summary>
+            <summary>Build URI from address, use Scheme, Host and Path but set the port as defined by port-field or default port. Calls AddressRewriter if set.</summary>
             <exception cref="T:System.ArgumentException"></exception>
         </member>
         <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.ConnectUsingSettings(Fusion.Photon.Realtime.AppSettings)">
@@ -1339,7 +1365,7 @@
             </remarks>
             <returns>False, if the conditions are not met. Then, this client does not attempt the ReconnectAndRejoin.</returns>
         </member>
-        <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.Disconnect(Fusion.Photon.Realtime.DisconnectCause)">
+        <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.Disconnect">
              <summary>Disconnects the peer from a server or stays disconnected. If the client / peer was connected, a callback will be triggered.</summary>
              <remarks>
              Disconnect will attempt to notify the server of the client closing the connection.
@@ -1349,6 +1375,9 @@
              This method will not change the current State, if this client State is PeerCreated, Disconnecting or Disconnected.
              In those cases, there is also no callback for the disconnect. The DisconnectedCause will only change if the client was connected.
              </remarks>
+        </member>
+        <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.Disconnect(Fusion.Photon.Realtime.DisconnectCause)">
+            <summary>Disconnects the client / peer from a server or stays disconnected. Internal method that sets the DisconnectedCause as well.</summary>
         </member>
         <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.DisconnectToReconnect">
             <summary>
@@ -1821,11 +1850,10 @@
             Privately used only to read properties for a distinct actor (which might be the hashtable OR a key-pair value IN the actorProperties).
             </summary>
         </member>
-        <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.ChangeLocalID(System.Int32)">
-            <summary>
-            Internally used to set the LocalPlayer's ID (from -1 to the actual in-room ID).
-            </summary>
-            <param name="newID">New actor ID (a.k.a actorNr) assigned when joining a room.</param>
+        <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.ChangeLocalID(System.Int32,System.Boolean)">
+            <summary>Internally used to set the LocalPlayer's actorNumber (from -1 to the actual in-room value) and optionally the userId.</summary>
+            <param name="newId">New actorNr assigned when joining a room.</param>
+            <param name="applyUserId">Set true for offline mode. If true the player.UserId is set to this.AuthValues.UserId or a new GUID (mimicking online mode).</param>
         </member>
         <member name="M:Fusion.Photon.Realtime.LoadBalancingClient.GameEnteredOnGameServer(ExitGames.Client.Photon.OperationResponse)">
             <summary>
@@ -3700,6 +3728,21 @@
             Options for authentication modes. From "classic" auth on each server to AuthOnce (on NameServer).
             </summary>
         </member>
+        <member name="F:Fusion.Photon.Realtime.AuthModeOption.Auth">
+            <summary>
+            Classic authentication mode.
+            </summary>
+        </member>
+        <member name="F:Fusion.Photon.Realtime.AuthModeOption.AuthOnce">
+            <summary>
+            Authenticate once on the NameServer.
+            </summary>
+        </member>
+        <member name="F:Fusion.Photon.Realtime.AuthModeOption.AuthOnceWss">
+            <summary>
+            Authenticate once on the NameServer using WebSocket Secure (WSS).
+            </summary>
+        </member>
         <member name="T:Fusion.Photon.Realtime.CustomAuthenticationType">
             <summary>
             Options for optional "Custom Authentication" services used with Photon. Used by OpAuthenticate after connecting to Photon.
@@ -3720,6 +3763,9 @@
         <member name="F:Fusion.Photon.Realtime.CustomAuthenticationType.PlayStation4">
             <summary>Authenticates users by their PSN Account and token on PS4. Set token as "token", env as "env" and userName as "userName" via AddAuthParameter().</summary>
         </member>
+        <member name="F:Fusion.Photon.Realtime.CustomAuthenticationType.PlayStation">
+            <inheritdoc cref="F:Fusion.Photon.Realtime.CustomAuthenticationType.PlayStation4"/>
+        </member>
         <member name="F:Fusion.Photon.Realtime.CustomAuthenticationType.Xbox">
             <summary>Authenticates users by their Xbox Account. Pass the XSTS token via SetAuthPostData().</summary>
         </member>
@@ -3731,6 +3777,9 @@
         </member>
         <member name="F:Fusion.Photon.Realtime.CustomAuthenticationType.PlayStation5">
             <summary>Authenticates users by their PSN Account and token on PS5. Set token as "token", env as "env" and userName as "userName" via AddAuthParameter().</summary>
+        </member>
+        <member name="F:Fusion.Photon.Realtime.CustomAuthenticationType.Playstation5">
+            <inheritdoc cref="F:Fusion.Photon.Realtime.CustomAuthenticationType.PlayStation5"/>
         </member>
         <member name="F:Fusion.Photon.Realtime.CustomAuthenticationType.Epic">
             <summary>Authenticates users with Epic Online Services (EOS). Set token as "token" and ownershipToken as "ownershipToken" via AddAuthParameter(). The ownershipToken is optional.</summary>
@@ -4141,7 +4190,7 @@
         <member name="M:Fusion.Photon.Realtime.RegionHandler.GetResults">
             <summary>Provides a list of regions and their pings as string.</summary>
         </member>
-        <member name="M:Fusion.Photon.Realtime.RegionHandler.SetRegions(ExitGames.Client.Photon.OperationResponse)">
+        <member name="M:Fusion.Photon.Realtime.RegionHandler.SetRegions(ExitGames.Client.Photon.OperationResponse,Fusion.Photon.Realtime.LoadBalancingClient)">
             <summary>Initializes the regions of this RegionHandler with values provided from the Name Server (as OperationResponse for OpGetRegions).</summary>
         </member>
         <member name="F:Fusion.Photon.Realtime.RegionHandler.PortToPingOverride">
@@ -4799,6 +4848,11 @@
             Indicates whether to send serialized game state in HTTP request to web service or not.
             </summary>
         </member>
+        <member name="T:Fusion.Photon.Realtime.FusionAppSettings">
+            <summary>
+            Settings for Fusion application
+            </summary>
+        </member>
         <member name="F:Fusion.Photon.Realtime.FusionAppSettings.encryptionMode">
             <summary>
             Select the Relayed Connection Encryption Mode
@@ -4807,6 +4861,17 @@
         <member name="F:Fusion.Photon.Realtime.FusionAppSettings.emptyRoomTtl">
             <summary>
             Photon Session EmptyRoomTTL in milliseconds. Valid only in Shared Mode.
+            </summary>
+        </member>
+        <member name="M:Fusion.Photon.Realtime.FusionAppSettings.GetCopy">
+            <summary>
+            Returns a copy of the current object.
+            </summary>
+            <returns>Copy of the current object</returns>
+        </member>
+        <member name="M:Fusion.Photon.Realtime.FusionAppSettings.ToString">
+            <summary>
+            Returns a string that represents the current object.
             </summary>
         </member>
         <member name="T:Fusion.Photon.Realtime.PhotonAppSettings">
@@ -4823,6 +4888,18 @@
         </member>
         <member name="P:Fusion.Photon.Realtime.PhotonAppSettings.Global">
             <summary>Serialized server settings, written by the Setup Wizard for use in ConnectUsingSettings.</summary>
+        </member>
+        <member name="M:Fusion.Photon.Realtime.PhotonAppSettings.TryGetGlobal(Fusion.Photon.Realtime.PhotonAppSettings@)">
+            <summary>
+            Try to get the global settings
+            </summary>
+            <param name="settings">Output settings</param>
+            <returns>True if the settings are loaded, false otherwise</returns>
+        </member>
+        <member name="P:Fusion.Photon.Realtime.PhotonAppSettings.IsGlobalLoaded">
+            <summary>
+            Check if the global settings are loaded
+            </summary>
         </member>
         <member name="T:Fusion.SessionProperty">
             <summary>
@@ -4900,6 +4977,11 @@
             <param name="obj">Object reference to be converted</param>
             <returns>Instance of a <see cref="T:Fusion.SessionProperty"/> if type is supported, null otherwise</returns>
             <exception cref="T:System.ArgumentException">If the object type passed as argument is not supported</exception>
+        </member>
+        <member name="M:Fusion.SessionProperty.ToString">
+            <summary>
+            String representation of the <see cref="T:Fusion.SessionProperty"/>
+            </summary>
         </member>
     </members>
 </doc>

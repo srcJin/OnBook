@@ -20,3 +20,10 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 130518
+  packageName: Photon Voice 2
+  packageVersion: 2.57
+  assetPath: Assets/Photon/PhotonVoice/Demos/Resources/CAD-GXL2200-Condenser-vs-Audigy5rx-Sound-Test.mp3
+  uploadId: 716761

@@ -264,7 +264,7 @@ namespace Fusion {
 #if FUSION_ENABLE_ADDRESSABLES && !FUSION_DISABLE_ADDRESSABLES
       // this may be a blocking call due to WaitForCompletion being used internally
       if (!TryGetAddressableScenes(out var addressableScenes)) {
-        Log.ErrorSceneManager(this, $"Failed to resolve addressable scene paths, won't be able to resolve {sceneNameOrPath} or any other addressable scene.");
+        Log.Error(this, $"Failed to resolve addressable scene paths, won't be able to resolve {sceneNameOrPath} or any other addressable scene.");
         addressableScenes = Array.Empty<string>();
       }
 
@@ -401,7 +401,7 @@ namespace Fusion {
           } else {
 #if FUSION_ENABLE_ADDRESSABLES && !FUSION_DISABLE_ADDRESSABLES
             if (!TryGetAddressableScenes(out var addressableScenes)) {
-              Log.ErrorSceneManager(this, $"Failed to resolve addressable scene paths, won't be able to resolve {sceneRef}");
+              Log.Error(this, $"Failed to resolve addressable scene paths, won't be able to resolve {sceneRef}");
               addressableScenes = Array.Empty<string>();
             }
 
@@ -519,7 +519,7 @@ namespace Fusion {
           Log.TraceSceneManager(Runner, $"Started unloading {sceneToUnload.Dump()} for {sceneRef}");
 
           if (!sceneToUnload.CanBeUnloaded()) {
-            Log.WarnSceneManager(Runner, $"Scene {sceneToUnload.Dump()} can't be unloaded for {sceneRef}, creating a temporary scene to unload it");
+            Log.Warn(Runner, $"Scene {sceneToUnload.Dump()} can't be unloaded for {sceneRef}, creating a temporary scene to unload it");
             Debug.Assert(!_tempUnloadScene.IsValid());
             _tempUnloadScene = SceneManager.CreateScene($"FusionSceneManager_TempEmptyScene");
           }
@@ -626,7 +626,7 @@ namespace Fusion {
       coro.Completed += x => {
 
         if (LogSceneLoadErrors && x.Error != null) {
-          Log.ErrorSceneManager(Runner, $"Failed async op: {x.Error.SourceException}");
+          Log.Error(Runner, $"Failed async op: {x.Error.SourceException}");
         }
         
         // remove this one from the list
@@ -657,7 +657,7 @@ namespace Fusion {
 
     protected void MarkSceneAsOwned(SceneRef sceneRef, Scene scene) {
       if (_allOwnedScenes.TryGetValue(scene, out var manager)) {
-        Log.WarnSceneManager(Runner, $"Scene {scene.Dump()} (for {sceneRef}) already owned by {manager}");
+        Log.Warn(Runner, $"Scene {scene.Dump()} (for {sceneRef}) already owned by {manager}");
       } else {
         _allOwnedScenes.Add(scene, this);
       }
@@ -665,7 +665,7 @@ namespace Fusion {
 
     private NetworkSceneAsyncOp FailOp(SceneRef sceneRef, Exception exception) {
       if (LogSceneLoadErrors) {
-        Log.ErrorSceneManager(Runner, $"Failed with: {exception}");
+        Log.Error(Runner, $"Failed with: {exception}");
       }
 
       return NetworkSceneAsyncOp.FromError(sceneRef, exception);
@@ -744,7 +744,7 @@ namespace Fusion {
     
     private bool TryGetAddressableScenes(out string[] addressableScenes) {
       if (!_addressableScenesTask.IsValueCreated) {
-        Log.WarnSceneManager(Runner, $"Going to block the thread in wait for addressable scene paths being resolved, call and await {nameof(LoadAddressableScenePathsAsync)} to avoid this.");
+        Log.Warn(Runner, $"Going to block the thread in wait for addressable scene paths being resolved, call and await {nameof(LoadAddressableScenePathsAsync)} to avoid this.");
       }
 
       var t = _addressableScenesTask.Value;
