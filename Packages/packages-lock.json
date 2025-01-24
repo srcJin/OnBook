@@ -36,6 +36,27 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.meta.xr.sdk.avatars": {
+      "version": "33.0.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.meta.xr.sdk.core": "69.0.1",
+        "com.meta.xr.sdk.platform": "69.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.xr.legacyinputhelpers": "2.1.9",
+        "com.meta.xr.sdk.avatars.sample.assets": "33.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.meta.xr.sdk.avatars.sample.assets": {
+      "version": "33.0.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.meta.xr.sdk.core": {
       "version": "71.0.0",
       "depth": 1,
