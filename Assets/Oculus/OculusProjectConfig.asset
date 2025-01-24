@@ -18,7 +18,7 @@ MonoBehaviour:
   handTrackingFrequency: 0
   handTrackingVersion: 2
   anchorSupport: 1
-  sharedAnchorSupport: 0
+  sharedAnchorSupport: 2
   renderModelSupport: 0
   trackedKeyboardSupport: 0
   bodyTrackingSupport: 0
