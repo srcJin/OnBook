@@ -74,3 +74,6 @@ crashlytics-build.properties
 
 .DS_Store
 PresetAvatars_*
+mono_crash*
+.idea*
+.utmp*
