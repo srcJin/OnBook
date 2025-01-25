@@ -10,7 +10,7 @@ public class ExampleUsage : MonoBehaviour
     void Start()
     {
         client = GetComponent<MrHonbookClient>();
-        // StartCoroutine(client.GetSceneConfig());
+        StartCoroutine(client.GetSceneConfig());
         // StartCoroutine(client.GetCurrentSceneId());
 
         // StartCoroutine(client.RecordMocapAndAudio());

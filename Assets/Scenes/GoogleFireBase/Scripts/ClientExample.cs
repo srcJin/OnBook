@@ -135,8 +135,8 @@ public class MrHonbookClient : MonoBehaviour
     public IEnumerator RecordMocapAndAudio()
     {
         //TODO: Handle getting local stored data files
-        string mocapLocalPath = Path.Combine(Application.dataPath, "Scripts/MichaelExampleScripts/mrhonbook-default-rtdb-export.json");
-        string audioLocalPath = Path.Combine(Application.dataPath, "Scripts/MichaelExampleScripts/file_example_MP3_5MG.mp3");
+        string mocapLocalPath = Path.Combine(Application.dataPath, "Scenes/GoogleFireBase/Scripts/body_tracking_data.json");
+        string audioLocalPath = Path.Combine(Application.dataPath, "Scenes/GoogleFireBase/Scripts/file_example_MP3_5MG.mp3");
 
         yield return StartCoroutine(UploadFileDirect(mocapLocalPath, ThisClientId + "Mocap", "application/json"));
         string mocapDownloadURL = lastUploadedUrl;

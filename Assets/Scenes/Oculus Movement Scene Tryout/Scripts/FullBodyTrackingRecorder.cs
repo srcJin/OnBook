@@ -110,12 +110,22 @@ public class FullBodyTrackingRecorder : MonoBehaviour
         // Convert recorded data to JSON
         string json = JsonUtility.ToJson(new Wrapper<BodyFrameData> { frames = recordedData }, true);
 
-        // Save JSON to local storage
-        string filePath = Path.Combine(Application.persistentDataPath, "body_tracking_data.json");
+        // Specify the file path in the StreamingAssets folder
+        string folderPath = Path.Combine(Application.streamingAssetsPath, "BodyTrackingData");
+        string filePath = Path.Combine(folderPath, "body_tracking_data.json");
+
+        // Ensure the directory exists
+        if (!Directory.Exists(folderPath))
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+
+        // Write JSON to the file
         File.WriteAllText(filePath, json);
 
         Debug.Log($"Data saved to {filePath}");
     }
+
 
     // Wrapper class for JSON serialization
     [System.Serializable]
