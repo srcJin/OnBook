@@ -3401,7 +3401,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cc5c234723e3a54d8dd09b131117743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _meshType: 4
+  _meshType: 0
 --- !u!114 &724186872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3433,7 +3433,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2609c54f376cffc4da1ab9401cc1a36f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _skeletonType: 4
+  _skeletonType: 0
   _updateRootPose: 0
   _updateRootScale: 1
   _enablePhysicsCapsules: 1
@@ -3452,7 +3452,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HandType: 0
   _pointerPoseRoot: {fileID: 0}
-  m_showState: 3
+  m_showState: 0
   RayHelper: {fileID: 0}
 --- !u!114 &724186875
 MonoBehaviour:
@@ -4743,7 +4743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cc5c234723e3a54d8dd09b131117743, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _meshType: 5
+  _meshType: 1
 --- !u!114 &1010289426
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4775,7 +4775,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2609c54f376cffc4da1ab9401cc1a36f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _skeletonType: 5
+  _skeletonType: 1
   _updateRootPose: 0
   _updateRootScale: 1
   _enablePhysicsCapsules: 1
@@ -4794,7 +4794,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HandType: 1
   _pointerPoseRoot: {fileID: 0}
-  m_showState: 3
+  m_showState: 0
   RayHelper: {fileID: 0}
 --- !u!114 &1010289429
 MonoBehaviour:

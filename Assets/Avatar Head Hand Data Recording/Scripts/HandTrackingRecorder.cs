@@ -12,12 +12,13 @@ public class HandTrackingRecorder : MonoBehaviour
 
     private bool isRecording = false;
     private List<HandData> recordedData = new List<HandData>();
+    private float recordingStartTime; // Track when recording starts
 
     // Struct for hand data
     [System.Serializable]
     public class HandData
     {
-        public float time; // Timestamp
+        public float time; // Elapsed recording time in seconds
         public List<BoneData> leftHandBones = new List<BoneData>();
         public List<BoneData> rightHandBones = new List<BoneData>();
     }
@@ -47,6 +48,7 @@ public class HandTrackingRecorder : MonoBehaviour
             {
                 Debug.Log("Recording started...");
                 recordedData.Clear(); // Clear any previous data
+                recordingStartTime = Time.time; // Set the start time
             }
             else
             {
@@ -60,7 +62,6 @@ public class HandTrackingRecorder : MonoBehaviour
     {
         if (isRecording)
         {
-            //Debug.Log("FixedUpdate: Recording data...");
             RecordHandData();
         }
     }
@@ -68,17 +69,15 @@ public class HandTrackingRecorder : MonoBehaviour
     void RecordHandData()
     {
         HandData handData = new HandData();
-        handData.time = Time.time;
+        handData.time = Time.time - recordingStartTime; // Calculate elapsed time
 
         // Record left hand bones
         if (leftHand.IsTracked)
         {
-            Debug.Log("Left hand is tracked.");
             foreach (var bone in leftSkeleton.Bones)
             {
                 if (bone.Transform != null)
                 {
-                    Debug.Log($"Left Bone: {bone.Id} Position: {bone.Transform.position}");
                     BoneData boneData = new BoneData
                     {
                         boneName = bone.Id.ToString(),
@@ -89,20 +88,14 @@ public class HandTrackingRecorder : MonoBehaviour
                 }
             }
         }
-        else
-        {
-            Debug.LogWarning("Left hand is not tracked.");
-        }
 
         // Record right hand bones
         if (rightHand.IsTracked)
         {
-            Debug.Log("Right hand is tracked.");
             foreach (var bone in rightSkeleton.Bones)
             {
                 if (bone.Transform != null)
                 {
-                    Debug.Log($"Right Bone: {bone.Id} Position: {bone.Transform.position}");
                     BoneData boneData = new BoneData
                     {
                         boneName = bone.Id.ToString(),
@@ -113,22 +106,13 @@ public class HandTrackingRecorder : MonoBehaviour
                 }
             }
         }
-        else
-        {
-            Debug.LogWarning("Right hand is not tracked.");
-        }
 
         // Add data only if at least one hand has bone data
         if (handData.leftHandBones.Count > 0 || handData.rightHandBones.Count > 0)
         {
             recordedData.Add(handData);
         }
-        else
-        {
-            Debug.LogWarning("No bones recorded for either hand.");
-        }
     }
-
 
     void SaveDataToJson()
     {
@@ -138,10 +122,8 @@ public class HandTrackingRecorder : MonoBehaviour
             return;
         }
 
-        // Debugging recorded data count
         Debug.Log($"Recording {recordedData.Count} frames of hand data.");
 
-        // Convert recordedData to JSON
         string json = JsonUtility.ToJson(new Wrapper<HandData> { handsData = recordedData }, true);
         string filePath = Path.Combine(Application.persistentDataPath, "hand_data.json");
 
@@ -155,5 +137,4 @@ public class HandTrackingRecorder : MonoBehaviour
     {
         public List<T> handsData;
     }
-
 }
