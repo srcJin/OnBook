@@ -40,34 +40,34 @@ public class OnBookService : MonoBehaviour
 
     void Update()
     {
-        // Press Space to toggle recording
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (isRecording)
-            {
-                StopRecording();
-
-                // Start the upload and set the flag once complete
-                StartCoroutine(UploadData());
-            }
-            else
-            {
-                StartRecording();
-            }
-        }
-
         // Press P to start playback
         if (Input.GetKeyDown(KeyCode.P))
         {
             if (isDataUploaded)
             {
-                Debug.Log("Starting downloading...");
-                StartCoroutine(client.StartPlayback());
+                Debug.Log("Starting download and playback...");
+                StartCoroutine(DownloadAndPlay());
             }
             else
             {
-                Debug.LogWarning("Playback cannot start. Data is not yet uploaded.");
+                Debug.LogWarning("Cannot start playback. Data has not been uploaded yet.");
             }
+        }
+    }
+
+    /// <summary>
+    /// Toggles recording through external interaction, such as poking a button.
+    /// </summary>
+    public void ToggleRecording()
+    {
+        if (isRecording)
+        {
+            StopRecording();
+            StartCoroutine(UploadData());
+        }
+        else
+        {
+            StartRecording();
         }
     }
 
@@ -90,6 +90,7 @@ public class OnBookService : MonoBehaviour
 
         isRecording = true;
         isDataUploaded = false; // Reset the upload flag when a new recording starts
+
         Debug.Log("Combined recording started.");
     }
 
@@ -111,6 +112,7 @@ public class OnBookService : MonoBehaviour
         }
 
         isRecording = false;
+
         Debug.Log("Combined recording stopped and saved.");
     }
 
@@ -123,5 +125,15 @@ public class OnBookService : MonoBehaviour
         yield return StartCoroutine(client.RecordMocapAndAudio());
         isDataUploaded = true; // Set the flag once the upload is complete
         Debug.Log("Data successfully uploaded to the server.");
+    }
+
+    /// <summary>
+    /// Handles downloading and playing data from the server.
+    /// </summary>
+    private IEnumerator DownloadAndPlay()
+    {
+        Debug.Log("Downloading data from the server...");
+        yield return StartCoroutine(client.StartPlayback());
+        Debug.Log("Playback started successfully.");
     }
 }

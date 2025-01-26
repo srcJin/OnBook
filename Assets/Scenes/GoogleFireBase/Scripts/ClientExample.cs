@@ -360,7 +360,7 @@ public class MrHonbookClient : MonoBehaviour
     ///////////////////////////////////////////////////////////////////////////
     private IEnumerator HandleMocapAndAudio(string mocapFileName, string audioFileName)
     {
-        Debug.Log("LOOK AT MEEEEE" + mocapFileName + audioFileName);
+        //Debug.Log("LOOK AT MEEEEE" + mocapFileName + audioFileName);
         // Ensure the mocap file has the .json extension
         //if (!mocapFileName.EndsWith(".json"))
         //{
@@ -410,7 +410,8 @@ public class MrHonbookClient : MonoBehaviour
 
             if (audioData != null)
             {
-                File.WriteAllBytes(audioLocalPath, audioData); // Save the downloaded file locally
+                //File.WriteAllBytes(audioLocalPath, audioData); // Save the downloaded file locally
+                SaveAsWav(audioLocalPath, audioData);
                 Debug.Log($"Audio file downloaded and saved at {audioLocalPath}.");
             }
             else
@@ -424,6 +425,36 @@ public class MrHonbookClient : MonoBehaviour
         }
 
         //TODO: Play external and local audio and mocap files synchronously
+    }
+
+    /// <summary>
+    /// Saves the raw audio data as a WAV file by adding a proper WAV header.
+    /// </summary>
+    /// <param name="filePath">The file path where the WAV file will be saved.</param>
+    /// <param name="audioData">The raw audio data.</param>
+    private void SaveAsWav(string filePath, byte[] audioData)
+    {
+        using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
+        using (BinaryWriter writer = new BinaryWriter(fileStream))
+        {
+            // WAV file header
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("RIFF")); // Chunk ID
+            writer.Write(36 + audioData.Length);                     // Chunk Size
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("WAVE")); // Format
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("fmt ")); // Sub-chunk 1 ID
+            writer.Write(16);                                        // Sub-chunk 1 Size (PCM header)
+            writer.Write((short)1);                                  // Audio format (1 = PCM)
+            writer.Write((short)1);                                  // Number of channels (1 = mono, 2 = stereo)
+            writer.Write(44100);                                     // Sample rate (e.g., 44100 Hz)
+            writer.Write(44100 * 2);                                 // Byte rate (SampleRate * NumChannels * BitsPerSample / 8)
+            writer.Write((short)2);                                  // Block align (NumChannels * BitsPerSample / 8)
+            writer.Write((short)16);                                 // Bits per sample (e.g., 16-bit)
+            writer.Write(System.Text.Encoding.UTF8.GetBytes("data")); // Sub-chunk 2 ID
+            writer.Write(audioData.Length);                          // Sub-chunk 2 Size
+            writer.Write(audioData);                                 // Audio data
+
+            Debug.Log($"Audio data saved as WAV file at: {filePath}");
+        }
     }
 
 
