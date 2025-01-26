@@ -16,7 +16,7 @@ public class FullBodyTrackingPlayback : MonoBehaviour
     public class BodyFrameData
     {
         public float timestamp; // Time since recording started
-        public List<BoneData> bones = new List<BoneData>();
+        public List<BoneData> humanoidBones = new List<BoneData>();
     }
 
     [System.Serializable]
@@ -37,17 +37,17 @@ public class FullBodyTrackingPlayback : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Press 'P' to start playback.");
+        Debug.Log("Initializing FullBodyTrackingPlayback...");
+
         LoadDataFromJson();
 
         // Cache all the bones of the avatar in order
         avatarBones = avatar.GetComponentsInChildren<Transform>();
-        Debug.Log($"Avatar has {avatarBones.Length} bones.");
+        Debug.Log($"Avatar initialization complete. Found {avatarBones.Length} bones.");
     }
 
     void Update()
     {
-        // Start playback with the 'P' key
         if (Input.GetKeyDown(KeyCode.P))
         {
             if (!isPlaying)
@@ -59,23 +59,21 @@ public class FullBodyTrackingPlayback : MonoBehaviour
             }
         }
 
-        // Handle playback logic
         if (isPlaying && currentFrameIndex < playbackData.Count)
         {
             float elapsedTime = Time.time - playbackStartTime;
 
-            // Play frames in sequence based on timestamp
             while (currentFrameIndex < playbackData.Count &&
                    elapsedTime >= playbackData[currentFrameIndex].timestamp)
             {
+                Debug.Log($"Applying frame {currentFrameIndex + 1}/{playbackData.Count} at timestamp {elapsedTime:F2}s");
                 ApplyFrameData(playbackData[currentFrameIndex]);
                 currentFrameIndex++;
             }
 
-            // Stop playback when all frames are played
             if (currentFrameIndex >= playbackData.Count)
             {
-                Debug.Log("Playback finished.");
+                Debug.Log("Playback finished. All frames have been applied.");
                 isPlaying = false;
             }
         }
@@ -100,21 +98,47 @@ public class FullBodyTrackingPlayback : MonoBehaviour
 
     void ApplyFrameData(BodyFrameData frameData)
     {
-        // Ensure the number of bones matches between the recorded data and the avatar
-        if (avatarBones.Length != frameData.bones.Count)
+        if (avatarBones.Length == 0)
         {
-            Debug.LogError("Mismatch between the number of avatar bones and recorded bones.");
+            Debug.LogError("No avatar bones found. Ensure the avatar is correctly configured.");
             return;
         }
 
-        for (int i = 0; i < frameData.bones.Count; i++)
-        {
-            var boneData = frameData.bones[i];
-            var boneTransform = avatarBones[i];
+        Debug.Log($"Processing frame at timestamp {frameData.timestamp:F2}s with {frameData.humanoidBones.Count} bones.");
 
-            // Apply position and rotation to the avatar's bone
-            boneTransform.localPosition = new Vector3(boneData.position.x, boneData.position.y, boneData.position.z);
-            boneTransform.localRotation = new Quaternion(boneData.rotation.x, boneData.rotation.y, boneData.rotation.z, boneData.rotation.w);
+        foreach (var humanoidBoneData in frameData.humanoidBones)
+        {
+            string cleanBoneName = humanoidBoneData.boneName.Replace("_", "");
+            Debug.Log($"Attempting to map bone: Original='{humanoidBoneData.boneName}', Clean='{cleanBoneName}'");
+
+            bool boneFound = false;
+
+            foreach (HumanBodyBones humanBone in System.Enum.GetValues(typeof(HumanBodyBones)))
+            {
+                string humanBoneName = humanBone.ToString();
+                if (cleanBoneName.Equals(humanBoneName, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    boneFound = true;
+                    Debug.Log($"Found Bone {humanBoneName}");
+                    Transform boneTransform = avatar.GetComponent<Animator>().GetBoneTransform(humanBone);
+                    if (boneTransform != null)
+                    {
+                        Debug.Log($"Applying transformation to bone: {humanBoneName}");
+                        boneTransform.localPosition = humanoidBoneData.position;
+                        boneTransform.localRotation = humanoidBoneData.rotation;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Bone '{humanBoneName}' not found on the avatar's Animator.");
+                    }
+                    break;
+                }
+            }
+
+            if (!boneFound)
+            {
+                Debug.LogWarning($"Bone '{humanoidBoneData.boneName}' (cleaned: '{cleanBoneName}') did not match any HumanBodyBones.");
+            }
         }
     }
 }

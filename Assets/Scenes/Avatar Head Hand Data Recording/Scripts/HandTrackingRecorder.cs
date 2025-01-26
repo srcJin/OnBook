@@ -28,8 +28,10 @@ public class HandTrackingRecorder : MonoBehaviour
     public class BoneData
     {
         public string boneName;
-        public Vector3 position;
-        public Quaternion rotation;
+        public Vector3 position; // Global space
+        public Quaternion rotation; // Global space
+        public Vector3 localPosition; // Local space
+        public Quaternion localRotation; // Local space
     }
 
     void Start()
@@ -82,9 +84,15 @@ public class HandTrackingRecorder : MonoBehaviour
                     {
                         boneName = bone.Id.ToString(),
                         position = bone.Transform.position,
-                        rotation = bone.Transform.rotation
+                        rotation = bone.Transform.rotation,
+                        localPosition = bone.Transform.localPosition,
+                        localRotation = bone.Transform.localRotation
                     };
                     handData.leftHandBones.Add(boneData);
+
+                    // Debug output
+                    Debug.Log($"[Left Hand] Bone: {boneData.boneName}, Global Pos: {boneData.position}, Local Pos: {boneData.localPosition}");
+                    Debug.Log($"[Left Hand] Bone: {boneData.boneName}, Global Rot: {boneData.rotation.eulerAngles}, Local Rot: {boneData.localRotation.eulerAngles}");
                 }
             }
         }
@@ -100,9 +108,15 @@ public class HandTrackingRecorder : MonoBehaviour
                     {
                         boneName = bone.Id.ToString(),
                         position = bone.Transform.position,
-                        rotation = bone.Transform.rotation
+                        rotation = bone.Transform.rotation,
+                        localPosition = bone.Transform.localPosition,
+                        localRotation = bone.Transform.localRotation
                     };
                     handData.rightHandBones.Add(boneData);
+
+                    // Debug output
+                    Debug.Log($"[Right Hand] Bone: {boneData.boneName}, Global Pos: {boneData.position}, Local Pos: {boneData.localPosition}");
+                    Debug.Log($"[Right Hand] Bone: {boneData.boneName}, Global Rot: {boneData.rotation.eulerAngles}, Local Rot: {boneData.localRotation.eulerAngles}");
                 }
             }
         }

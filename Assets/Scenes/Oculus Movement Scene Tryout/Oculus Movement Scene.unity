@@ -567,7 +567,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 767141979}
-  - component: {fileID: 767141978}
+  - component: {fileID: 767141980}
   m_Layer: 0
   m_Name: Movement Recorder
   m_TagString: Untagged
@@ -575,19 +575,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &767141978
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 767141977}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4924f244cdfd1b440a098a4f450ed9e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ovrBody: {fileID: 188078979}
 --- !u!4 &767141979
 Transform:
   m_ObjectHideFlags: 0
@@ -603,6 +590,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &767141980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 767141977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f9bf575056186045bd3b29c7018411c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ovrBody: {fileID: 188078979}
+  armatureSkinningUpdateTPose: {fileID: 188078977}
 --- !u!1001 &829855486
 PrefabInstance:
   m_ObjectHideFlags: 0
