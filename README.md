@@ -1,4 +1,5 @@
 # OnBook
+OnBook is a mixed reality tool designed to revolutionize the way live performers collaborate and rehearse. Utilizing multi-player mixed reality, OnBook streamlines the rehearsal process by helping directors give more nuanced feedback and by enabling actors to practice more efficiently. Bridging the gap between creative intent and execution, OnBook fosters a more supportive and collaborative rehearsal environment for everyone on stage and on set.
 
 ## Inspiration
 Our team started from our desired tech stack. We met during team formation because we all wanted to build a multiplayer, mixed reality app on either Quest 3 or Apple Vision Pro.
