@@ -3,14 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class FullBodyTrackingPlayback : MonoBehaviour
+public class FullBodyTrackingPlaybackWithAudio : MonoBehaviour
 {
     public GameObject avatar; // Reference to the avatar
     public string jsonFileName = "body_tracking_data.json"; // Name of the JSON file to load
+    public string audioFileName = "audio_data.wav"; // Name of the audio file to load
+
     private List<BodyFrameData> playbackData = new List<BodyFrameData>();
     private bool isPlaying = false;
+    private bool isPaused = false; // To track pause state
     private float playbackStartTime;
+    private float pauseTimeOffset; // To maintain elapsed time during pause
     private int currentFrameIndex = 0;
+
+    private AudioSource audioSource; // AudioSource to play the audio file
 
     [System.Serializable]
     public class BodyFrameData
@@ -37,13 +43,17 @@ public class FullBodyTrackingPlayback : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Initializing FullBodyTrackingPlayback...");
+        Debug.Log("Initializing FullBodyTrackingPlaybackWithAudio...");
 
         LoadDataFromJson();
 
         // Cache all the bones of the avatar in order
         avatarBones = avatar.GetComponentsInChildren<Transform>();
         Debug.Log($"Avatar initialization complete. Found {avatarBones.Length} bones.");
+
+        // Initialize AudioSource
+        audioSource = gameObject.AddComponent<AudioSource>();
+        LoadAudio();
     }
 
     void Update()
@@ -52,30 +62,84 @@ public class FullBodyTrackingPlayback : MonoBehaviour
         {
             if (!isPlaying)
             {
-                Debug.Log("Playback started...");
-                playbackStartTime = Time.time; // Set playback start time
-                currentFrameIndex = 0; // Reset to the first frame
-                isPlaying = true;
+                StartPlayback();
             }
         }
 
-        if (isPlaying && currentFrameIndex < playbackData.Count)
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            float elapsedTime = Time.time - playbackStartTime;
+            if (isPlaying)
+            {
+                TogglePause();
+            }
+        }
+
+        if (isPlaying && !isPaused && currentFrameIndex < playbackData.Count)
+        {
+            float elapsedTime = (Time.time - playbackStartTime) + pauseTimeOffset;
 
             while (currentFrameIndex < playbackData.Count &&
                    elapsedTime >= playbackData[currentFrameIndex].timestamp)
             {
-                Debug.Log($"Applying frame {currentFrameIndex + 1}/{playbackData.Count} at timestamp {elapsedTime:F2}s");
                 ApplyFrameData(playbackData[currentFrameIndex]);
                 currentFrameIndex++;
             }
 
             if (currentFrameIndex >= playbackData.Count)
             {
-                Debug.Log("Playback finished. All frames have been applied.");
-                isPlaying = false;
+                EndPlayback();
             }
+        }
+    }
+
+    void StartPlayback()
+    {
+        Debug.Log("Playback started...");
+        playbackStartTime = Time.time; // Set playback start time
+        pauseTimeOffset = 0f; // Reset pause offset
+        currentFrameIndex = 0; // Reset to the first frame
+        isPlaying = true;
+        isPaused = false;
+
+        if (audioSource.clip != null)
+        {
+            audioSource.Play();
+        }
+        else
+        {
+            Debug.LogWarning("AudioSource clip is null. Ensure the audio file is loaded properly.");
+        }
+    }
+
+    void TogglePause()
+    {
+        isPaused = !isPaused;
+
+        if (isPaused)
+        {
+            // Pause playback
+            pauseTimeOffset += Time.time - playbackStartTime; // Calculate elapsed time before pausing
+            audioSource.Pause();
+            Debug.Log("Playback paused.");
+        }
+        else
+        {
+            // Resume playback
+            playbackStartTime = Time.time; // Reset playback start time
+            audioSource.Play();
+            Debug.Log("Playback resumed.");
+        }
+    }
+
+    void EndPlayback()
+    {
+        Debug.Log("Playback finished. All frames have been applied.");
+        isPlaying = false;
+        isPaused = false;
+
+        if (audioSource.isPlaying)
+        {
+            audioSource.Stop();
         }
     }
 
@@ -96,6 +160,31 @@ public class FullBodyTrackingPlayback : MonoBehaviour
         Debug.Log($"Loaded {playbackData.Count} frames of playback data from {filePath}");
     }
 
+    void LoadAudio()
+    {
+        string audioPath = Path.Combine(Application.persistentDataPath, audioFileName);
+
+        if (!File.Exists(audioPath))
+        {
+            Debug.LogError($"Audio file not found at {audioPath}");
+            return;
+        }
+
+        // Load the audio clip from the file
+        WWW audioLoader = new WWW($"file://{audioPath}");
+        AudioClip audioClip = audioLoader.GetAudioClip(false, true);
+
+        if (audioClip != null)
+        {
+            audioSource.clip = audioClip;
+            Debug.Log($"Loaded audio file from {audioPath}");
+        }
+        else
+        {
+            Debug.LogError($"Failed to load audio from {audioPath}");
+        }
+    }
+
     void ApplyFrameData(BodyFrameData frameData)
     {
         if (avatarBones.Length == 0)
@@ -104,26 +193,18 @@ public class FullBodyTrackingPlayback : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Processing frame at timestamp {frameData.timestamp:F2}s with {frameData.humanoidBones.Count} bones.");
-
         foreach (var humanoidBoneData in frameData.humanoidBones)
         {
             string cleanBoneName = humanoidBoneData.boneName.Replace("_", "");
-            Debug.Log($"Attempting to map bone: Original='{humanoidBoneData.boneName}', Clean='{cleanBoneName}'");
-
-            bool boneFound = false;
 
             foreach (HumanBodyBones humanBone in System.Enum.GetValues(typeof(HumanBodyBones)))
             {
                 string humanBoneName = humanBone.ToString();
                 if (cleanBoneName.Equals(humanBoneName, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    boneFound = true;
-                    Debug.Log($"Found Bone {humanBoneName}");
                     Transform boneTransform = avatar.GetComponent<Animator>().GetBoneTransform(humanBone);
                     if (boneTransform != null)
                     {
-                        Debug.Log($"Applying transformation to bone: {humanBoneName}");
                         boneTransform.localPosition = humanoidBoneData.position;
                         boneTransform.localRotation = humanoidBoneData.rotation;
                     }
@@ -133,11 +214,6 @@ public class FullBodyTrackingPlayback : MonoBehaviour
                     }
                     break;
                 }
-            }
-
-            if (!boneFound)
-            {
-                Debug.LogWarning($"Bone '{humanoidBoneData.boneName}' (cleaned: '{cleanBoneName}') did not match any HumanBodyBones.");
             }
         }
     }

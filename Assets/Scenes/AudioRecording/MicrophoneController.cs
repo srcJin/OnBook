@@ -2,15 +2,13 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// Dynamic recording script that dynamically calculates the length of the recording without the need for predefined duration.
+/// Handles microphone audio recording and saving the recorded audio to a WAV file.
 /// </summary>
 public class MicrophoneController : MonoBehaviour
 {
     private AudioClip recordedClip; // Stores the final recorded audio
     private string _microphone; // Current microphone device in use
     private AudioClip currentlyRecordingClip; // Currently recording audio
-    private float[] audioSamples = new float[256]; // Buffer for calculating sound intensity
-    private float elapsedSeconds = 0f; // Tracks elapsed time to log sound level every second
     private int recordingStartPosition; // Position where the recording started
 
     private void Awake()
@@ -28,102 +26,50 @@ public class MicrophoneController : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R)) // Start recording
-        {
-            StartRecording();
-        }
-
-        if (Input.GetKeyDown(KeyCode.S)) // Stop recording
-        {
-            StopRecording();
-        }
-
-        if (currentlyRecordingClip != null && Microphone.IsRecording(_microphone))
-        {
-            elapsedSeconds += Time.deltaTime;
-            if (elapsedSeconds >= 1f)
-            {
-                LogSoundLevel();
-                elapsedSeconds = 0f;
-            }
-        }
-    }
-
     /// <summary>
-    /// Start recording
+    /// Starts audio recording.
     /// </summary>
-    private void StartRecording()
+    public void StartRecording()
     {
-        Debug.Log("Recording started...");
-        if (Microphone.IsRecording(_microphone))
+        if (_microphone == null)
         {
-            StopRecording();
+            Debug.LogError("No microphone detected. Cannot start recording.");
+            return;
         }
 
-        // Start recording with an indefinite duration
+        Debug.Log("Microphone recording started...");
         currentlyRecordingClip = Microphone.Start(_microphone, true, 300, 44100);
         recordingStartPosition = Microphone.GetPosition(_microphone);
-        Debug.Log($"Recording started, device: {_microphone}");
     }
 
     /// <summary>
-    /// Stop recording
+    /// Stops audio recording and saves the recorded audio to a WAV file.
     /// </summary>
-    private void StopRecording()
+    public void StopRecording()
     {
         if (Microphone.IsRecording(_microphone))
         {
             int recordingEndPosition = Microphone.GetPosition(_microphone);
             int totalSamples = recordingEndPosition - recordingStartPosition;
-            if (totalSamples < 0) totalSamples += currentlyRecordingClip.samples; // Handle circular buffer
-            recordedClip = AudioClip.Create("RecordedClip", totalSamples, currentlyRecordingClip.channels, currentlyRecordingClip.frequency, false);
+            if (totalSamples < 0) totalSamples += currentlyRecordingClip.samples;
 
-            // Extract the actual audio data from the recording buffer
+            recordedClip = AudioClip.Create("RecordedClip", totalSamples, currentlyRecordingClip.channels, currentlyRecordingClip.frequency, false);
             float[] samples = new float[totalSamples];
             currentlyRecordingClip.GetData(samples, recordingStartPosition);
             recordedClip.SetData(samples, 0);
 
             Microphone.End(_microphone);
             SaveRecording(recordedClip);
-            Debug.Log("Recording stopped and saved.");
+            Debug.Log("Microphone recording stopped and saved.");
         }
         else
         {
-            Debug.LogWarning("No ongoing recording to stop.");
+            Debug.LogWarning("No active microphone recording to stop.");
         }
     }
 
     /// <summary>
-    /// Log the current sound intensity
-    /// </summary>
-    private void LogSoundLevel()
-    {
-        int micPosition = Microphone.GetPosition(_microphone);
-        if (micPosition >= audioSamples.Length)
-        {
-            currentlyRecordingClip.GetData(audioSamples, micPosition - audioSamples.Length);
-            float rmsValue = Mathf.Sqrt(CalculateRMS(audioSamples));
-            Debug.Log($"Current sound intensity (RMS): {rmsValue:F3}");
-        }
-    }
-
-    /// <summary>
-    /// Calculate the RMS value of the audio samples
-    /// </summary>
-    private float CalculateRMS(float[] samples)
-    {
-        float sum = 0f;
-        foreach (float sample in samples)
-        {
-            sum += sample * sample;
-        }
-        return sum / samples.Length;
-    }
-
-    /// <summary>
-    /// Save the recorded audio to a WAV file
+    /// Saves the recorded audio to a WAV file.
     /// </summary>
     private void SaveRecording(AudioClip clip)
     {
@@ -151,7 +97,7 @@ public class MicrophoneController : MonoBehaviour
     }
 
     /// <summary>
-    /// Write the WAV file header
+    /// Writes the WAV file header.
     /// </summary>
     private void WriteWavHeader(BinaryWriter writer, int channels, int sampleRate, int totalSamples)
     {
