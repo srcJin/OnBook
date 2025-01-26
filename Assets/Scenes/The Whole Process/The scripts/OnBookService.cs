@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// Controls the recording of both audio and motion data by interfacing with MicrophoneController and MovementRecorder.
@@ -10,11 +11,12 @@ public class OnBookService : MonoBehaviour
     private MovementRecorder movementRecorder; // Reference to the MovementRecorder component
 
     private bool isRecording = false;
+    private bool isDataUploaded = false; // Flag to track upload completion
 
     void Start()
     {
         client = GetComponent<MrHonbookClient>();
-        StartCoroutine(client.GetSceneConfig());
+
         // Automatically assign components if they are on the same GameObject
         microphoneController = GetComponent<MicrophoneController>();
         movementRecorder = GetComponent<MovementRecorder>();
@@ -29,6 +31,11 @@ public class OnBookService : MonoBehaviour
         {
             Debug.LogError("MovementRecorder component is missing on this GameObject.");
         }
+
+        if (client == null)
+        {
+            Debug.LogError("MrHonbookClient component is missing on this GameObject.");
+        }
     }
 
     void Update()
@@ -40,13 +47,26 @@ public class OnBookService : MonoBehaviour
             {
                 StopRecording();
 
-      
-                StartCoroutine(client.RecordMocapAndAudio());
-
+                // Start the upload and set the flag once complete
+                StartCoroutine(UploadData());
             }
             else
             {
                 StartRecording();
+            }
+        }
+
+        // Press P to start playback
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (isDataUploaded)
+            {
+                Debug.Log("Starting downloading...");
+                StartCoroutine(client.StartPlayback());
+            }
+            else
+            {
+                Debug.LogWarning("Playback cannot start. Data is not yet uploaded.");
             }
         }
     }
@@ -69,10 +89,9 @@ public class OnBookService : MonoBehaviour
         }
 
         isRecording = true;
+        isDataUploaded = false; // Reset the upload flag when a new recording starts
         Debug.Log("Combined recording started.");
     }
-
-
 
     /// <summary>
     /// Stops recording both audio and motion data.
@@ -93,5 +112,16 @@ public class OnBookService : MonoBehaviour
 
         isRecording = false;
         Debug.Log("Combined recording stopped and saved.");
+    }
+
+    /// <summary>
+    /// Handles the upload of recorded data and sets the upload completion flag.
+    /// </summary>
+    private IEnumerator UploadData()
+    {
+        Debug.Log("Uploading data to the server...");
+        yield return StartCoroutine(client.RecordMocapAndAudio());
+        isDataUploaded = true; // Set the flag once the upload is complete
+        Debug.Log("Data successfully uploaded to the server.");
     }
 }

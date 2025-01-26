@@ -79,7 +79,7 @@ public class MicrophoneController : MonoBehaviour
             return;
         }
 
-        string filePath = Path.Combine(Application.persistentDataPath, "audio_data.wav");
+        string filePath = Path.Combine(Application.persistentDataPath, MrHonbookClient.ThisClientId + "audio_data.wav");
         float[] samples = new float[clip.samples * clip.channels];
         clip.GetData(samples, 0);
 

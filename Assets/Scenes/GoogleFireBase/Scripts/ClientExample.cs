@@ -10,9 +10,11 @@ using Newtonsoft.Json;
 public class MrHonbookClient : MonoBehaviour
 {
     private string currentSceneId = "scene001";
-    private string ThisClientId = "testClient456"; //THIS SHOULD BE HARD CODED BASED ON CLIENTS
+    public static string ThisClientId = "testClient456"; //THIS SHOULD BE HARD CODED BASED ON CLIENTS
     private string webserverURL = "https://mrhonbook-132d3a53c108.herokuapp.com";
     private string firebaseBucket = "mrhonbook.firebasestorage.app";
+
+    public GameObject cube;
 
     ///////////////////////////////////////////////////////////////////////////
     // 1) EXAMPLE: On connection, READ the current scene configuration
@@ -136,7 +138,7 @@ public class MrHonbookClient : MonoBehaviour
     {
         //TODO: Handle getting local stored data files
         string mocapLocalPath = Path.Combine(Application.persistentDataPath, ThisClientId + "body_tracking_data.json");
-        string audioLocalPath = Path.Combine(Application.persistentDataPath, "audio_data.wav");
+        string audioLocalPath = Path.Combine(Application.persistentDataPath, ThisClientId + "audio_data.wav");
 
         yield return StartCoroutine(UploadFileDirect(mocapLocalPath, ThisClientId + "Mocap", "application/json"));
         string mocapDownloadURL = lastUploadedUrl;
@@ -178,9 +180,10 @@ public class MrHonbookClient : MonoBehaviour
             }
             else
             {
+                // This is a log confirmation that both the audio and movement data has been uploaded to the server. 
                 Debug.Log("End recording updated: " + request.downloadHandler.text);
 
-
+                cube.GetComponent<Renderer>().material.color = Color.red;
             }
         }
     }
@@ -357,32 +360,73 @@ public class MrHonbookClient : MonoBehaviour
     ///////////////////////////////////////////////////////////////////////////
     private IEnumerator HandleMocapAndAudio(string mocapFileName, string audioFileName)
     {
-        //TODO: Check if there is a local copy of external data
-        // 1) Download mocap as bytes
-        yield return StartCoroutine(DownloadFileAsBytes(mocapFileName));
-        byte[] mocapData = lastDownloadedBytes;
-        if (mocapData != null)
-        {
-            string mocapText = Encoding.UTF8.GetString(mocapData);
-            Debug.Log($"Decoded Mocap JSON ({mocapFileName}):\n{mocapText}");
+        Debug.Log("LOOK AT MEEEEE" + mocapFileName + audioFileName);
+        // Ensure the mocap file has the .json extension
+        //if (!mocapFileName.EndsWith(".json"))
+        //{
+        //    mocapFileName += ".json";
+        //}
 
-            //TODO: Store external mocap files
+        //// Ensure the audio file has the .wav extension
+        //if (!audioFileName.EndsWith(".wav"))
+        //{
+        //    audioFileName += ".wav";
+        //}
+
+        // Define file paths in the persistent data path
+        string mocapLocalPath = Path.Combine(Application.persistentDataPath, mocapFileName);
+        string audioLocalPath = Path.Combine(Application.persistentDataPath, audioFileName);
+
+        // Check if the mocap file exists
+        if (!File.Exists(mocapLocalPath))
+        {
+            // Download mocap as bytes if it does not exist
+            Debug.Log($"Mocap file not found locally. Downloading {mocapFileName}...");
+            yield return StartCoroutine(DownloadFileAsBytes(mocapFileName));
+            byte[] mocapData = lastDownloadedBytes;
+
+            if (mocapData != null)
+            {
+                File.WriteAllBytes(mocapLocalPath, mocapData); // Save the downloaded file locally
+                Debug.Log($"Mocap file downloaded and saved at {mocapLocalPath}.");
+            }
+            else
+            {
+                Debug.LogError($"Failed to download mocap file: {mocapFileName}");
+            }
+        }
+        else
+        {
+            Debug.Log($"Mocap file already exists locally at {mocapLocalPath}.");
         }
 
-        // 2) Download audio as bytes
-        yield return StartCoroutine(DownloadFileAsBytes(audioFileName));
-        byte[] audioData = lastDownloadedBytes;
-        if (audioData != null)
+        // Check if the audio file exists
+        if (!File.Exists(audioLocalPath))
         {
-            string audioText = Encoding.UTF8.GetString(audioData);
-            Debug.Log($"Decoded Audio Bytes ({audioFileName}):\n{audioText}");
-            
-            //TODO: Store external audio files
+            // Download audio as bytes if it does not exist
+            Debug.Log($"Audio file not found locally. Downloading {audioFileName}...");
+            yield return StartCoroutine(DownloadFileAsBytes(audioFileName));
+            byte[] audioData = lastDownloadedBytes;
+
+            if (audioData != null)
+            {
+                File.WriteAllBytes(audioLocalPath, audioData); // Save the downloaded file locally
+                Debug.Log($"Audio file downloaded and saved at {audioLocalPath}.");
+            }
+            else
+            {
+                Debug.LogError($"Failed to download audio file: {audioFileName}");
+            }
+        }
+        else
+        {
+            Debug.Log($"Audio file already exists locally at {audioLocalPath}.");
         }
 
         //TODO: Play external and local audio and mocap files synchronously
-
     }
+
+
 
     ///////////////////////////////////////////////////////////////////////////
     // HELPERS: Direct Upload to Firebase Storage (Unauthenticated)

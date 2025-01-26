@@ -147,7 +147,7 @@ public class MovementRecorder : MonoBehaviour
         }
 
         string json = JsonUtility.ToJson(new Wrapper<BodyFrameData> { frames = recordedData }, true);
-        string filePath = Path.Combine(Application.persistentDataPath, "body_tracking_data.json");
+        string filePath = Path.Combine(Application.persistentDataPath, MrHonbookClient.ThisClientId+"body_tracking_data.json");
         File.WriteAllText(filePath, json);
 
         Debug.Log($"Movement data saved to {filePath}");
