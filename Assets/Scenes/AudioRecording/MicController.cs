@@ -2,40 +2,40 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// 动态录音脚本，开始和结束录音动态计算长度，无需提前定义
+/// Dynamic recording script that dynamically calculates the length of the recording without the need for predefined duration.
 /// </summary>
 public class MicrophoneController : MonoBehaviour
 {
-    private AudioClip recordedClip; // 保存最终录音的音频
-    private string _microphone; // 当前使用的麦克风设备
-    private AudioClip currentlyRecordingClip; // 正在录制的音频
-    private float[] audioSamples = new float[256]; // 用于计算声音强度的缓冲
-    private float elapsedSeconds = 0f; // 每秒记录音量
-    private int recordingStartPosition; // 录音开始的位置
+    private AudioClip recordedClip; // Stores the final recorded audio
+    private string _microphone; // Current microphone device in use
+    private AudioClip currentlyRecordingClip; // Currently recording audio
+    private float[] audioSamples = new float[256]; // Buffer for calculating sound intensity
+    private float elapsedSeconds = 0f; // Tracks elapsed time to log sound level every second
+    private int recordingStartPosition; // Position where the recording started
 
     private void Awake()
     {
-        // 设置使用的麦克风设备
+        // Set the microphone device to use
         if (Microphone.devices.Length > 0)
         {
             _microphone = Microphone.devices[0];
-            Debug.Log($"检测到麦克风: {_microphone}");
+            Debug.Log($"Microphone detected: {_microphone}");
         }
         else
         {
-            Debug.LogError("未检测到麦克风设备。");
+            Debug.LogError("No microphone devices detected.");
             return;
         }
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R)) // 开始录音
+        if (Input.GetKeyDown(KeyCode.R)) // Start recording
         {
             StartRecording();
         }
 
-        if (Input.GetKeyDown(KeyCode.S)) // 停止录音
+        if (Input.GetKeyDown(KeyCode.S)) // Stop recording
         {
             StopRecording();
         }
@@ -52,24 +52,24 @@ public class MicrophoneController : MonoBehaviour
     }
 
     /// <summary>
-    /// 开始录音
+    /// Start recording
     /// </summary>
     private void StartRecording()
     {
-        Debug.Log("开始录音...");
+        Debug.Log("Recording started...");
         if (Microphone.IsRecording(_microphone))
         {
             StopRecording();
         }
 
-        // 开始录音，无限时长
+        // Start recording with an indefinite duration
         currentlyRecordingClip = Microphone.Start(_microphone, true, 300, 44100);
         recordingStartPosition = Microphone.GetPosition(_microphone);
-        Debug.Log($"已开始录音，设备: {_microphone}");
+        Debug.Log($"Recording started, device: {_microphone}");
     }
 
     /// <summary>
-    /// 停止录音
+    /// Stop recording
     /// </summary>
     private void StopRecording()
     {
@@ -77,26 +77,26 @@ public class MicrophoneController : MonoBehaviour
         {
             int recordingEndPosition = Microphone.GetPosition(_microphone);
             int totalSamples = recordingEndPosition - recordingStartPosition;
-            if (totalSamples < 0) totalSamples += currentlyRecordingClip.samples; // 处理循环缓冲区
+            if (totalSamples < 0) totalSamples += currentlyRecordingClip.samples; // Handle circular buffer
             recordedClip = AudioClip.Create("RecordedClip", totalSamples, currentlyRecordingClip.channels, currentlyRecordingClip.frequency, false);
 
-            // 从录音缓冲中提取实际音频数据
+            // Extract the actual audio data from the recording buffer
             float[] samples = new float[totalSamples];
             currentlyRecordingClip.GetData(samples, recordingStartPosition);
             recordedClip.SetData(samples, 0);
 
             Microphone.End(_microphone);
             SaveRecording(recordedClip);
-            Debug.Log("录音已停止并保存。");
+            Debug.Log("Recording stopped and saved.");
         }
         else
         {
-            Debug.LogWarning("当前没有正在进行的录音。");
+            Debug.LogWarning("No ongoing recording to stop.");
         }
     }
 
     /// <summary>
-    /// 输出当前声音强度
+    /// Log the current sound intensity
     /// </summary>
     private void LogSoundLevel()
     {
@@ -105,12 +105,12 @@ public class MicrophoneController : MonoBehaviour
         {
             currentlyRecordingClip.GetData(audioSamples, micPosition - audioSamples.Length);
             float rmsValue = Mathf.Sqrt(CalculateRMS(audioSamples));
-            Debug.Log($"当前声音强度 (RMS): {rmsValue:F3}");
+            Debug.Log($"Current sound intensity (RMS): {rmsValue:F3}");
         }
     }
 
     /// <summary>
-    /// 计算音频样本的 RMS 值
+    /// Calculate the RMS value of the audio samples
     /// </summary>
     private float CalculateRMS(float[] samples)
     {
@@ -123,13 +123,13 @@ public class MicrophoneController : MonoBehaviour
     }
 
     /// <summary>
-    /// 保存录制的音频到 WAV 文件
+    /// Save the recorded audio to a WAV file
     /// </summary>
     private void SaveRecording(AudioClip clip)
     {
         if (clip == null)
         {
-            Debug.LogError("没有录制的音频可保存。");
+            Debug.LogError("No recorded audio to save.");
             return;
         }
 
@@ -147,11 +147,11 @@ public class MicrophoneController : MonoBehaviour
             }
         }
 
-        Debug.Log($"录音已保存到 {filePath}");
+        Debug.Log($"Recording saved to {filePath}");
     }
 
     /// <summary>
-    /// 写入 WAV 文件头
+    /// Write the WAV file header
     /// </summary>
     private void WriteWavHeader(BinaryWriter writer, int channels, int sampleRate, int totalSamples)
     {
@@ -160,12 +160,12 @@ public class MicrophoneController : MonoBehaviour
         writer.Write(System.Text.Encoding.UTF8.GetBytes("WAVE"));
         writer.Write(System.Text.Encoding.UTF8.GetBytes("fmt "));
         writer.Write(16);
-        writer.Write((short)1); // PCM 格式
+        writer.Write((short)1); // PCM format
         writer.Write((short)channels);
         writer.Write(sampleRate);
         writer.Write(sampleRate * channels * 2);
-        writer.Write((short)(channels * 2)); // 数据块对齐
-        writer.Write((short)16); // 每个采样的位数
+        writer.Write((short)(channels * 2)); // Block align
+        writer.Write((short)16); // Bits per sample
         writer.Write(System.Text.Encoding.UTF8.GetBytes("data"));
         writer.Write(totalSamples * 2);
     }
