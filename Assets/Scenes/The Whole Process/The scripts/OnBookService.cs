@@ -39,6 +39,10 @@ public class OnBookService : MonoBehaviour
             if (isRecording)
             {
                 StopRecording();
+
+      
+                StartCoroutine(client.RecordMocapAndAudio());
+
             }
             else
             {
@@ -67,6 +71,8 @@ public class OnBookService : MonoBehaviour
         isRecording = true;
         Debug.Log("Combined recording started.");
     }
+
+
 
     /// <summary>
     /// Stops recording both audio and motion data.
