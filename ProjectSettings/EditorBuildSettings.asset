@@ -5,9 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Examples/FusionExample/StickyNotesMetaSSAColocation.unity
     guid: e2857486134c1f24eaf06cdef0cb0d9f
+  - enabled: 1
+    path: Assets/Scenes/Oculus Movement Scene Tryout/Oculus Movement Scene.unity
+    guid: f66281af00476fa4ebf48af1869c5c2e
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 4ebff249c28f61844a87606b7fc34b9e,
       type: 2}

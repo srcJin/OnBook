@@ -143,6 +143,9 @@ PlayerSettings:
   bundleVersion: 1.0
   preloadedAssets:
   - {fileID: 11400000, guid: 56ec39e7cfff8a9448c6bac6b8c0c5c6, type: 2}
+  - {fileID: 11400000, guid: 1cae0f2f9aaef464c8ed71b38352cd21, type: 2}
+  - {fileID: 8472234355653643081, guid: b6a6997d697719e4b9f9962d42ebc3a8, type: 2}
+  - {fileID: -4589819320554907273, guid: a5854d47103f9204bb8283aa6df2affc, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -165,7 +168,7 @@ PlayerSettings:
   androidMinAspectRatio: 1
   applicationIdentifier:
     Android: com.RealityHacks.OnBook
-    Standalone: com.PhotonEngine.Fusion-Sticky-Notes-Meta-SSA-Colocation
+    Standalone: com.RealityHacks.OnBook
     VisionOS: com.exitgames.samples.stickynotes
     iPhone: com.Unity-Technologies.com.unity.template.urp-blank
   buildNumber:
